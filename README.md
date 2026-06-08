@@ -1,5 +1,12 @@
 # Signal Garden
 
+[Open Signal Garden](https://signal-garden.space)
+
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178c6?style=flat-square&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19.0.0-149eca?style=flat-square&logo=react&logoColor=white)
+![Phaser](https://img.shields.io/badge/Phaser-3.90.0-8cc84b?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-7.2.7-646cff?style=flat-square&logo=vite&logoColor=white)
+
 Signal Garden is a Vite React + Phaser self-reflection game with a warm virtual pet. It helps users move one inner signal through a gentle lens journey: loosen a word or story, notice body weather, name emotion, shape an inner image, pause at the observer lens, open a wider meaning, choose one tiny kind action, and save the journey as a seed in a visual Dream Garden.
 
 The current browser prototype includes:
