@@ -1,0 +1,94 @@
+{
+  "assetVersion": 4,
+  "frameSize": { "width": 512, "height": 512 },
+  "source": "source/full-art-pass/ragdoll-pet-pose-sheet-chromakey.png",
+  "runtimePreparation": "Runtime frames are normalized to a 512x512 transparent canvas, bottom-center anchored, alpha-cleaned, chroma-key removed, and trimmed to avoid neighboring source-sheet fragments. Cleanup pass 2026-06-07 removed stray source-sheet fragments from groom, nap-curl, and settle-back. Living-animation pass 2026-06-07 uses clip timing, per-step offsets, subtle leans/scale changes, posture variation, and sleep breathing instead of constant full-body bouncing. Ambient idle blinking is disabled until a smoother blink asset exists.",
+  "anchors": {
+    "default": { "x": 0.5, "y": 1 }
+  },
+  "hitArea": {
+    "type": "ellipse",
+    "x": 0,
+    "y": -86,
+    "width": 172,
+    "height": 220
+  },
+  "frames": {
+    "idle": "frames/idle-sit.png",
+    "curious": "frames/curious-lean.png",
+    "headbuttWindup": "frames/headbutt-windup.png",
+    "headbuttContact": "frames/headbutt-contact.png",
+    "settleBack": "frames/settle-back.png",
+    "blinkSleepy": "frames/blink-sleepy.png",
+    "stretch": "frames/stretch.png",
+    "groom": "frames/groom.png",
+    "napCurl": "frames/nap-curl.png",
+    "sleeping": "frames/sleeping.png",
+    "wake": "frames/wake.png",
+    "plantProud": "frames/plant-proud.png"
+  },
+  "frameOffsets": {
+    "idle": { "x": 0, "y": 0 },
+    "curious": { "x": -12, "y": 0 },
+    "headbuttWindup": { "x": 2, "y": -9 },
+    "headbuttContact": { "x": -12, "y": -1 },
+    "settleBack": { "x": -28, "y": -2 },
+    "blinkSleepy": { "x": 0, "y": 0 },
+    "stretch": { "x": 7, "y": -23 },
+    "groom": { "x": -1, "y": 39 },
+    "napCurl": { "x": 28, "y": 0 },
+    "sleeping": { "x": 11, "y": -2 },
+    "wake": { "x": 0, "y": 1 },
+    "plantProud": { "x": -1, "y": 1 }
+  },
+  "animations": {
+    "idle": [
+      { "frame": "idle", "durationMs": 1800 }
+    ],
+    "attention": [
+      { "frame": "idle", "durationMs": 90 },
+      { "frame": "curious", "durationMs": 520, "motion": "look" },
+      { "frame": "idle", "durationMs": 240, "motion": "lookSettle" }
+    ],
+    "headButt": [
+      { "frame": "curious", "durationMs": 150, "motion": "look" },
+      { "frame": "headbuttWindup", "durationMs": 260, "motion": "headButtWindup" },
+      { "frame": "headbuttContact", "durationMs": 290, "motion": "headButtContact" },
+      { "frame": "settleBack", "durationMs": 360, "motion": "settle" },
+      { "frame": "idle", "durationMs": 260, "motion": "lookSettle" }
+    ],
+    "stretch": [
+      { "frame": "curious", "durationMs": 140, "motion": "look" },
+      { "frame": "stretch", "durationMs": 920, "motion": "stretch" },
+      { "frame": "settleBack", "durationMs": 320, "motion": "settle" },
+      { "frame": "idle", "durationMs": 260, "motion": "lookSettle" }
+    ],
+    "groom": [
+      { "frame": "curious", "durationMs": 120, "motion": "look" },
+      { "frame": "groom", "durationMs": 560, "motion": "groom" },
+      { "frame": "blinkSleepy", "durationMs": 150, "motion": "blink" },
+      { "frame": "groom", "durationMs": 500, "motion": "groom" },
+      { "frame": "settleBack", "durationMs": 220, "motion": "settle" },
+      { "frame": "idle", "durationMs": 260, "motion": "lookSettle" }
+    ],
+    "sleep": [
+      { "frame": "blinkSleepy", "durationMs": 300, "motion": "blink" },
+      { "frame": "idle", "durationMs": 180 },
+      { "frame": "blinkSleepy", "durationMs": 380, "motion": "blink" },
+      { "frame": "napCurl", "durationMs": 900, "motion": "nap" },
+      { "frame": "sleeping", "durationMs": 1200, "motion": "sleep" }
+    ],
+    "wake": [
+      { "frame": "wake", "durationMs": 520, "motion": "wake" },
+      { "frame": "blinkSleepy", "durationMs": 120, "motion": "blink" },
+      { "frame": "curious", "durationMs": 320, "motion": "look" },
+      { "frame": "idle", "durationMs": 280, "motion": "lookSettle" }
+    ],
+    "plantReaction": [
+      { "frame": "curious", "durationMs": 150, "motion": "look" },
+      { "frame": "headbuttContact", "durationMs": 190, "motion": "headButtContact" },
+      { "frame": "plantProud", "durationMs": 620, "motion": "proud" },
+      { "frame": "idle", "durationMs": 300, "motion": "lookSettle" }
+    ]
+  }
+}
