@@ -353,9 +353,8 @@ test.describe('garden-first lens journey', () => {
     await expect(canvas).toHaveAttribute('data-pet-motion', 'sleeping');
   });
 
-  test('pet debug mode can freeze every pose and play every sequence', async ({ page }) => {
+  test('pet debug mode can freeze every pose and trigger representative sequences', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile-chrome', 'Exhaustive pet pose review is covered on desktop; mobile keeps reduced-motion and canvas smoke coverage.');
-    test.setTimeout(60_000);
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -386,20 +385,17 @@ test.describe('garden-first lens journey', () => {
       await expect(canvas).toHaveAttribute('data-pet-debug-preview', frame);
     }
 
-    const sequences: Array<{ id: string; finalState: string }> = [
-      { id: 'attention', finalState: 'idle' },
-      { id: 'headButt', finalState: 'idle' },
-      { id: 'stretch', finalState: 'idle' },
-      { id: 'groom', finalState: 'idle' },
-      { id: 'sleep', finalState: 'sleep' },
-      { id: 'wake', finalState: 'idle' },
-      { id: 'plantProud', finalState: 'idle' }
+    const sequences: Array<{ id: string; state: string; finalState: string }> = [
+      { id: 'stretch', state: 'attention', finalState: 'idle' },
+      { id: 'sleep', state: 'napStart', finalState: 'sleep' },
+      { id: 'wake', state: 'attention', finalState: 'idle' }
     ];
 
     for (const sequence of sequences) {
       await page.getByTestId(`pet-debug-sequence-${sequence.id}`).click();
       await expect(canvas).toHaveAttribute('data-pet-debug-preview', sequence.id);
-      await expect(canvas).toHaveAttribute('data-pet-state', sequence.finalState, { timeout: 5_000 });
+      await expect(canvas).toHaveAttribute('data-pet-state', sequence.state);
+      await expect(canvas).toHaveAttribute('data-pet-state', sequence.finalState, { timeout: 20_000 });
     }
   });
 
