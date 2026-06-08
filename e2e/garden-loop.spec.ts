@@ -354,6 +354,7 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('pet debug mode can freeze every pose and trigger representative sequences', async ({ page }) => {
+    test.skip(!!process.env.CI, 'Pet debug pose review is a local visual QA harness; CI covers user-facing pet behavior and reduced-motion sequence smoke.');
     test.skip(test.info().project.name === 'mobile-chrome', 'Exhaustive pet pose review is covered on desktop; mobile keeps reduced-motion and canvas smoke coverage.');
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
