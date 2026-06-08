@@ -88,7 +88,7 @@ test.describe('garden-first lens journey', () => {
     await clickCanvasFraction(page, 0.37, 0.58);
     await expect(page.getByTestId('lens-panel')).toBeHidden();
 
-    await clickCanvasFraction(page, 0.34, 0.56);
+    await clickActiveLensTarget(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
     await expect(page.getByLabel('What word or story is attached?')).toBeVisible();
   });
@@ -524,4 +524,21 @@ async function clickCanvasFraction(page: Page, xFraction: number, yFraction: num
   if (!box) throw new Error('Garden canvas missing');
 
   await page.mouse.click(box.x + box.width * xFraction, box.y + box.height * yFraction);
+}
+
+async function clickActiveLensTarget(page: Page) {
+  const wrapper = page.getByTestId('garden-canvas');
+  await expect(wrapper).toHaveAttribute('data-active-lens-x', /0\.\d+/);
+  await expect(wrapper).toHaveAttribute('data-active-lens-y', /0\.\d+/);
+
+  const [xFraction, yFraction] = await wrapper.evaluate((element) => [
+    Number((element as HTMLElement).dataset.activeLensX),
+    Number((element as HTMLElement).dataset.activeLensY)
+  ]);
+
+  if (!Number.isFinite(xFraction) || !Number.isFinite(yFraction)) {
+    throw new Error('Active lens target is missing');
+  }
+
+  await clickCanvasFraction(page, xFraction, yFraction);
 }

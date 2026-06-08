@@ -51,11 +51,26 @@ export type LensObjectBounds = {
   bottom: number;
 };
 
+export type CircleHitTarget = {
+  x: number;
+  y: number;
+  radius: number;
+};
+
+export type EllipseHitTarget = {
+  x: number;
+  y: number;
+  radiusX: number;
+  radiusY: number;
+};
+
 const MAX_VISIBLE_SEEDS = 50;
 export const GARDEN_DESIGN_WIDTH = 1480;
 export const GARDEN_DESIGN_HEIGHT = 484;
 export const LENS_POOL_CENTER = { x: 0.49, y: 0.66 };
 export const LENS_RING_ORDER: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
+export const PET_INTERACTION_OFFSET = { x: 0, y: -92 };
+export const PET_INTERACTION_SIZE = { width: 178, height: 226 };
 
 const PREFERRED_PLOT_IDS = ['front-right', 'front-center', 'front-left', 'front-far-right'];
 
@@ -216,6 +231,36 @@ export function lensObjectBounds(placement: LensObjectPlacement): LensObjectBoun
   };
 }
 
+export function lensObjectHitTarget(placement: LensObjectPlacement): CircleHitTarget {
+  const offsetY = placement.anchor === 'center' ? 0 : -placement.size * 0.36;
+
+  return {
+    x: placement.x,
+    y: placement.y + offsetY,
+    radius: placement.size * 0.48
+  };
+}
+
+export function petInteractionTarget(frame: GardenFrame): EllipseHitTarget {
+  const petPoint = visibleGardenPoint(frame, 0.24, 0.73);
+
+  return {
+    x: petPoint.x + PET_INTERACTION_OFFSET.x,
+    y: petPoint.y + PET_INTERACTION_OFFSET.y,
+    radiusX: PET_INTERACTION_SIZE.width / 2,
+    radiusY: PET_INTERACTION_SIZE.height / 2
+  };
+}
+
+export function circleOverlapsEllipse(circle: CircleHitTarget, ellipse: EllipseHitTarget, padding = 0) {
+  const radiusX = ellipse.radiusX + circle.radius + padding;
+  const radiusY = ellipse.radiusY + circle.radius + padding;
+  const dx = (circle.x - ellipse.x) / radiusX;
+  const dy = (circle.y - ellipse.y) / radiusY;
+
+  return dx * dx + dy * dy < 1;
+}
+
 export function pendingSeedStartPoint(frame: GardenFrame, plot: GardenPlot | null) {
   if (frame.width < 560) return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.72, 0.82);
 
@@ -355,7 +400,7 @@ function clampLensPointForMobile(frame: GardenFrame, point: { x: number; y: numb
   const bottomInset = anchor === 'center' ? half : 0;
 
   return {
-    x: clamp(point.x, Math.max(half + 12, frame.width * 0.62), frame.width - half - 12),
+    x: clamp(point.x, Math.max(half + 12, frame.width * 0.66), frame.width - half - 12),
     y: clamp(point.y, topInset + 18, frame.height - bottomInset - 172)
   };
 }

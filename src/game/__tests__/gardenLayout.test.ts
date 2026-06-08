@@ -2,15 +2,18 @@ import { describe, expect, it } from 'vitest';
 import type { ReflectionSeed } from '../../../shared/models';
 import {
   availableGardenPlots,
+  circleOverlapsEllipse,
   createGardenFrame,
   createGardenPlots,
   createGardenSeedLayout,
   createLensObjectPlacements,
   firstAvailableGardenPlot,
   gardenPlotPoint,
+  lensObjectHitTarget,
   lensObjectBounds,
   LENS_RING_ORDER,
   pendingSeedStartPoint,
+  petInteractionTarget,
   resolveGardenSeedPlacement,
   type GardenSeedLayoutItem
 } from '../gardenLayout';
@@ -206,6 +209,21 @@ describe('pool-centered lens object layout', () => {
         expect(bounds.right).toBeLessThanOrEqual(frame.width);
         expect(bounds.top).toBeGreaterThanOrEqual(0);
         expect(bounds.bottom).toBeLessThanOrEqual(frame.height - 144);
+      });
+    });
+  });
+
+  it('keeps mobile active lens hit targets away from the pet and bottom panel', () => {
+    [createGardenFrame(390, 758), createGardenFrame(390, 844), createGardenFrame(360, 664)].forEach((frame) => {
+      const petTarget = petInteractionTarget(frame);
+
+      LENS_RING_ORDER.forEach((kind) => {
+        const [placement] = createLensObjectPlacements(frame, kind);
+        const hitTarget = lensObjectHitTarget(placement);
+
+        expect(circleOverlapsEllipse(hitTarget, petTarget, 8)).toBe(false);
+        expect(hitTarget.y - hitTarget.radius).toBeGreaterThanOrEqual(0);
+        expect(hitTarget.y + hitTarget.radius).toBeLessThanOrEqual(frame.height - 144);
       });
     });
   });

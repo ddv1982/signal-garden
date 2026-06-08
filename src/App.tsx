@@ -8,7 +8,7 @@ import type {
   SeedBloomOutcome
 } from '../shared/models';
 import { seedCardAccessibilityLabel, seedStatusLabel } from './domain/accessibilityCopy';
-import { serializeSeedExport } from './domain/exportSeeds';
+import { seedExportFilename, serializeSeedExport } from './domain/exportSeeds';
 import {
   completeLens,
   createJourneyFromSession,
@@ -242,7 +242,7 @@ export function App() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `signal-garden-seeds-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.download = seedExportFilename();
     anchor.click();
     URL.revokeObjectURL(url);
   }

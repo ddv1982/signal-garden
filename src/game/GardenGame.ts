@@ -12,7 +12,10 @@ import {
   gardenNormalizedPoint,
   gardenPlotPoint,
   gardenPoint,
+  lensObjectHitTarget,
   pendingSeedStartPoint,
+  PET_INTERACTION_OFFSET,
+  PET_INTERACTION_SIZE,
   resolveGardenSeedPlacement,
   visibleGardenPoint,
   type GardenFrame,
@@ -427,6 +430,8 @@ class BrowserGardenScene extends Phaser.Scene {
   }
 
   private clearScene() {
+    delete this.hostElement.dataset.activeLensX;
+    delete this.hostElement.dataset.activeLensY;
     this.stopPetMotionTweens();
     this.children.removeAll(true);
     this.seedGroups = [];
@@ -672,14 +677,21 @@ class BrowserGardenScene extends Phaser.Scene {
     if (!this.lensSessionActive || this.pendingSeed) return;
 
     const placements = createLensObjectPlacements(frame, this.currentLens);
+    const activePlacement = placements.find((placement) => placement.kind === this.currentLens);
+    if (activePlacement) {
+      const target = lensObjectHitTarget(activePlacement);
+      this.hostElement.dataset.activeLensX = (target.x / this.scale.width).toFixed(4);
+      this.hostElement.dataset.activeLensY = (target.y / this.scale.height).toFixed(4);
+    }
 
     placements.forEach((placement) => {
       const active = this.currentLens === placement.kind;
       const size = placement.size;
-      const glowY = placement.anchor === 'center' ? 0 : -size * 0.36;
+      const hitTarget = lensObjectHitTarget(placement);
+      const glowY = hitTarget.y - placement.y;
       const group = this.add.container(placement.x, placement.y).setDepth(active ? 620 : 240);
       if (active) {
-        group.setInteractive(new Phaser.Geom.Circle(0, glowY, size * 0.48), Phaser.Geom.Circle.Contains);
+        group.setInteractive(new Phaser.Geom.Circle(0, glowY, hitTarget.radius), Phaser.Geom.Circle.Contains);
         group.on('pointerdown', () => {
           this.onLensObjectSelected(placement.kind);
           if (this.wakePet()) return;
@@ -730,7 +742,15 @@ class BrowserGardenScene extends Phaser.Scene {
   private drawPet(frame: GardenFrame) {
     const { x, y } = this.visibleGardenPoint(frame, 0.24, 0.73);
     const group = this.add.container(x, y).setDepth(500);
-    group.setInteractive(new Phaser.Geom.Ellipse(0, -92, 178, 226), Phaser.Geom.Ellipse.Contains);
+    group.setInteractive(
+      new Phaser.Geom.Ellipse(
+        PET_INTERACTION_OFFSET.x,
+        PET_INTERACTION_OFFSET.y,
+        PET_INTERACTION_SIZE.width,
+        PET_INTERACTION_SIZE.height
+      ),
+      Phaser.Geom.Ellipse.Contains
+    );
     group.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const seed = this.seedUnderPointer(pointer);
       if (seed) {
