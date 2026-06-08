@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "icons:generate": "node scripts/generate-favicons.mjs",
     "lens:audit": "node scripts/audit-lens-props.mjs",
     "lens:clean": "node scripts/clean-lens-props.mjs",
     "pet:audit": "node scripts/audit-pet-frames.mjs",
