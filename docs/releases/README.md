@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.5`](./0.1.5.md) — records the passing mobile active-lens sign-off and release-ready QA evidence
 - [`0.1.4`](./0.1.4.md) — clears the mobile active-lens tap target and local-date export filename found during QA
 - [`0.1.3`](./0.1.3.md) — removes the local-only pet-debug visual review loop from the CI production deploy gate
 - [`0.1.2`](./0.1.2.md) — adds the MIT license to the first deployed beta line
