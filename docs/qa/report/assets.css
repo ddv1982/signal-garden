@@ -86,6 +86,11 @@ main {
   content: ".";
 }
 
+.verdict-word.is-yes::after {
+  color: #2f7a45;
+  content: ".";
+}
+
 .verdict-line,
 .deck {
   color: var(--quote);

@@ -71,6 +71,8 @@ export const LENS_POOL_CENTER = { x: 0.49, y: 0.66 };
 export const LENS_RING_ORDER: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
 export const PET_INTERACTION_OFFSET = { x: 0, y: -92 };
 export const PET_INTERACTION_SIZE = { width: 178, height: 226 };
+const MOBILE_LENS_PANEL_SAFE_HEIGHT = 144;
+const MOBILE_LENS_SAFE_GAP = 8;
 
 const PREFERRED_PLOT_IDS = ['front-right', 'front-center', 'front-left', 'front-far-right'];
 
@@ -201,7 +203,7 @@ export function createLensObjectPlacements(frame: GardenFrame, currentLens: Lens
     const size = lensObjectSize(frame, placement.size, compact);
     const clamped = compact ? clampLensPointForMobile(frame, point, size, placement.anchor) : point;
 
-    return {
+    const lensPlacement = {
       kind: placement.kind,
       x: clamped.x,
       y: clamped.y,
@@ -214,6 +216,8 @@ export function createLensObjectPlacements(frame: GardenFrame, currentLens: Lens
       shadowAlpha: placement.shadowAlpha,
       anchor: placement.anchor
     };
+
+    return compact ? separateLensPlacementFromMobilePet(frame, lensPlacement) : lensPlacement;
   });
 }
 
@@ -402,6 +406,39 @@ function clampLensPointForMobile(frame: GardenFrame, point: { x: number; y: numb
   return {
     x: clamp(point.x, Math.max(half + 12, frame.width * 0.66), frame.width - half - 12),
     y: clamp(point.y, topInset + 18, frame.height - bottomInset - 172)
+  };
+}
+
+function separateLensPlacementFromMobilePet(frame: GardenFrame, placement: LensObjectPlacement): LensObjectPlacement {
+  const target = lensObjectHitTarget(placement);
+  const petTarget = petInteractionTarget(frame);
+  if (!circleOverlapsEllipse(target, petTarget, MOBILE_LENS_SAFE_GAP)) return placement;
+
+  const radiusX = petTarget.radiusX + target.radius + MOBILE_LENS_SAFE_GAP;
+  const radiusY = petTarget.radiusY + target.radius + MOBILE_LENS_SAFE_GAP;
+  const dy = (target.y - petTarget.y) / radiusY;
+  const requiredX = petTarget.x + radiusX * Math.sqrt(Math.max(0, 1 - dy * dy)) + 1;
+  const shiftedRight = clampLensPlacementForMobileFrame({ ...placement, x: Math.max(placement.x, requiredX) }, frame);
+  if (!circleOverlapsEllipse(lensObjectHitTarget(shiftedRight), petTarget, MOBILE_LENS_SAFE_GAP)) return shiftedRight;
+
+  return clampLensPlacementForMobileFrame(
+    { ...placement, y: placement.y - (target.y - (petTarget.y - radiusY - 1)) },
+    frame
+  );
+}
+
+function clampLensPlacementForMobileFrame(placement: LensObjectPlacement, frame: GardenFrame): LensObjectPlacement {
+  const bounds = lensObjectBounds(placement);
+  const target = lensObjectHitTarget(placement);
+  const minX = placement.x + Math.max(0, -bounds.left, target.radius - target.x);
+  const maxX = placement.x - Math.max(0, bounds.right - frame.width, target.x + target.radius - frame.width);
+  const minY = placement.y + Math.max(0, -bounds.top, target.radius - target.y);
+  const maxY = placement.y - Math.max(0, bounds.bottom - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT), target.y + target.radius - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT));
+
+  return {
+    ...placement,
+    x: clamp(placement.x, minX, maxX),
+    y: clamp(placement.y, minY, maxY)
   };
 }
 
