@@ -44,6 +44,8 @@ corepack pnpm run e2e
 corepack pnpm run build
 ```
 
+Production builds do not emit browser-referenced source maps by default. Set `BUILD_SOURCE_MAPS=true` only when you need hidden `.map` artifacts for a private error-monitoring upload flow.
+
 ## Notes
 
 The active project runtime is the root Vite app under `src/`. It is a static frontend suitable for Vercel.

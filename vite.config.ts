@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+const buildSourceMap = process.env.BUILD_SOURCE_MAPS === 'true' ? 'hidden' : false;
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -10,7 +12,7 @@ export default defineConfig({
     port: 4173
   },
   build: {
-    sourcemap: true,
+    sourcemap: buildSourceMap,
     // Phaser is intentionally isolated as a lazy game-runtime chunk; keep warnings focused on unexpected growth.
     chunkSizeWarningLimit: 1300,
     rollupOptions: {
