@@ -79,10 +79,10 @@ const PREFERRED_PLOT_IDS = ['front-right', 'front-center', 'front-left', 'front-
 const LENS_PROP_RATIOS: Record<LensKind, { width: number; height: number }> = {
   word: scaledRatio(335, 247),
   body: scaledRatio(364, 243),
-  emotion: scaledRatio(290, 275),
-  image: scaledRatio(340, 251),
-  observer: scaledRatio(340, 227),
-  meaning: scaledRatio(341, 295),
+  emotion: scaledRatio(289, 274),
+  image: scaledRatio(374, 253),
+  observer: scaledRatio(376, 261),
+  meaning: scaledRatio(340, 295),
   action: scaledRatio(347, 272)
 };
 
@@ -102,7 +102,7 @@ const LENS_RING: Array<{
   { kind: 'body', angle: 236, radiusX: 0.12, radiusY: 0.15, size: 108, shadowY: 26, shadowWidth: 98, shadowHeight: 20, shadowAlpha: 0.1, anchor: 'center' },
   { kind: 'emotion', angle: 282, radiusX: 0.14, radiusY: 0.13, size: 108, shadowY: 23, shadowWidth: 74, shadowHeight: 22, shadowAlpha: 0.14, anchor: 'bottom' },
   { kind: 'image', angle: 322, radiusX: 0.16, radiusY: 0.13, size: 116, shadowY: 24, shadowWidth: 98, shadowHeight: 22, shadowAlpha: 0.11, anchor: 'bottom' },
-  { kind: 'observer', angle: 8, radiusX: 0.17, radiusY: 0.14, size: 96, shadowY: 22, shadowWidth: 84, shadowHeight: 18, shadowAlpha: 0.1, anchor: 'bottom' },
+  { kind: 'observer', angle: 8, radiusX: 0.17, radiusY: 0.14, size: 92, shadowY: 22, shadowWidth: 84, shadowHeight: 18, shadowAlpha: 0.1, anchor: 'bottom' },
   { kind: 'meaning', angle: 76, radiusX: 0.14, radiusY: 0.17, size: 120, shadowY: 26, shadowWidth: 84, shadowHeight: 22, shadowAlpha: 0.13, anchor: 'bottom' },
   { kind: 'action', angle: 136, radiusX: 0.15, radiusY: 0.18, size: 108, shadowY: 24, shadowWidth: 84, shadowHeight: 22, shadowAlpha: 0.14, anchor: 'bottom' }
 ];

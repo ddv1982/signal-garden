@@ -11,7 +11,9 @@ const minimumSourceMargin = 3;
 const sourceCrops = {
   'action-basket.png': { x: 935, y: 760, width: 365, height: 264 },
   'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
-  'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 }
+  'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 },
+  'image-cloud.png': { x: 1085, y: 535, width: 370, height: 235 },
+  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 }
 };
 
 const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).sort();
@@ -149,7 +151,7 @@ function isChromaKey(red, green, blue) {
 }
 
 function isMagentaChromaKey(red, green, blue) {
-  return red > 200 && blue > 180 && green < 190 && red - green > 45 && blue - green > 35;
+  return red > 200 && blue > 170 && green < 195 && red - green > 45 && blue - green > 24;
 }
 
 function pixelIndex(png, x, y) {
