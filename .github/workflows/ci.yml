@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
@@ -39,6 +44,41 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+  publish-release:
+    needs: verify
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          version="${TAG_NAME#v}"
+          notes_file="docs/releases/${version}.md"
+
+          if [ ! -f "$notes_file" ]; then
+            echo "Release notes file not found: $notes_file" >&2
+            exit 1
+          fi
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" \
+              --title "Release ${version}" \
+              --notes-file "$notes_file"
+          else
+            gh release create "$TAG_NAME" \
+              --title "Release ${version}" \
+              --notes-file "$notes_file"
+          fi
 
   deploy-production:
     needs: verify
