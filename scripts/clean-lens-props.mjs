@@ -4,16 +4,24 @@ import { PNG } from 'pngjs';
 
 const projectRoot = new URL('..', import.meta.url).pathname;
 const propDir = path.join(projectRoot, 'src/assets/lenses/props');
+const sourceSheetPath = path.join(projectRoot, 'src/assets/lenses/source/garden-lens-sheet-chromakey.png');
 const alphaThreshold = 8;
 const outputPadding = 24;
+const sourceCrops = {
+  'action-basket.png': { x: 935, y: 760, width: 365, height: 264 },
+  'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
+  'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 }
+};
 
 const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).sort();
+const sourceSheet = PNG.sync.read(fs.readFileSync(sourceSheetPath));
 
 for (const file of files) {
   const filePath = path.join(propDir, file);
-  const source = PNG.sync.read(fs.readFileSync(filePath));
+  const source = sourceCrops[file] ? cropSourceSheet(sourceSheet, sourceCrops[file]) : PNG.sync.read(fs.readFileSync(filePath));
   removeChromaKeyBackground(source);
   removeDetachedEdgeArtifacts(source);
+  if (file === 'emotion-lantern.png') removeSmallDetachedArtifacts(source, 80);
   defringeChromaKeyEdges(source);
   if (!hasSemiTransparentAlpha(source)) featherAlphaEdges(source);
   bleedTransparentEdgeColors(source);
@@ -22,6 +30,24 @@ for (const file of files) {
 
   const metrics = collectMetrics(cleaned);
   console.log(`${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tchromaKey=${metrics.chromaKey}`);
+}
+
+function cropSourceSheet(sheet, crop) {
+  const output = new PNG({ width: crop.width, height: crop.height, colorType: 6 });
+  output.data.fill(0);
+
+  for (let y = 0; y < crop.height; y += 1) {
+    for (let x = 0; x < crop.width; x += 1) {
+      const sourceIndex = pixelIndex(sheet, crop.x + x, crop.y + y);
+      const targetIndex = pixelIndex(output, x, y);
+      output.data[targetIndex] = sheet.data[sourceIndex];
+      output.data[targetIndex + 1] = sheet.data[sourceIndex + 1];
+      output.data[targetIndex + 2] = sheet.data[sourceIndex + 2];
+      output.data[targetIndex + 3] = sheet.data[sourceIndex + 3];
+    }
+  }
+
+  return output;
 }
 
 function removeChromaKeyBackground(png) {
@@ -43,6 +69,18 @@ function removeDetachedEdgeArtifacts(png) {
 
   for (const component of components.slice(1)) {
     if (!touchesImageEdge(component, png) || component.count < 80) continue;
+    for (const [x, y] of component.pixels) {
+      const index = pixelIndex(png, x, y);
+      png.data[index + 3] = 0;
+    }
+  }
+}
+
+function removeSmallDetachedArtifacts(png, minimumPixels) {
+  const components = collectComponents(png);
+
+  for (const component of components.slice(1)) {
+    if (component.count >= minimumPixels) continue;
     for (const [x, y] of component.pixels) {
       const index = pixelIndex(png, x, y);
       png.data[index + 3] = 0;

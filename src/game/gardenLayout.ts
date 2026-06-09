@@ -77,13 +77,13 @@ const MOBILE_LENS_SAFE_GAP = 8;
 const PREFERRED_PLOT_IDS = ['front-right', 'front-center', 'front-left', 'front-far-right'];
 
 const LENS_PROP_RATIOS: Record<LensKind, { width: number; height: number }> = {
-  word: scaledRatio(333, 246),
-  body: scaledRatio(352, 242),
-  emotion: scaledRatio(261, 294),
+  word: scaledRatio(335, 247),
+  body: scaledRatio(364, 243),
+  emotion: scaledRatio(290, 275),
   image: scaledRatio(340, 251),
-  observer: scaledRatio(339, 225),
-  meaning: scaledRatio(339, 294),
-  action: scaledRatio(394, 295)
+  observer: scaledRatio(340, 227),
+  meaning: scaledRatio(341, 295),
+  action: scaledRatio(347, 272)
 };
 
 const LENS_RING: Array<{

@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.8`](./0.1.8.md) — widens the action-basket and emotion-lantern lens props with stronger crop QA
 - [`0.1.7`](./0.1.7.md) — smooths the body-ripple lens prop and hardens repeatable lens asset cleanup
 - [`0.1.6`](./0.1.6.md) — stops deployed production bundles from advertising unavailable source maps
 - [`0.1.5`](./0.1.5.md) — records the passing mobile active-lens sign-off and release-ready QA evidence
