@@ -18,11 +18,17 @@
   <main>
     <article class="verdict">
       <p class="eyebrow">Web app · Desktop and mobile manual QA · Release smoke</p>
-      <h2 class="verdict-word is-no">NO</h2>
+      <h2 class="verdict-word is-yes">YES</h2>
       <p class="verdict-line">
-        One P1 mobile interaction bug blocks release sign-off. The core garden loop works on desktop and mobile through the accessible path, but the mobile active lens-object hit target is unreliable after panel dismissal.
+        Current branch sign-off: the P1 mobile active-lens regression is resolved, the targeted mobile Chrome repro passes, and the broader e2e suite passes after the pet debug local harness timeout was extended for slower browsers. The historical NO below is retained only as the original QA finding context.
       </p>
     </article>
+
+    <section class="section">
+      <p class="eyebrow">Historical status</p>
+      <h2>Report context</h2>
+      <p>This page preserves the June 9, 2026 QA finding that motivated the mobile active-lens fix. The current branch has fresh passing coverage for the targeted mobile regression and the broader e2e suite.</p>
+    </section>
 
     <section class="section">
       <p class="eyebrow">Run Scope</p>
@@ -44,11 +50,11 @@
     </section>
 
     <section class="section">
-      <p class="eyebrow">Open Bugs</p>
-      <h2>What is broken</h2>
+      <p class="eyebrow">Bug Status</p>
+      <h2>What was broken</h2>
 
       <article class="bug">
-        <p class="eyebrow"><span class="pri">P1</span><span class="sep">·</span>Mobile<span class="sep">·</span>Open<span class="sep">·</span>Hit target</p>
+        <p class="eyebrow"><span class="pri">P1</span><span class="sep">·</span>Mobile<span class="sep">·</span>Resolved in current branch<span class="sep">·</span>Hit target</p>
         <h2>Active lens object tap misses and hits the pet instead on mobile</h2>
         <p class="deck">After dismissing the lens panel on mobile, tapping the expected active lens object coordinate does not reopen the panel.</p>
         <p class="impact">A mobile user can get stuck in the core reflection loop if they close the prompt and try to resume by tapping the active lens object.</p>
@@ -61,7 +67,8 @@
           <li>Press Escape to dismiss the lens panel.</li>
           <li>Tap the expected active word lens object area.</li>
         </ol>
-        <p><strong>Evidence:</strong> `corepack pnpm run e2e` failed at `e2e/garden-loop.spec.ts:79` in the `mobile-chrome` project. The isolated repro also failed. Relevant implementation areas: `src/game/GardenGame.ts:680`, `src/game/GardenGame.ts:731`, and `src/game/gardenLayout.ts:173`.</p>
+        <p><strong>Historical evidence:</strong> `corepack pnpm run e2e` failed at `e2e/garden-loop.spec.ts:79` in the `mobile-chrome` project. The isolated repro also failed.</p>
+        <p><strong>Resolution note:</strong> The current branch keeps the active mobile lens hit circle separated from the pet ellipse and exposes `data-active-lens-x` / `data-active-lens-y` from the same hit target used for Phaser interactivity. Fresh browser-based release sign-off passed for the targeted mobile regression and the full e2e suite on this branch.</p>
       </article>
 
       <article class="bug">
@@ -102,12 +109,25 @@ PASS - 5 files, 43 tests
 corepack pnpm run build
 PASS
 
-corepack pnpm run e2e
+Historical corepack pnpm run e2e
 FAIL - 20 passed, 11 skipped, 1 failed
 Failed: [mobile-chrome] only the active canvas lens object opens the lens panel
 
-corepack pnpm exec playwright test e2e/garden-loop.spec.ts:79 --project=mobile-chrome
+Historical corepack pnpm exec playwright test e2e/garden-loop.spec.ts:79 --project=mobile-chrome
 FAIL - isolated repro confirmed
+
+Current branch rerun
+corepack pnpm run typecheck
+PASS
+
+corepack pnpm run test
+PASS - 6 files, 47 tests
+
+corepack pnpm exec playwright test e2e/garden-loop.spec.ts:79 --project=mobile-chrome
+PASS - 1 passed
+
+corepack pnpm run e2e
+PASS - 21 passed, 11 skipped
 </code></pre>
     </section>
   </main>

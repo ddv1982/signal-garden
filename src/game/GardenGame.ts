@@ -677,12 +677,6 @@ class BrowserGardenScene extends Phaser.Scene {
     if (!this.lensSessionActive || this.pendingSeed) return;
 
     const placements = createLensObjectPlacements(frame, this.currentLens);
-    const activePlacement = placements.find((placement) => placement.kind === this.currentLens);
-    if (activePlacement) {
-      const target = lensObjectHitTarget(activePlacement);
-      this.hostElement.dataset.activeLensX = (target.x / this.scale.width).toFixed(4);
-      this.hostElement.dataset.activeLensY = (target.y / this.scale.height).toFixed(4);
-    }
 
     placements.forEach((placement) => {
       const active = this.currentLens === placement.kind;
@@ -691,6 +685,8 @@ class BrowserGardenScene extends Phaser.Scene {
       const glowY = hitTarget.y - placement.y;
       const group = this.add.container(placement.x, placement.y).setDepth(active ? 620 : 240);
       if (active) {
+        this.hostElement.dataset.activeLensX = (hitTarget.x / this.scale.width).toFixed(4);
+        this.hostElement.dataset.activeLensY = (hitTarget.y / this.scale.height).toFixed(4);
         group.setInteractive(new Phaser.Geom.Circle(0, glowY, hitTarget.radius), Phaser.Geom.Circle.Contains);
         group.on('pointerdown', () => {
           this.onLensObjectSelected(placement.kind);

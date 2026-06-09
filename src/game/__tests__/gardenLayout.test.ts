@@ -213,6 +213,23 @@ describe('pool-centered lens object layout', () => {
     });
   });
 
+  it('keeps 390px mobile word and observer active targets visible and clear of the pet', () => {
+    const frame = createGardenFrame(390, 758);
+    const petTarget = petInteractionTarget(frame);
+
+    (['word', 'observer'] as const).forEach((kind) => {
+      const [placement] = createLensObjectPlacements(frame, kind);
+      const hitTarget = lensObjectHitTarget(placement);
+
+      expect(placement.kind).toBe(kind);
+      expect(circleOverlapsEllipse(hitTarget, petTarget)).toBe(false);
+      expect(hitTarget.x - hitTarget.radius).toBeGreaterThanOrEqual(0);
+      expect(hitTarget.x + hitTarget.radius).toBeLessThanOrEqual(frame.width);
+      expect(hitTarget.y - hitTarget.radius).toBeGreaterThanOrEqual(0);
+      expect(hitTarget.y + hitTarget.radius).toBeLessThanOrEqual(frame.height - 144);
+    });
+  });
+
   it('keeps mobile active lens hit targets away from the pet and bottom panel', () => {
     [createGardenFrame(390, 758), createGardenFrame(390, 844), createGardenFrame(360, 664)].forEach((frame) => {
       const petTarget = petInteractionTarget(frame);
@@ -222,6 +239,8 @@ describe('pool-centered lens object layout', () => {
         const hitTarget = lensObjectHitTarget(placement);
 
         expect(circleOverlapsEllipse(hitTarget, petTarget, 8)).toBe(false);
+        expect(hitTarget.x - hitTarget.radius).toBeGreaterThanOrEqual(0);
+        expect(hitTarget.x + hitTarget.radius).toBeLessThanOrEqual(frame.width);
         expect(hitTarget.y - hitTarget.radius).toBeGreaterThanOrEqual(0);
         expect(hitTarget.y + hitTarget.radius).toBeLessThanOrEqual(frame.height - 144);
       });
