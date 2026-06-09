@@ -12,13 +12,28 @@ const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).so
 for (const file of files) {
   const filePath = path.join(propDir, file);
   const source = PNG.sync.read(fs.readFileSync(filePath));
+  removeChromaKeyBackground(source);
   removeDetachedEdgeArtifacts(source);
-  defringeMagentaEdges(source);
+  defringeChromaKeyEdges(source);
+  if (!hasSemiTransparentAlpha(source)) featherAlphaEdges(source);
+  bleedTransparentEdgeColors(source);
   const cleaned = cropAndPad(source, outputPadding);
   fs.writeFileSync(filePath, PNG.sync.write(cleaned));
 
   const metrics = collectMetrics(cleaned);
-  console.log(`${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tsemiMagenta=${metrics.semiMagenta}`);
+  console.log(`${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tchromaKey=${metrics.chromaKey}`);
+}
+
+function removeChromaKeyBackground(png) {
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const index = pixelIndex(png, x, y);
+      const alpha = png.data[index + 3];
+      if (alpha <= 0) continue;
+      if (!isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) continue;
+      png.data[index + 3] = 0;
+    }
+  }
 }
 
 function removeDetachedEdgeArtifacts(png) {
@@ -35,14 +50,14 @@ function removeDetachedEdgeArtifacts(png) {
   }
 }
 
-function defringeMagentaEdges(png) {
+function defringeChromaKeyEdges(png) {
   const replacements = [];
 
   for (let y = 0; y < png.height; y += 1) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isMagentaFringe(png.data[index], png.data[index + 1], png.data[index + 2])) continue;
+      if (alpha <= 0 || alpha >= 252 || !isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) continue;
 
       const replacement = nearestOpaqueObjectColor(png, x, y);
       replacements.push({ index, replacement });
@@ -60,8 +75,82 @@ function defringeMagentaEdges(png) {
   }
 }
 
-function nearestOpaqueObjectColor(png, x, y) {
-  for (let radius = 1; radius <= 12; radius += 1) {
+function featherAlphaEdges(png) {
+  const sourceAlpha = new Uint8Array(png.width * png.height);
+  const solidMask = new Uint8Array(png.width * png.height);
+
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const maskIndex = y * png.width + x;
+      const alpha = alphaAt(png, x, y);
+      sourceAlpha[maskIndex] = alpha;
+      solidMask[maskIndex] = alpha >= 180 ? 1 : 0;
+    }
+  }
+
+  const replacements = [];
+
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const maskIndex = y * png.width + x;
+      let solidNeighbors = 0;
+
+      for (let yy = Math.max(0, y - 1); yy <= Math.min(png.height - 1, y + 1); yy += 1) {
+        for (let xx = Math.max(0, x - 1); xx <= Math.min(png.width - 1, x + 1); xx += 1) {
+          solidNeighbors += solidMask[yy * png.width + xx];
+        }
+      }
+
+      if (solidNeighbors === 0 || (solidNeighbors === 9 && solidMask[maskIndex])) continue;
+
+      const alpha = Math.round((solidNeighbors / 9) * 255);
+      const replacement = nearestOpaqueObjectColor(png, x, y, 4);
+      replacements.push({ index: pixelIndex(png, x, y), alpha, replacement, sourceAlpha: sourceAlpha[maskIndex] });
+    }
+  }
+
+  for (const { index, alpha, replacement, sourceAlpha } of replacements) {
+    if (replacement && !isChromaKey(replacement[0], replacement[1], replacement[2])) {
+      png.data[index] = replacement[0];
+      png.data[index + 1] = replacement[1];
+      png.data[index + 2] = replacement[2];
+    } else if (sourceAlpha === 0) {
+      png.data[index] = 0;
+      png.data[index + 1] = 0;
+      png.data[index + 2] = 0;
+    }
+
+    png.data[index + 3] = alpha;
+  }
+}
+
+function bleedTransparentEdgeColors(png) {
+  const replacements = [];
+
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const index = pixelIndex(png, x, y);
+      if (png.data[index + 3] !== 0) continue;
+      replacements.push({ index, replacement: nearestOpaqueObjectColor(png, x, y, 4) });
+    }
+  }
+
+  for (const { index, replacement } of replacements) {
+    if (!replacement || isChromaKey(replacement[0], replacement[1], replacement[2])) {
+      png.data[index] = 0;
+      png.data[index + 1] = 0;
+      png.data[index + 2] = 0;
+      continue;
+    }
+
+    png.data[index] = replacement[0];
+    png.data[index + 1] = replacement[1];
+    png.data[index + 2] = replacement[2];
+  }
+}
+
+function nearestOpaqueObjectColor(png, x, y, maxRadius = 12) {
+  for (let radius = 1; radius <= maxRadius; radius += 1) {
     let red = 0;
     let green = 0;
     let blue = 0;
@@ -76,7 +165,7 @@ function nearestOpaqueObjectColor(png, x, y) {
         const r = png.data[index];
         const g = png.data[index + 1];
         const b = png.data[index + 2];
-        if (isMagentaFringe(r, g, b)) continue;
+        if (isChromaKey(r, g, b)) continue;
         red += r;
         green += g;
         blue += b;
@@ -161,22 +250,33 @@ function collectComponents(png) {
 
 function collectMetrics(png) {
   const bounds = alphaBounds(png);
-  let semiMagenta = 0;
+  let chromaKey = 0;
 
   for (let y = 0; y < png.height; y += 1) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha > 5 && alpha < 245 && isMagentaFringe(png.data[index], png.data[index + 1], png.data[index + 2])) semiMagenta += 1;
+      if (alpha > 5 && isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) chromaKey += 1;
     }
   }
 
-  if (!bounds) return { bbox: 'empty', margins: 'n/a', semiMagenta };
+  if (!bounds) return { bbox: 'empty', margins: 'n/a', chromaKey };
   return {
     bbox: `${bounds.minX},${bounds.minY}..${bounds.maxX},${bounds.maxY}`,
     margins: `${bounds.minX},${bounds.minY},${png.width - 1 - bounds.maxX},${png.height - 1 - bounds.maxY}`,
-    semiMagenta
+    chromaKey
   };
+}
+
+function hasSemiTransparentAlpha(png) {
+  for (let y = 0; y < png.height; y += 1) {
+    for (let x = 0; x < png.width; x += 1) {
+      const alpha = alphaAt(png, x, y);
+      if (alpha > alphaThreshold && alpha < 245) return true;
+    }
+  }
+
+  return false;
 }
 
 function alphaBounds(png) {
@@ -197,7 +297,11 @@ function touchesImageEdge(component, png) {
   return component.minX === 0 || component.minY === 0 || component.maxX === png.width - 1 || component.maxY === png.height - 1;
 }
 
-function isMagentaFringe(red, green, blue) {
+function isChromaKey(red, green, blue) {
+  return isMagentaChromaKey(red, green, blue);
+}
+
+function isMagentaChromaKey(red, green, blue) {
   return red > 200 && blue > 180 && green < 190 && red - green > 45 && blue - green > 35;
 }
 

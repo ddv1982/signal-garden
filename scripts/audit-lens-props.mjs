@@ -15,16 +15,16 @@ for (const file of files) {
   const png = PNG.sync.read(fs.readFileSync(filePath));
   const metrics = collectMetrics(png);
 
-  console.log(`${file}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tsemiMagenta=${metrics.semiMagenta}`);
+  console.log(`${file}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tchromaKey=${metrics.chromaKey}`);
 
   if (metrics.margins.some((margin) => margin < minimumMargin)) {
     hasFailure = true;
     console.error(`  FAIL ${file}: expected at least ${minimumMargin}px transparent padding on every side`);
   }
 
-  if (metrics.semiMagenta > 0) {
+  if (metrics.chromaKey > 0) {
     hasFailure = true;
-    console.error(`  FAIL ${file}: semi-transparent chroma-key fringe remains`);
+    console.error(`  FAIL ${file}: chroma-key pixels remain`);
   }
 }
 
@@ -32,23 +32,23 @@ if (hasFailure) process.exit(1);
 
 function collectMetrics(png) {
   const bounds = alphaBounds(png);
-  let semiMagenta = 0;
+  let chromaKey = 0;
 
   for (let y = 0; y < png.height; y += 1) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha > 5 && alpha < 245 && isMagentaFringe(png.data[index], png.data[index + 1], png.data[index + 2])) {
-        semiMagenta += 1;
+      if (alpha > 5 && isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) {
+        chromaKey += 1;
       }
     }
   }
 
-  if (!bounds) return { bbox: 'empty', margins: [0, 0, 0, 0], semiMagenta };
+  if (!bounds) return { bbox: 'empty', margins: [0, 0, 0, 0], chromaKey };
   return {
     bbox: `${bounds.minX},${bounds.minY}..${bounds.maxX},${bounds.maxY}`,
     margins: [bounds.minX, bounds.minY, png.width - 1 - bounds.maxX, png.height - 1 - bounds.maxY],
-    semiMagenta
+    chromaKey
   };
 }
 
@@ -66,7 +66,11 @@ function alphaBounds(png) {
   return bounds.maxX >= 0 ? bounds : null;
 }
 
-function isMagentaFringe(red, green, blue) {
+function isChromaKey(red, green, blue) {
+  return isMagentaChromaKey(red, green, blue);
+}
+
+function isMagentaChromaKey(red, green, blue) {
   return red > 200 && blue > 180 && green < 190 && red - green > 45 && blue - green > 35;
 }
 
