@@ -51,6 +51,8 @@ import observerPoolUrl from '../assets/lenses/props/observer-pool.png';
 import wordStonesUrl from '../assets/lenses/props/word-stones.png';
 import petAnimationManifest from '../assets/companion/companion.animations.json';
 
+const GARDEN_BACKGROUND_TOP_TRIM = 28;
+
 type PetAnimationState =
   | 'idle'
   | 'blink'
@@ -471,7 +473,13 @@ class BrowserGardenScene extends Phaser.Scene {
   private drawBackground(width: number, height: number, frame: GardenFrame) {
     if (this.textures.exists('garden-background-v3')) {
       const background = this.add.image(width / 2, height / 2, 'garden-background-v3').setDepth(0);
-      background.setScale(frame.scale);
+      background.setCrop(
+        0,
+        GARDEN_BACKGROUND_TOP_TRIM,
+        GARDEN_DESIGN_WIDTH,
+        GARDEN_DESIGN_HEIGHT - GARDEN_BACKGROUND_TOP_TRIM
+      );
+      background.setDisplaySize(GARDEN_DESIGN_WIDTH * frame.scale, GARDEN_DESIGN_HEIGHT * frame.scale);
       this.add.rectangle(width / 2, height / 2, width, height, 0xfff6e8, 0.08).setDepth(1);
       return;
     }
