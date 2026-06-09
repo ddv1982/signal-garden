@@ -5,7 +5,7 @@ This folder contains generated garden graphics passes for Signal Garden.
 - Source: generated with the built-in image generation workflow for this project.
 - Intended use: browser prototype game art for the Phaser Dream Garden.
 - Visual target: soft storybook/felt-watercolor garden environment with warm light, handmade textures, and calm self-reflection mood.
-- `background-v3.webp`: current runtime backdrop from the full lens-game art pass.
+- `background-v4.webp`: current runtime backdrop from the full lens-game art pass, with chroma-contaminated edge pixels cleaned in the asset.
 - `source/props-sheet-chromakey.png`: generated prop sheet on a flat chroma-key background.
 - `source/full-art-pass/garden-lens-sheet-chromakey.png`: generated garden and lens object sheet for the full game redesign.
 - `source/growth-bud-chromakey.png`: generated leafy bud growth-stage source on a flat magenta chroma-key background.

@@ -23,7 +23,7 @@ import { advanceGardenGrowth, assignPlotToSeed, bloomSeed, waterSeed } from './d
 import { createSignalGardenRepository } from './persistence/repositories';
 import { firstAvailableGardenPlot } from './game/gardenLayout';
 import companionIdleUrl from './assets/companion/frames/idle-sit.png';
-import gardenBackgroundUrl from './assets/garden/background-v3.webp';
+import gardenBackgroundUrl from './assets/garden/background-v4.webp';
 
 type Tab = 'home' | 'garden' | 'archive' | 'settings';
 type SeedDialogTab = 'overview' | 'water' | 'history';

@@ -33,7 +33,7 @@ import settleBackUrl from '../assets/companion/frames/settle-back.png';
 import sleepingUrl from '../assets/companion/frames/sleeping.png';
 import stretchUrl from '../assets/companion/frames/stretch.png';
 import wakeUrl from '../assets/companion/frames/wake.png';
-import gardenBackgroundUrl from '../assets/garden/background-v3.webp';
+import gardenBackgroundUrl from '../assets/garden/background-v4.webp';
 import budUrl from '../assets/garden/props/bud.png';
 import dreamStoneUrl from '../assets/garden/props/dream-stone.png';
 import flowerUrl from '../assets/garden/props/flower.png';
@@ -50,8 +50,6 @@ import meaningGateUrl from '../assets/lenses/props/meaning-gate.png';
 import observerPoolUrl from '../assets/lenses/props/observer-pool.png';
 import wordStonesUrl from '../assets/lenses/props/word-stones.png';
 import petAnimationManifest from '../assets/companion/companion.animations.json';
-
-const GARDEN_BACKGROUND_TOP_PATCH = 28;
 
 type PetAnimationState =
   | 'idle'
@@ -288,7 +286,7 @@ class BrowserGardenScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('garden-background-v3', gardenBackgroundUrl);
+    this.load.image('garden-background-v4', gardenBackgroundUrl);
     this.load.image('prop-bud', budUrl);
     this.load.image('prop-dream-stone', dreamStoneUrl);
     this.load.image('prop-flower', flowerUrl);
@@ -471,13 +469,9 @@ class BrowserGardenScene extends Phaser.Scene {
   }
 
   private drawBackground(width: number, height: number, frame: GardenFrame) {
-    if (this.textures.exists('garden-background-v3')) {
-      const background = this.add.image(width / 2, height / 2, 'garden-background-v3').setDepth(0);
+    if (this.textures.exists('garden-background-v4')) {
+      const background = this.add.image(width / 2, height / 2, 'garden-background-v4').setDepth(0);
       background.setScale(frame.scale);
-
-      const topPatch = this.add.image(width / 2, height / 2 - GARDEN_BACKGROUND_TOP_PATCH * frame.scale, 'garden-background-v3').setDepth(1);
-      topPatch.setCrop(0, GARDEN_BACKGROUND_TOP_PATCH, GARDEN_DESIGN_WIDTH, GARDEN_BACKGROUND_TOP_PATCH);
-      topPatch.setScale(frame.scale);
 
       this.add.rectangle(width / 2, height / 2, width, height, 0xfff6e8, 0.08).setDepth(2);
       return;

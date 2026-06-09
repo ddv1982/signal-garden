@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.12`](./0.1.12.md) — replaces the patched garden backdrop with a cleaned asset and removes the visible sky splice
 - [`0.1.11`](./0.1.11.md) — restores the garden sky edge after the first magenta-line fix exposed a beige strip
 - [`0.1.10`](./0.1.10.md) — removes the garden background's magenta top-edge artifact with focused render QA
 - [`0.1.9`](./0.1.9.md) — cleans cat, cloud, body-ripple, and observer-pool matte edges with stronger asset QA
