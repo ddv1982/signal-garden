@@ -75,8 +75,8 @@ handling, and theming. Split along the official template's `src/game/scenes/` la
 - [x] Deduplicate `startIdleBreathing`/`startSleepBreathing` (GardenGame.ts:1620/1639) into one
       parameterized tween helper.
 - [~] Extract `GardenRenderer` (or split draw methods into `renderers/` modules). Deferred:
-      after the pet/assets/lighting extraction the scene is ~1,200 lines of pure rendering with
-      one concern; a further renderer split is optional follow-up, not a blocker.
+  after the pet/assets/lighting extraction the scene is ~1,200 lines of pure rendering with
+  one concern; a further renderer split is optional follow-up, not a blocker.
 - [x] Name the magic numbers for pet behavior: `PET_SLEEP_TIMING`, `PET_POSTURE_TIMING`, and
       `PET_BREATHING` in `src/game/petAnimation.ts` replace the bare sleep thresholds and
       breathing durations. (One-off tween durations inside individual draw methods stay inline —

@@ -161,14 +161,18 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                   {bloomOutcomeOptions.map((option) => (
                     <label
                       key={option.value}
-                      className={form.bloomOutcome === option.value ? 'segment selected' : 'segment'}
+                      className={
+                        form.bloomOutcome === option.value ? 'segment selected' : 'segment'
+                      }
                     >
                       <input
                         type="radio"
                         name="bloom-outcome"
                         value={option.value}
                         checked={form.bloomOutcome === option.value}
-                        onChange={() => dispatch({ type: 'set-bloom-outcome', value: option.value })}
+                        onChange={() =>
+                          dispatch({ type: 'set-bloom-outcome', value: option.value })
+                        }
                       />
                       {option.label}
                     </label>
