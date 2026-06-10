@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { GardenState, LensKind, ReflectionSeed } from '../../shared/models';
+import type { ActiveTheme } from '../domain/theme';
 import { gardenAccessibilityLabel } from '../domain/accessibilityCopy';
 import {
   createGardenGame,
@@ -11,6 +12,7 @@ import {
 type GardenCanvasProps = {
   state: GardenState;
   reducedMotion: boolean;
+  theme: ActiveTheme;
   pendingSeed: ReflectionSeed | null;
   currentLens: LensKind | null;
   lensSessionActive: boolean;
@@ -57,6 +59,7 @@ const petDebugSequences: Array<{ id: PetSequenceId; label: string }> = [
 export function GardenCanvas({
   state,
   reducedMotion,
+  theme,
   pendingSeed,
   currentLens,
   lensSessionActive,
@@ -121,6 +124,7 @@ export function GardenCanvas({
       parent: containerRef.current,
       state,
       reducedMotion,
+      theme,
       pendingSeed,
       currentLens,
       lensSessionActive,
@@ -141,8 +145,8 @@ export function GardenCanvas({
   }, []);
 
   useEffect(() => {
-    gameRef.current?.update(state, reducedMotion, pendingSeed, currentLens, lensSessionActive, lastWateringEvent);
-  }, [state, reducedMotion, pendingSeed, currentLens, lensSessionActive, lastWateringEvent]);
+    gameRef.current?.update(state, reducedMotion, theme, pendingSeed, currentLens, lensSessionActive, lastWateringEvent);
+  }, [state, reducedMotion, theme, pendingSeed, currentLens, lensSessionActive, lastWateringEvent]);
 
   return (
     <>

@@ -1,9 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 
-const projectRoot = new URL('..', import.meta.url).pathname;
-const frameDir = path.join(projectRoot, 'src/assets/companion/frames');
+const projectRoot = fileURLToPath(new URL('..', import.meta.url));
+const args = process.argv.slice(2);
+const inputDir = args.find((arg) => !arg.startsWith('--'));
+const skipMatte = args.includes('--skip-matte');
+const frameDir = inputDir ? path.resolve(projectRoot, inputDir) : path.join(projectRoot, 'src/assets/companion/frames');
+const shouldAuditMatte = !skipMatte;
 const expectedSize = 512;
 const alphaThreshold = 8;
 const edgeInset = 12;
@@ -23,11 +28,11 @@ for (const file of files) {
   const unexpectedExtras = metrics.extraComponents.slice(allowedExtras);
 
   console.log([
-    file,
+    path.relative(projectRoot, filePath),
     `${png.width}x${png.height}`,
     `bbox=${metrics.bbox}`,
     `edgeAlpha=${metrics.edgeAlpha}`,
-    `edgeMatte=${metrics.edgeMatte}`,
+    `edgeMatte=${shouldAuditMatte ? metrics.edgeMatte : 'skipped'}`,
     `bottomMargin=${metrics.bottomMargin}`,
     `visualCenterX=${metrics.visualCenterX}`,
     `extras=${metrics.extraComponents.length}`
@@ -43,7 +48,7 @@ for (const file of files) {
     console.error(`  FAIL ${file}: alpha pixels found within ${edgeInset}px of frame edge`);
   }
 
-  if (metrics.edgeMatte > 0) {
+  if (shouldAuditMatte && metrics.edgeMatte > 0) {
     hasFailure = true;
     console.error(`  FAIL ${file}: green/olive matte pixels remain on the transparent silhouette edge`);
   }

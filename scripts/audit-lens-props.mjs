@@ -1,9 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 
-const projectRoot = new URL('..', import.meta.url).pathname;
-const propDir = path.join(projectRoot, 'src/assets/lenses/props');
+const projectRoot = fileURLToPath(new URL('..', import.meta.url));
+const args = process.argv.slice(2);
+const inputDir = args.find((arg) => !arg.startsWith('--'));
+const skipChroma = args.includes('--skip-chroma');
+const defaultPropDir = path.join(projectRoot, 'src/assets/lenses/props');
+const propDir = inputDir ? path.resolve(projectRoot, inputDir) : defaultPropDir;
 const sourceSheetPath = path.join(projectRoot, 'src/assets/lenses/source/garden-lens-sheet-chromakey.png');
 const alphaThreshold = 8;
 const minimumMargin = 24;
@@ -17,23 +22,26 @@ const sourceCrops = {
 };
 
 const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).sort();
-const sourceSheet = PNG.sync.read(fs.readFileSync(sourceSheetPath));
+const shouldAuditSourceSheet = propDir === defaultPropDir;
+const shouldAuditChromaKey = !skipChroma;
+const sourceSheet = shouldAuditSourceSheet ? PNG.sync.read(fs.readFileSync(sourceSheetPath)) : null;
 let hasFailure = false;
 
 for (const file of files) {
   const filePath = path.join(propDir, file);
   const png = PNG.sync.read(fs.readFileSync(filePath));
   const metrics = collectMetrics(png);
-  const sourceMetrics = sourceCrops[file] ? collectSourceCropMetrics(sourceSheet, sourceCrops[file]) : null;
+  const sourceMetrics = sourceSheet && sourceCrops[file] ? collectSourceCropMetrics(sourceSheet, sourceCrops[file]) : null;
 
-  console.log(`${file}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tchromaKey=${metrics.chromaKey}`);
+  const chromaKeyLabel = shouldAuditChromaKey ? metrics.chromaKey : 'skipped';
+  console.log(`${path.relative(projectRoot, filePath)}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tchromaKey=${chromaKeyLabel}`);
 
   if (metrics.margins.some((margin) => margin < minimumMargin)) {
     hasFailure = true;
     console.error(`  FAIL ${file}: expected at least ${minimumMargin}px transparent padding on every side`);
   }
 
-  if (metrics.chromaKey > 0) {
+  if (shouldAuditChromaKey && metrics.chromaKey > 0) {
     hasFailure = true;
     console.error(`  FAIL ${file}: chroma-key pixels remain`);
   }

@@ -25,7 +25,7 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: 'corepack pnpm exec vite --host 127.0.0.1 --port 6173 --strictPort',
+    command: 'pnpm exec vite --host 127.0.0.1 --port 6173 --strictPort',
     url: 'http://127.0.0.1:6173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000

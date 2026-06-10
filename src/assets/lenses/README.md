@@ -7,5 +7,6 @@ This folder contains generated lens object props for the Phaser Dream Garden.
 - Runtime props: word stones, body ripple, emotion lantern, image cloud, observer pool, meaning gate, and action basket.
 - Processing: the generated chroma-key sheet is kept in `source/`, while alpha-processed runtime props are kept in `props/`.
 - Runtime cleanup: `corepack pnpm run lens:clean` removes detached sheet-edge artifacts, despills magenta chroma-key fringe, crops to alpha bounds, and adds 24px transparent padding. `corepack pnpm run lens:audit` verifies padding and fringe metrics.
+- Dark-mode pass 2026-06-10: `props-dark/` contains moonlit runtime siblings produced with `node scripts/create-dark-asset-variants.mjs`, preserving transparent padding and runtime anchors for the theme-aware Phaser texture swap.
 
 These assets are decorative and interactive game art only. User reflection text is not sent to an image or text model at runtime.

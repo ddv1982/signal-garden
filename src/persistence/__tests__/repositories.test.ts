@@ -72,7 +72,84 @@ describe('createSignalGardenRepository', () => {
 
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: true,
-      onboardingCompleted: false
+      onboardingCompleted: false,
+      themePreference: 'system'
+    });
+  });
+
+  it('saves and loads the theme preference', () => {
+    const storage = createMemoryStorage();
+    const repository = createSignalGardenRepository(storage);
+
+    repository.saveSettings({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'dark'
+    });
+
+    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBe('dark');
+    expect(repository.loadSettings()).toEqual({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'dark'
+    });
+  });
+
+  it('loads a valid legacy theme preference when the dedicated preference is absent', () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      'signal-garden/settings/vite/v1',
+      JSON.stringify({ reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' })
+    );
+
+    expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'dark'
+    });
+  });
+
+  it('prefers the dedicated theme preference over the legacy settings value', () => {
+    const storage = createMemoryStorage();
+    storage.setItem('signal-garden/theme-preference/vite/v1', 'light');
+    storage.setItem(
+      'signal-garden/settings/vite/v1',
+      JSON.stringify({ reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' })
+    );
+
+    expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'light'
+    });
+  });
+
+  it('falls back to system theme when a persisted theme preference is invalid without resetting other settings', () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      'signal-garden/settings/vite/v1',
+      JSON.stringify({ reducedMotion: false, onboardingCompleted: true, themePreference: 'night' })
+    );
+
+    expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'system'
+    });
+  });
+
+  it('falls back to system theme when the dedicated theme preference is invalid', () => {
+    const storage = createMemoryStorage();
+    storage.setItem('signal-garden/theme-preference/vite/v1', 'night');
+    storage.setItem(
+      'signal-garden/settings/vite/v1',
+      JSON.stringify({ reducedMotion: true, onboardingCompleted: true, themePreference: 'dark' })
+    );
+
+    expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
+      reducedMotion: true,
+      onboardingCompleted: true,
+      themePreference: 'system'
     });
   });
 });

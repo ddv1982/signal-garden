@@ -1,6 +1,6 @@
 {
   "name": "signal-garden",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -14,9 +14,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "icons:generate": "node scripts/generate-favicons.mjs",
+    "assets:dark": "node scripts/create-dark-asset-variants.mjs",
+    "assets:dark-background": "node scripts/create-dark-background.mjs",
+    "garden:audit:dark": "node scripts/audit-dark-garden-props.mjs",
     "lens:audit": "node scripts/audit-lens-props.mjs",
+    "lens:audit:dark": "node scripts/audit-lens-props.mjs src/assets/lenses/props-dark --skip-chroma",
     "lens:clean": "node scripts/clean-lens-props.mjs",
     "pet:audit": "node scripts/audit-pet-frames.mjs",
+    "pet:audit:dark": "node scripts/audit-pet-frames.mjs src/assets/companion/frames-dark --skip-matte",
     "pet:sheet": "node scripts/render-pet-frame-sheet.mjs"
   },
   "dependencies": {
@@ -32,6 +37,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "jsdom": "^27.3.0",
     "pngjs": "^7.0.0",
+    "sharp": "^0.34.5",
     "typescript": "~5.8.3",
     "vite": "^7.2.7",
     "vitest": "^4.1.8"

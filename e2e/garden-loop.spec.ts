@@ -123,6 +123,114 @@ test.describe('garden-first lens journey', () => {
     await expect(canvas).not.toHaveAttribute('data-pet-motion', 'bouncing');
   });
 
+  test('follows the system dark theme by default', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload();
+    await completeOnboarding(page);
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('.app-shell')).toHaveAttribute('data-theme-preference', 'system');
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'dark');
+    await expect(page.getByRole('button', { name: 'Use dark mode' })).toHaveClass(/active/);
+  });
+
+  test('persists a manual light override while the system is dark', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload();
+    await completeOnboarding(page);
+
+    await page.getByRole('button', { name: 'Use light mode' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'light');
+    await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'light' });
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'light');
+  });
+
+  test('persists a manual dark override while the system is light and can return to system', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.reload();
+    await completeOnboarding(page);
+
+    await page.getByRole('button', { name: 'Use dark mode' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'dark');
+    await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'dark' });
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+    await page.getByLabel('Follow system').check();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'system' });
+  });
+
+  for (const scenario of [
+    {
+      name: 'dedicated manual dark preference',
+      colorScheme: 'light' as const,
+      themePreference: 'dark',
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'dedicated manual light preference',
+      colorScheme: 'dark' as const,
+      themePreference: 'light',
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
+      expectedTheme: 'light'
+    },
+    {
+      name: 'dedicated system dark preference',
+      colorScheme: 'dark' as const,
+      themePreference: 'system',
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'system' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'dedicated preference over legacy settings',
+      colorScheme: 'light' as const,
+      themePreference: 'dark',
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'legacy manual dark preference',
+      colorScheme: 'light' as const,
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'invalid dedicated preference',
+      colorScheme: 'dark' as const,
+      themePreference: 'night',
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'invalid legacy preference',
+      colorScheme: 'dark' as const,
+      settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'night' },
+      expectedTheme: 'dark'
+    },
+    {
+      name: 'invalid settings shape with manual theme',
+      colorScheme: 'light' as const,
+      settings: { themePreference: 'dark' },
+      expectedTheme: 'light'
+    },
+    {
+      name: 'malformed persisted settings',
+      colorScheme: 'dark' as const,
+      settings: '{not-json',
+      expectedTheme: 'dark'
+    }
+  ]) {
+    test(`sets first-paint theme from ${scenario.name} before React loads`, async ({ page }) => {
+      await assertBootstrapTheme(page, scenario);
+    });
+  }
+
   test('advances an older seed after a later lens journey', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile-chrome', 'Full repeated journey growth is covered on desktop.');
     test.setTimeout(90_000);
@@ -494,6 +602,40 @@ async function startLensJourney(page: Page) {
 
 async function storedSeeds(page: Page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]'));
+}
+
+async function storedSettings(page: Page) {
+  return page.evaluate(() => JSON.parse(localStorage.getItem('signal-garden/settings/vite/v1') ?? '{}'));
+}
+
+async function assertBootstrapTheme(
+  page: Page,
+  scenario: {
+    colorScheme: 'dark' | 'light';
+    themePreference?: string;
+    settings: Record<string, unknown> | string;
+    expectedTheme: 'dark' | 'light';
+  }
+) {
+  await page.emulateMedia({ colorScheme: scenario.colorScheme });
+  await page.route('**/src/main.tsx', (route) => route.fulfill({
+    contentType: 'application/javascript',
+    body: ''
+  }));
+  await page.addInitScript(({ settings, themePreference }) => {
+    localStorage.removeItem('signal-garden/theme-preference/vite/v1');
+    localStorage.removeItem('signal-garden/settings/vite/v1');
+    if (themePreference !== undefined) {
+      localStorage.setItem('signal-garden/theme-preference/vite/v1', themePreference);
+    }
+    localStorage.setItem('signal-garden/settings/vite/v1', typeof settings === 'string' ? settings : JSON.stringify(settings));
+  }, { settings: scenario.settings, themePreference: scenario.themePreference });
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', scenario.expectedTheme);
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.colorScheme)).toBe(scenario.expectedTheme);
+  await expect(page.locator('#root')).toBeEmpty();
 }
 
 async function seedStoredGarden(page: Page, plotIds: string[]) {

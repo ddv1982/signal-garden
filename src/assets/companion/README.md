@@ -11,5 +11,6 @@ This folder contains generated pet art passes for Signal Garden.
 - Living-animation pass 2026-06-07: runtime clips now use posture variation, subtle lean/scale motion, sleep breathing, and stable ground offsets instead of constant full-body bouncing; ambient idle blinking is disabled until a smoother blink asset exists.
 - Review tooling: run `corepack pnpm exec node scripts/audit-pet-frames.mjs` and `corepack pnpm exec node scripts/render-pet-frame-sheet.mjs` after any pet frame update.
 - Full art pass: the current source sheet contains idle, blink, curious, head-butt, settle, stretch, groom, nap, sleep, wake, and proud planting poses.
+- Dark-mode pass 2026-06-10: `frames-dark/` contains moonlit runtime siblings produced with `node scripts/create-dark-asset-variants.mjs` from the transparent generated frames. The script preserves the 512x512 canvases and existing bottom-center anchoring so animation offsets remain stable.
 
 Do not treat the generated source sheets as final production art. Future passes can still improve edge matte quality and animation timing, but the runtime frame proportions are stable for the browser prototype.

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type {
   InnerExperienceMode,
   LensKind,
@@ -9,6 +9,12 @@ import type {
 } from '../shared/models';
 import { seedCardAccessibilityLabel, seedStatusLabel } from './domain/accessibilityCopy';
 import { seedExportFilename, serializeSeedExport } from './domain/exportSeeds';
+import {
+  resolveActiveTheme,
+  systemThemeFromMatches,
+  type ActiveTheme,
+  type ThemePreference
+} from './domain/theme';
 import {
   completeLens,
   createJourneyFromSession,
@@ -23,7 +29,9 @@ import { advanceGardenGrowth, assignPlotToSeed, bloomSeed, waterSeed } from './d
 import { createSignalGardenRepository } from './persistence/repositories';
 import { firstAvailableGardenPlot } from './game/gardenLayout';
 import companionIdleUrl from './assets/companion/frames/idle-sit.png';
+import companionIdleDarkUrl from './assets/companion/frames-dark/idle-sit.png';
 import gardenBackgroundUrl from './assets/garden/background-v4.webp';
+import gardenBackgroundDarkUrl from './assets/garden/background-dark.jpg';
 
 type Tab = 'home' | 'garden' | 'archive' | 'settings';
 type SeedDialogTab = 'overview' | 'water' | 'history';
@@ -53,10 +61,17 @@ const bloomOutcomeOptions: Array<{ value: SeedBloomOutcome; label: string }> = [
   { value: 'more-care', label: 'It needs more care' }
 ];
 
+const themePreferenceOptions: Array<{ value: ThemePreference; label: string }> = [
+  { value: 'system', label: 'Follow system' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' }
+];
+
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
   const [seeds, setSeeds] = useState<ReflectionSeed[]>(() => advanceGardenGrowth(repository.loadSeeds()));
   const [settings, setSettings] = useState(() => repository.loadSettings());
+  const [systemTheme, setSystemTheme] = useState<ActiveTheme>(() => readSystemTheme());
   const [profile, setProfile] = useState(() => repository.loadLensProfile());
   const [lensDraft, setLensDraft] = useState<LensSessionDraft | null>(() => repository.loadLensSessionDraft());
   const [selectedSeed, setSelectedSeed] = useState<ReflectionSeed | null>(null);
@@ -87,9 +102,29 @@ export function App() {
   const lensOrder = lensOrderForProfile(profile);
   const petDebug = import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
   const accessiblePlantPlot = firstAvailableGardenPlot(seeds, gardenCanvasWidth);
+  const activeTheme = resolveActiveTheme(settings.themePreference, systemTheme);
 
   useEffect(() => repository.saveSeeds(seeds), [seeds]);
   useEffect(() => repository.saveSettings(settings), [settings]);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (event: MediaQueryListEvent) => setSystemTheme(systemThemeFromMatches(event.matches));
+    setSystemTheme(systemThemeFromMatches(mediaQuery.matches));
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = activeTheme;
+    document.documentElement.style.colorScheme = activeTheme;
+  }, [activeTheme]);
   useEffect(() => {
     if (profile) repository.saveLensProfile(profile);
   }, [profile]);
@@ -254,8 +289,12 @@ export function App() {
     setPetMessage('Your pet settles beside the empty garden.');
   }
 
+  function setThemePreference(themePreference: ThemePreference) {
+    setSettings((current) => ({ ...current, themePreference }));
+  }
+
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-theme-preference={settings.themePreference} data-active-theme={activeTheme}>
       <header className="topbar">
         <div className="app-brand">
           <span className="brand-mark" aria-hidden="true">SG</span>
@@ -264,19 +303,48 @@ export function App() {
             <span>A living garden for shifting perspective.</span>
           </div>
         </div>
-        <nav className="tabs" aria-label="Signal Garden sections">
-          {(['home', 'garden', 'archive', 'settings'] as Tab[]).map((tab) => (
+        <div className="topbar-actions">
+          <nav className="tabs" aria-label="Signal Garden sections">
+            {(['home', 'garden', 'archive', 'settings'] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                className={activeTab === tab ? 'tab active' : 'tab'}
+                aria-current={activeTab === tab ? 'page' : undefined}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab[0].toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </nav>
+          <div
+            className="theme-toggle"
+            data-testid="theme-toggle"
+            role="group"
+            aria-label={`Theme controls. Current theme is ${activeTheme}.`}
+          >
             <button
-              key={tab}
               type="button"
-              className={activeTab === tab ? 'tab active' : 'tab'}
-              aria-current={activeTab === tab ? 'page' : undefined}
-              onClick={() => setActiveTab(tab)}
+              className={activeTheme === 'light' ? 'theme-button active' : 'theme-button'}
+              aria-label="Use light mode"
+              aria-pressed={activeTheme === 'light'}
+              title="Use light mode"
+              onClick={() => setThemePreference('light')}
             >
-              {tab[0].toUpperCase() + tab.slice(1)}
+              <SunIcon />
             </button>
-          ))}
-        </nav>
+            <button
+              type="button"
+              className={activeTheme === 'dark' ? 'theme-button active' : 'theme-button'}
+              aria-label="Use dark mode"
+              aria-pressed={activeTheme === 'dark'}
+              title="Use dark mode"
+              onClick={() => setThemePreference('dark')}
+            >
+              <MoonIcon />
+            </button>
+          </div>
+        </div>
       </header>
 
       {activeTab === 'home' && (
@@ -293,8 +361,12 @@ export function App() {
             </button>
           </div>
           <div className="home-visual" aria-live="polite">
-            <img className="home-garden-art" src={gardenBackgroundUrl} alt="" />
-            <img className="home-companion-art" src={companionIdleUrl} alt="Ragdoll-style pet sitting in the garden." />
+            <img className="home-garden-art" src={activeTheme === 'dark' ? gardenBackgroundDarkUrl : gardenBackgroundUrl} alt="" />
+            <img
+              className="home-companion-art"
+              src={activeTheme === 'dark' ? companionIdleDarkUrl : companionIdleUrl}
+              alt="Ragdoll-style pet sitting in the garden."
+            />
             <p>{petMessage}</p>
             <button type="button" className="primary-action" onClick={beginLensJourney}>
               Begin Lens Journey
@@ -311,6 +383,7 @@ export function App() {
               <GardenCanvas
                 state={gardenState}
                 reducedMotion={settings.reducedMotion}
+                theme={activeTheme}
                 pendingSeed={pendingSeed}
                 currentLens={currentLens}
                 lensSessionActive={Boolean(lensDraft)}
@@ -500,6 +573,26 @@ export function App() {
             />
             Reduce garden motion
           </label>
+          <fieldset className="settings-theme">
+            <legend>Appearance</legend>
+            <div className="segmented-grid theme-preference-grid">
+              {themePreferenceOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={settings.themePreference === option.value ? 'segment selected' : 'segment'}
+                >
+                  <input
+                    type="radio"
+                    name="theme-preference"
+                    value={option.value}
+                    checked={settings.themePreference === option.value}
+                    onChange={() => setThemePreference(option.value)}
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <div className="settings-actions">
             <button type="button" onClick={() => {
               setSettings((current) => ({ ...current, onboardingCompleted: false }));
@@ -765,6 +858,28 @@ export function App() {
 
 function isLastLens(current: LensKind, order: LensKind[]) {
   return order[order.length - 1] === current;
+}
+
+function readSystemTheme(): ActiveTheme {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
+  return systemThemeFromMatches(window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+function SunIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+      <path d="M20.3 14.1a7.1 7.1 0 0 1-10.4-8 7.8 7.8 0 1 0 10.4 8Z" />
+    </svg>
+  );
 }
 
 function wateringCountForSeed(seed: ReflectionSeed) {

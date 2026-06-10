@@ -27,6 +27,39 @@
       name="twitter:description"
       content="A gentle self-reflection app for noticing inner signals, softening labels, and growing tiny acts of self-trust."
     />
+    <script>
+      (function () {
+        try {
+          var preference = 'system';
+          var rawPreference = localStorage.getItem('signal-garden/theme-preference/vite/v1');
+          if (rawPreference === 'light' || rawPreference === 'dark' || rawPreference === 'system') {
+            preference = rawPreference;
+          } else if (rawPreference === null) {
+            var rawSettings = localStorage.getItem('signal-garden/settings/vite/v1');
+            if (rawSettings) {
+              var settings = JSON.parse(rawSettings);
+              var validSettings =
+                settings &&
+                typeof settings === 'object' &&
+                !Array.isArray(settings) &&
+                typeof settings.reducedMotion === 'boolean' &&
+                (settings.onboardingCompleted === undefined || typeof settings.onboardingCompleted === 'boolean');
+              if (validSettings && (settings.themePreference === 'light' || settings.themePreference === 'dark' || settings.themePreference === 'system')) {
+                preference = settings.themePreference;
+              }
+            }
+          }
+          var systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var activeTheme = preference === 'system' ? systemTheme : preference;
+          document.documentElement.dataset.theme = activeTheme;
+          document.documentElement.style.colorScheme = activeTheme;
+        } catch (error) {
+          var fallbackTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.dataset.theme = fallbackTheme;
+          document.documentElement.style.colorScheme = fallbackTheme;
+        }
+      })();
+    </script>
     <title>Signal Garden</title>
   </head>
   <body>
