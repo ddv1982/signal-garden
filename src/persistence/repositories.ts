@@ -10,7 +10,7 @@ import {
   isReflectionSeed,
 } from '../../shared/bridgeValidation';
 import { defaultThemePreference, isThemePreference, type ThemePreference } from '../domain/theme';
-import { getBrowserStorage, readJson, writeJson, type StorageLike } from './storage';
+import { getBrowserStorage, readJson, writeJson, writeRaw, type StorageLike } from './storage';
 
 const seedKey = 'signal-garden/reflection-seeds/vite/v1';
 const settingsKey = 'signal-garden/settings/vite/v1';
@@ -128,7 +128,7 @@ function readThemePreference(storage: StorageLike | null): ThemePreference | nul
 }
 
 function writeThemePreference(storage: StorageLike | null, themePreference: ThemePreference) {
-  storage?.setItem(themePreferenceKey, themePreference);
+  writeRaw(storage, themePreferenceKey, themePreference);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

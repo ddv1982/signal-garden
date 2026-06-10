@@ -2,12 +2,8 @@ import { useEffect, useRef } from 'react';
 import type { GardenState, LensKind, ReflectionSeed } from '../../shared/models';
 import type { ActiveTheme } from '../domain/theme';
 import { gardenAccessibilityLabel } from '../domain/accessibilityCopy';
-import {
-  createGardenGame,
-  type GardenGameHandle,
-  type PetFrameId,
-  type PetSequenceId,
-} from '../game/GardenGame';
+import { createGardenGame, type GardenGameHandle } from '../game/GardenGame';
+import { PetDebugPanel } from './PetDebugPanel';
 
 type GardenCanvasProps = {
   state: GardenState;
@@ -34,31 +30,6 @@ type GardenCanvasCallbacks = Pick<
   | 'onLensObjectSelected'
   | 'onPendingSeedPlanted'
 >;
-
-const petDebugFrames: Array<{ id: PetFrameId; label: string }> = [
-  { id: 'idle', label: 'Idle' },
-  { id: 'blinkSleepy', label: 'Blink' },
-  { id: 'curious', label: 'Curious' },
-  { id: 'headbuttWindup', label: 'Windup' },
-  { id: 'headbuttContact', label: 'Contact' },
-  { id: 'settleBack', label: 'Settle' },
-  { id: 'stretch', label: 'Stretch' },
-  { id: 'groom', label: 'Groom' },
-  { id: 'napCurl', label: 'Nap' },
-  { id: 'sleeping', label: 'Sleep' },
-  { id: 'wake', label: 'Wake' },
-  { id: 'plantProud', label: 'Proud' },
-];
-
-const petDebugSequences: Array<{ id: PetSequenceId; label: string }> = [
-  { id: 'attention', label: 'Attention' },
-  { id: 'headButt', label: 'Head-butt' },
-  { id: 'stretch', label: 'Stretch' },
-  { id: 'groom', label: 'Groom' },
-  { id: 'sleep', label: 'Sleep' },
-  { id: 'wake', label: 'Wake' },
-  { id: 'plantProud', label: 'Plant proud' },
-];
 
 export function GardenCanvas({
   state,
@@ -178,42 +149,10 @@ export function GardenCanvas({
         aria-label={gardenAccessibilityLabel(state.seeds.length)}
       />
       {petDebug && (
-        <div
-          className="pet-debug-panel"
-          data-testid="pet-debug-panel"
-          aria-label="Pet animation debug controls"
-        >
-          <div>
-            <strong>Freeze pose</strong>
-            <div>
-              {petDebugFrames.map((frame) => (
-                <button
-                  key={frame.id}
-                  type="button"
-                  data-testid={`pet-debug-frame-${frame.id}`}
-                  onClick={() => gameRef.current?.previewPetFrame(frame.id)}
-                >
-                  {frame.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <strong>Play sequence</strong>
-            <div>
-              {petDebugSequences.map((sequence) => (
-                <button
-                  key={sequence.id}
-                  type="button"
-                  data-testid={`pet-debug-sequence-${sequence.id}`}
-                  onClick={() => gameRef.current?.previewPetSequence(sequence.id)}
-                >
-                  {sequence.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <PetDebugPanel
+          onPreviewFrame={(frame) => gameRef.current?.previewPetFrame(frame)}
+          onPreviewSequence={(sequence) => gameRef.current?.previewPetSequence(sequence)}
+        />
       )}
     </>
   );
