@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.19`](./0.1.19.md) — polishes the home, archive, settings, and seed surfaces while cutting runtime image weight with WebP assets
 - [`0.1.18`](./0.1.18.md) — reveals one lens at a time with refined chrome and rebuilds the app and game internals into focused modules
 - [`0.1.17`](./0.1.17.md) — restores the dusk garden composition with a smaller pond and retuned dark assets
 - [`0.1.16`](./0.1.16.md) — grounds the moonlit companion and active lens focus so dark mode loses its visible selection halos

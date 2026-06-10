@@ -53,7 +53,7 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByText('1 saved seed')).toBeVisible();
 
     await page.getByRole('button', { name: 'Archive' }).click();
-    await page.getByRole('button', { name: /I am noticing the story that I am behind/i }).click();
+    await page.getByRole('button', { name: /I am behind/i }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByText('Goal: Take one soft pause', { exact: true })).toBeVisible();
     await dialog.getByRole('tab', { name: 'History' }).click();
@@ -154,7 +154,8 @@ test.describe('garden-first lens journey', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('.app-shell')).toHaveAttribute('data-theme-preference', 'system');
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'dark');
-    await expect(page.getByRole('button', { name: 'Use dark mode' })).toHaveClass(/active/);
+    await expect(page.getByRole('button', { name: 'Match system theme' })).toHaveClass(/active/);
+    await expect(page.getByRole('button', { name: 'Use dark mode' })).not.toHaveClass(/active/);
   });
 
   test('keeps the dark lens chip menu free of horizontal scrollbars', async ({ page }) => {
@@ -315,7 +316,7 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByText('1 saved seed')).toBeVisible();
 
     await page.getByRole('button', { name: 'Archive' }).click();
-    await page.getByRole('button', { name: /I am noticing the story that I am behind/i }).click();
+    await page.getByRole('button', { name: /I am behind/i }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByRole('button', { name: 'Grow Seed' })).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
@@ -381,7 +382,7 @@ test.describe('garden-first lens journey', () => {
     expect(firstWateringEvent).toBeTruthy();
 
     await page.getByRole('button', { name: 'Archive' }).click();
-    await page.getByRole('button', { name: /I am noticing the story that I am behind/i }).click();
+    await page.getByRole('button', { name: /I am behind/i }).click();
     await dialog.getByRole('tab', { name: 'Water' }).click();
     await dialog
       .getByLabel('What did you notice after trying this?')

@@ -1,6 +1,6 @@
 {
   "name": "signal-garden",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -28,6 +28,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
     "phaser": "3.90.0",
     "react": "19.0.0",
     "react-dom": "19.0.0"

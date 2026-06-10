@@ -2,21 +2,22 @@
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', system-ui,
     sans-serif;
-  --color-page: #fbfaf7;
-  --color-surface: rgba(255, 255, 255, 0.78);
-  --color-surface-strong: rgba(255, 255, 255, 0.92);
-  --color-surface-muted: #f5f3ee;
-  --color-border: rgba(60, 60, 67, 0.14);
-  --color-border-strong: rgba(60, 60, 67, 0.22);
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --color-page: #faf7ef;
+  --color-surface: rgba(254, 251, 244, 0.8);
+  --color-surface-strong: rgba(254, 251, 244, 0.94);
+  --color-surface-muted: #f3efe4;
+  --color-border: rgba(82, 71, 55, 0.16);
+  --color-border-strong: rgba(82, 71, 55, 0.25);
   --color-primary: #2f654f;
   --color-primary-strong: #26533f;
   --color-primary-soft: #e8f1ec;
   --color-accent: #8a5f50;
-  --color-control-bg: rgba(255, 255, 255, 0.62);
-  --color-input-bg: rgba(255, 255, 255, 0.72);
-  --color-hud-bg: rgba(255, 255, 255, 0.78);
-  --color-hud-border: rgba(255, 255, 255, 0.68);
-  --color-panel-glass: rgba(255, 255, 255, 0.72);
+  --color-control-bg: rgba(255, 252, 245, 0.66);
+  --color-input-bg: rgba(255, 252, 246, 0.74);
+  --color-hud-bg: rgba(254, 250, 240, 0.8);
+  --color-hud-border: rgba(250, 243, 228, 0.72);
+  --color-panel-glass: rgba(254, 250, 242, 0.74);
   --color-complete: #f1e7cb;
   --color-complete-border: rgba(154, 119, 55, 0.26);
   --color-danger: #8d3333;
@@ -226,6 +227,15 @@ strong {
   color: var(--text-primary);
 }
 
+h1,
+h2,
+h3,
+.settings-section h3,
+.settings-theme legend {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
 p {
   color: var(--text-secondary);
   font-size: 1rem;
@@ -326,15 +336,14 @@ strong {
   padding: clamp(24px, 4vw, 44px);
 }
 
-.home-grid,
-.settings-grid {
+.home-grid {
   display: grid;
   gap: clamp(32px, 5vw, 64px);
   grid-template-columns: minmax(0, 0.95fr) minmax(min(320px, 100%), 1.05fr);
 }
 
 .home-grid > div:first-child,
-.settings-grid > div:first-child,
+.settings-view > div:first-child,
 .section-heading > div {
   align-content: start;
   display: grid;
@@ -343,7 +352,7 @@ strong {
 
 .home-grid h2,
 .section-heading h2,
-.settings-grid h2 {
+.settings-view h2 {
   font-size: clamp(1.35rem, 1.8vw, 1.85rem);
   font-weight: var(--weight-subheading);
   line-height: var(--line-title);
@@ -357,13 +366,12 @@ strong {
 }
 
 .home-grid p,
-.settings-grid p {
+.settings-view p {
   margin: 0;
   max-width: 58ch;
 }
 
-.home-grid > div:first-child .primary-action,
-.settings-grid > div:first-child .primary-action {
+.home-grid > div:first-child .primary-action {
   justify-self: start;
   margin-top: 4px;
 }
@@ -423,20 +431,18 @@ strong {
 .home-companion-art {
   align-self: end;
   filter: drop-shadow(0 12px 18px rgba(29, 29, 31, 0.16));
-  justify-self: center;
-  max-height: 68%;
-  max-width: 48%;
+  /* Sits on the path at the lower left; centered it floats on the pond. */
+  justify-self: start;
+  margin-left: 7%;
+  max-height: 62%;
+  max-width: 44%;
   position: relative;
   z-index: 1;
 }
 
-.home-visual p,
-.home-visual button {
+.home-visual p {
   position: relative;
   z-index: 2;
-}
-
-.home-visual p {
   background: var(--color-hud-bg);
   border: 1px solid var(--color-hud-border);
   border-radius: var(--radius-md);
@@ -477,6 +483,28 @@ strong {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: space-between;
+}
+
+.confirm-inline {
+  align-items: center;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.confirm-inline span {
+  color: var(--text-primary);
+  font-weight: var(--weight-strong);
+}
+
+.confirm-inline .danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--text-inverse);
 }
 
 .garden-view {
@@ -928,6 +956,27 @@ span.lens-chip {
   text-align: left;
 }
 
+.seed-stage-art {
+  height: 52px;
+  object-fit: contain;
+  width: 52px;
+}
+
+.archive-empty {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  margin-top: clamp(24px, 3vw, 36px);
+  padding: clamp(28px, 5vw, 56px) 20px;
+  text-align: center;
+}
+
+.archive-empty img {
+  height: 76px;
+  object-fit: contain;
+  width: 76px;
+}
+
 .seed-card span {
   color: var(--text-tertiary);
   font-size: 0.8rem;
@@ -948,9 +997,40 @@ span.lens-chip {
   width: 22px;
 }
 
+.settings-view {
+  display: grid;
+  gap: clamp(20px, 3vw, 30px);
+  max-width: 780px;
+}
+
+.settings-section {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding-top: clamp(16px, 2.5vw, 24px);
+}
+
+.settings-section h3,
+.settings-theme legend {
+  font-size: 1.05rem;
+  font-weight: var(--weight-subheading);
+  margin: 0;
+}
+
 .settings-theme {
   display: grid;
   gap: 10px;
+}
+
+/* Appearance is the first section; a legend would straddle a border-top line. */
+fieldset.settings-section {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.settings-theme .segmented-grid {
+  justify-self: stretch;
 }
 
 .theme-preference-grid {
@@ -1034,21 +1114,30 @@ span.lens-chip {
 }
 
 .seed-progress span {
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
   color: var(--text-tertiary);
+  display: grid;
   font-size: 0.78rem;
   font-weight: var(--weight-strong);
-  min-height: 34px;
-  padding: 8px 6px;
+  gap: 6px;
+  padding-top: 2px;
   text-align: center;
 }
 
+.seed-progress span::before {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  content: '';
+  display: block;
+  height: 4px;
+  width: 100%;
+}
+
 .seed-progress span.complete {
-  background: var(--color-primary-soft);
-  border-color: rgba(47, 101, 79, 0.32);
   color: var(--color-primary-strong);
+}
+
+.seed-progress span.complete::before {
+  background: var(--color-primary);
 }
 
 .seed-dialog details {

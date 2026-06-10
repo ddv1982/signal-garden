@@ -1,4 +1,4 @@
-import type { ActiveTheme } from '../domain/theme';
+import type { ActiveTheme, ThemePreference } from '../domain/theme';
 
 export type Tab = 'home' | 'garden' | 'archive' | 'settings';
 
@@ -7,11 +7,18 @@ const tabs: Tab[] = ['home', 'garden', 'archive', 'settings'];
 type TopBarProps = {
   activeTab: Tab;
   activeTheme: ActiveTheme;
+  themePreference: ThemePreference;
   onSelectTab: (tab: Tab) => void;
-  onSelectTheme: (theme: 'light' | 'dark') => void;
+  onSelectTheme: (preference: ThemePreference) => void;
 };
 
-export function TopBar({ activeTab, activeTheme, onSelectTab, onSelectTheme }: TopBarProps) {
+export function TopBar({
+  activeTab,
+  activeTheme,
+  themePreference,
+  onSelectTab,
+  onSelectTheme,
+}: TopBarProps) {
   return (
     <header className="topbar">
       <div className="app-brand">
@@ -45,9 +52,9 @@ export function TopBar({ activeTab, activeTheme, onSelectTab, onSelectTheme }: T
         >
           <button
             type="button"
-            className={activeTheme === 'light' ? 'theme-button active' : 'theme-button'}
+            className={themePreference === 'light' ? 'theme-button active' : 'theme-button'}
             aria-label="Use light mode"
-            aria-pressed={activeTheme === 'light'}
+            aria-pressed={themePreference === 'light'}
             title="Use light mode"
             onClick={() => onSelectTheme('light')}
           >
@@ -55,13 +62,23 @@ export function TopBar({ activeTab, activeTheme, onSelectTab, onSelectTheme }: T
           </button>
           <button
             type="button"
-            className={activeTheme === 'dark' ? 'theme-button active' : 'theme-button'}
+            className={themePreference === 'dark' ? 'theme-button active' : 'theme-button'}
             aria-label="Use dark mode"
-            aria-pressed={activeTheme === 'dark'}
+            aria-pressed={themePreference === 'dark'}
             title="Use dark mode"
             onClick={() => onSelectTheme('dark')}
           >
             <MoonIcon />
+          </button>
+          <button
+            type="button"
+            className={themePreference === 'system' ? 'theme-button active' : 'theme-button'}
+            aria-label="Match system theme"
+            aria-pressed={themePreference === 'system'}
+            title="Match system theme"
+            onClick={() => onSelectTheme('system')}
+          >
+            <AutoIcon />
           </button>
         </div>
       </div>
@@ -82,6 +99,15 @@ function MoonIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
       <path d="M20.3 14.1a7.1 7.1 0 0 1-10.4-8 7.8 7.8 0 1 0 10.4 8Z" />
+    </svg>
+  );
+}
+
+function AutoIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none" />
     </svg>
   );
 }

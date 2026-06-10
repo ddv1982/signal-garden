@@ -195,7 +195,7 @@ export function createReflectionSeedFromJourney(journey: LensJourney): Reflectio
     createdAt,
     labelText: response.wordLabel.trim(),
     unhookedText: response.wordLabel.trim()
-      ? `I am noticing the story that ${response.wordLabel.trim()}`
+      ? `Noticing the story: “${response.wordLabel.trim()}”`
       : undefined,
     emotions: splitList(response.emotion),
     bodySignals: splitList(response.bodySignal),

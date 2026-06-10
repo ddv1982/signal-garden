@@ -37,7 +37,7 @@ describe('lens domain', () => {
     expect(isLensSessionComplete(draft, profile)).toBe(true);
 
     const seed = createReflectionSeedFromJourney(createJourneyFromSession(draft, profile));
-    expect(seed.unhookedText).toBe('I am noticing the story that I am behind');
+    expect(seed.unhookedText).toBe('Noticing the story: “I am behind”');
     expect(seed.bodySignals).toEqual(['tight chest']);
     expect(seed.emotions).toEqual(['sad', 'worried']);
     expect(seed.dreams).toEqual(['a small gray cloud']);

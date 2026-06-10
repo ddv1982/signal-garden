@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
+import { RUNTIME_IMAGE_PATTERN, imageBaseName, readImageRGBA } from './lib/readImage.mjs';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -16,20 +16,20 @@ const alphaThreshold = 8;
 const edgeInset = 12;
 const disconnectedComponentThreshold = 80;
 const allowedDetachedComponents = {
-  'plant-proud.png': 6,
+  'plant-proud': 6,
 };
 
 const files = fs
   .readdirSync(frameDir)
-  .filter((file) => file.endsWith('.png'))
+  .filter((file) => RUNTIME_IMAGE_PATTERN.test(file))
   .sort();
 let hasFailure = false;
 
 for (const file of files) {
   const filePath = path.join(frameDir, file);
-  const png = PNG.sync.read(fs.readFileSync(filePath));
+  const png = await readImageRGBA(filePath);
   const metrics = collectMetrics(png);
-  const allowedExtras = allowedDetachedComponents[file] ?? 0;
+  const allowedExtras = allowedDetachedComponents[imageBaseName(file)] ?? 0;
   const unexpectedExtras = metrics.extraComponents.slice(allowedExtras);
 
   console.log(

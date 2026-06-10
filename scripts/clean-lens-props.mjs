@@ -4,10 +4,7 @@ import { PNG } from 'pngjs';
 
 const projectRoot = new URL('..', import.meta.url).pathname;
 const propDir = path.join(projectRoot, 'src/assets/lenses/props');
-const sourceSheetPath = path.join(
-  projectRoot,
-  'src/assets/lenses/source/garden-lens-sheet-chromakey.png'
-);
+const sourceSheetPath = path.join(projectRoot, 'art-source/lenses/garden-lens-sheet-chromakey.png');
 const alphaThreshold = 8;
 const outputPadding = 24;
 const sourceCrops = {

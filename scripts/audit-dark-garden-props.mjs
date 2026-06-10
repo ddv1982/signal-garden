@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
+import { RUNTIME_IMAGE_PATTERN, readImageRGBA } from './lib/readImage.mjs';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const lightDir = path.join(projectRoot, 'src/assets/garden/props');
@@ -11,11 +11,11 @@ const boundsTolerance = 1;
 
 const lightFiles = fs
   .readdirSync(lightDir)
-  .filter((file) => file.endsWith('.png'))
+  .filter((file) => RUNTIME_IMAGE_PATTERN.test(file))
   .sort();
 const darkFiles = fs
   .readdirSync(darkDir)
-  .filter((file) => file.endsWith('.png'))
+  .filter((file) => RUNTIME_IMAGE_PATTERN.test(file))
   .sort();
 let hasFailure = false;
 
@@ -29,8 +29,8 @@ for (const file of lightFiles) {
     continue;
   }
 
-  const light = PNG.sync.read(fs.readFileSync(lightPath));
-  const dark = PNG.sync.read(fs.readFileSync(darkPath));
+  const light = await readImageRGBA(lightPath);
+  const dark = await readImageRGBA(darkPath);
   const lightBounds = alphaBounds(light);
   const darkBounds = alphaBounds(dark);
 

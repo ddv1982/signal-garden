@@ -1,4 +1,5 @@
 import type { ReflectionSeed, SeedStatus } from '../../shared/models';
+import { friendlySeedDate } from './dates';
 
 export function seedStatusLabel(status: SeedStatus): string {
   switch (status) {
@@ -16,7 +17,7 @@ export function seedStatusLabel(status: SeedStatus): string {
 }
 
 export function seedCardAccessibilityLabel(seed: ReflectionSeed): string {
-  const date = new Date(seed.createdAt).toLocaleString();
+  const date = friendlySeedDate(seed.createdAt);
   const status = seedStatusLabel(seed.status);
   const primaryText = seed.unhookedText || seed.labelText || seed.tinyAction;
   const wateringCount = seed.waterings?.length ?? 0;
@@ -25,7 +26,7 @@ export function seedCardAccessibilityLabel(seed: ReflectionSeed): string {
       ? 'Not watered yet.'
       : `Watered ${wateringCount} ${wateringCount === 1 ? 'time' : 'times'}.`;
 
-  return `Open ${status.toLowerCase()} seed from ${date}. ${wateringText} ${primaryText}`;
+  return `Open ${status.toLowerCase()} seed planted ${date}. ${wateringText} ${primaryText}`;
 }
 
 export function gardenAccessibilityLabel(seedCount: number): string {

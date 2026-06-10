@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
+import { RUNTIME_IMAGE_PATTERN, imageBaseName, readImageRGBA } from './lib/readImage.mjs';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -9,38 +9,33 @@ const inputDir = args.find((arg) => !arg.startsWith('--'));
 const skipChroma = args.includes('--skip-chroma');
 const defaultPropDir = path.join(projectRoot, 'src/assets/lenses/props');
 const propDir = inputDir ? path.resolve(projectRoot, inputDir) : defaultPropDir;
-const sourceSheetPath = path.join(
-  projectRoot,
-  'src/assets/lenses/source/garden-lens-sheet-chromakey.png'
-);
+const sourceSheetPath = path.join(projectRoot, 'art-source/lenses/garden-lens-sheet-chromakey.png');
 const alphaThreshold = 8;
 const minimumMargin = 24;
 const minimumSourceMargin = 3;
 const sourceCrops = {
-  'action-basket.png': { x: 935, y: 760, width: 365, height: 264 },
-  'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
-  'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 },
-  'image-cloud.png': { x: 1085, y: 535, width: 370, height: 235 },
-  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 },
+  'action-basket': { x: 935, y: 760, width: 365, height: 264 },
+  'body-ripple': { x: 408, y: 528, width: 350, height: 225 },
+  'emotion-lantern': { x: 810, y: 522, width: 270, height: 244 },
+  'image-cloud': { x: 1085, y: 535, width: 370, height: 235 },
+  'observer-pool': { x: 230, y: 765, width: 365, height: 245 },
 };
 
 const files = fs
   .readdirSync(propDir)
-  .filter((file) => file.endsWith('.png'))
+  .filter((file) => RUNTIME_IMAGE_PATTERN.test(file))
   .sort();
 const shouldAuditSourceSheet = propDir === defaultPropDir;
 const shouldAuditChromaKey = !skipChroma;
-const sourceSheet = shouldAuditSourceSheet ? PNG.sync.read(fs.readFileSync(sourceSheetPath)) : null;
+const sourceSheet = shouldAuditSourceSheet ? await readImageRGBA(sourceSheetPath) : null;
 let hasFailure = false;
 
 for (const file of files) {
   const filePath = path.join(propDir, file);
-  const png = PNG.sync.read(fs.readFileSync(filePath));
+  const png = await readImageRGBA(filePath);
   const metrics = collectMetrics(png);
-  const sourceMetrics =
-    sourceSheet && sourceCrops[file]
-      ? collectSourceCropMetrics(sourceSheet, sourceCrops[file])
-      : null;
+  const crop = sourceCrops[imageBaseName(file)];
+  const sourceMetrics = sourceSheet && crop ? collectSourceCropMetrics(sourceSheet, crop) : null;
 
   const chromaKeyLabel = shouldAuditChromaKey ? metrics.chromaKey : 'skipped';
   console.log(
