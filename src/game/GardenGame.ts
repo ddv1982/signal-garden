@@ -202,23 +202,25 @@ function textureKeyForTheme(textureKey: string, theme: ActiveTheme) {
 
 type LensLighting = {
   glowColor: number;
-  ringColor: number;
+  focusColor: number;
+  moteColor: number;
   inactiveAlpha: number;
   activeAlpha: number;
   glowWidth: number;
   glowHeight: number;
-  ringWidth: number;
-  ringHeight: number;
+  focusWidth: number;
+  focusHeight: number;
+  focusYOffset: number;
 };
 
 const DARK_LENS_LIGHTING: Record<LensKind, LensLighting> = {
-  word: { glowColor: 0xaac9bf, ringColor: 0xe0e9d4, inactiveAlpha: 0.035, activeAlpha: 0.11, glowWidth: 0.92, glowHeight: 0.5, ringWidth: 0.94, ringHeight: 0.62 },
-  body: { glowColor: 0x8fd9de, ringColor: 0xc8f3ee, inactiveAlpha: 0.045, activeAlpha: 0.13, glowWidth: 1, glowHeight: 0.42, ringWidth: 1.08, ringHeight: 0.54 },
-  emotion: { glowColor: 0xf0b565, ringColor: 0xffd08a, inactiveAlpha: 0.055, activeAlpha: 0.16, glowWidth: 0.74, glowHeight: 0.58, ringWidth: 0.78, ringHeight: 0.76 },
-  image: { glowColor: 0xbfd2df, ringColor: 0xe6edf2, inactiveAlpha: 0.035, activeAlpha: 0.1, glowWidth: 0.98, glowHeight: 0.52, ringWidth: 1.04, ringHeight: 0.66 },
-  observer: { glowColor: 0x85d8df, ringColor: 0xcaf2f0, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 1.02, glowHeight: 0.46, ringWidth: 1.08, ringHeight: 0.58 },
-  meaning: { glowColor: 0xb7d5c4, ringColor: 0xd6edd4, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 0.84, glowHeight: 0.62, ringWidth: 0.88, ringHeight: 0.82 },
-  action: { glowColor: 0xe6be78, ringColor: 0xf0d39a, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 0.88, glowHeight: 0.48, ringWidth: 0.92, ringHeight: 0.62 }
+  word: { glowColor: 0xaac9bf, focusColor: 0xe0e9d4, moteColor: 0xc6eee1, inactiveAlpha: 0.03, activeAlpha: 0.095, glowWidth: 0.78, glowHeight: 0.32, focusWidth: 0.72, focusHeight: 0.24, focusYOffset: 0.18 },
+  body: { glowColor: 0x8fd9de, focusColor: 0xc8f3ee, moteColor: 0xbaedf0, inactiveAlpha: 0.04, activeAlpha: 0.115, glowWidth: 0.9, glowHeight: 0.34, focusWidth: 0.9, focusHeight: 0.24, focusYOffset: 0.16 },
+  emotion: { glowColor: 0xf0b565, focusColor: 0xffd08a, moteColor: 0xffd8a2, inactiveAlpha: 0.05, activeAlpha: 0.14, glowWidth: 0.68, glowHeight: 0.42, focusWidth: 0.62, focusHeight: 0.3, focusYOffset: 0.18 },
+  image: { glowColor: 0xbfd2df, focusColor: 0xe6edf2, moteColor: 0xdcebf1, inactiveAlpha: 0.03, activeAlpha: 0.085, glowWidth: 0.86, glowHeight: 0.34, focusWidth: 0.78, focusHeight: 0.26, focusYOffset: 0.17 },
+  observer: { glowColor: 0x85d8df, focusColor: 0xcaf2f0, moteColor: 0xb8eeee, inactiveAlpha: 0.035, activeAlpha: 0.1, glowWidth: 0.9, glowHeight: 0.32, focusWidth: 0.84, focusHeight: 0.24, focusYOffset: 0.16 },
+  meaning: { glowColor: 0xb7d5c4, focusColor: 0xd6edd4, moteColor: 0xc9edc8, inactiveAlpha: 0.035, activeAlpha: 0.105, glowWidth: 0.74, glowHeight: 0.42, focusWidth: 0.68, focusHeight: 0.3, focusYOffset: 0.18 },
+  action: { glowColor: 0xe6be78, focusColor: 0xf0d39a, moteColor: 0xf2d7a2, inactiveAlpha: 0.035, activeAlpha: 0.105, glowWidth: 0.78, glowHeight: 0.34, focusWidth: 0.7, focusHeight: 0.25, focusYOffset: 0.17 }
 };
 
 export type GardenGameOptions = {
@@ -800,12 +802,15 @@ class BrowserGardenScene extends Phaser.Scene {
         : this.add.circle(0, glowY, size * 0.42, active ? 0xfff1ad : 0xffffff, active ? 0.2 : 0.06);
       const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x071211 : 0x5c4a36, dark ? placement.shadowAlpha * 1.25 : placement.shadowAlpha);
       group.add([glow, shadow]);
+      if (active && dark) {
+        this.drawDarkActiveLensFocusBase(group, placement.kind, size, glowY);
+      }
       if (!this.addPropImage(group, `lens-${placement.kind}`, 0, 0, size, placement.anchor)) {
         group.add(this.add.circle(0, -size * 0.3, size * 0.3, active ? 0xf0b260 : 0xe6d1b7, 0.72));
       }
       if (active) {
         if (dark) {
-          this.drawDarkActiveLensRim(group, placement.kind, size, glowY);
+          this.drawDarkActiveLensMotes(group, placement.kind, size, glowY);
         } else {
           group.add(this.add.circle(0, glowY, size * 0.5, 0xfff1ad, 0).setStrokeStyle(2, 0xfff1ad, 0.52));
         }
@@ -836,21 +841,60 @@ class BrowserGardenScene extends Phaser.Scene {
     );
   }
 
-  private drawDarkActiveLensRim(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
+  private drawDarkActiveLensFocusBase(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
     const lighting = DARK_LENS_LIGHTING[kind];
-    const ring = this.add.ellipse(0, glowY + size * 0.02, size * lighting.ringWidth, size * lighting.ringHeight, lighting.ringColor, 0);
-    ring.setStrokeStyle(1.5, lighting.ringColor, 0.34);
-    const glint = this.add.arc(
-      -size * 0.18,
-      glowY - size * 0.2,
-      size * 0.28,
-      205,
-      300,
-      false,
-      lighting.ringColor,
-      0
-    ).setStrokeStyle(1.5, lighting.ringColor, 0.42);
-    group.add([ring, glint]);
+    const focus = this.add.ellipse(
+      0,
+      glowY + size * lighting.focusYOffset,
+      size * lighting.focusWidth,
+      size * lighting.focusHeight,
+      lighting.focusColor,
+      this.reducedMotion ? lighting.activeAlpha * 0.78 : lighting.activeAlpha
+    );
+    const inner = this.add.ellipse(
+      -size * 0.04,
+      glowY + size * (lighting.focusYOffset - 0.01),
+      size * lighting.focusWidth * 0.52,
+      size * lighting.focusHeight * 0.46,
+      lighting.moteColor,
+      this.reducedMotion ? 0.08 : 0.11
+    );
+    group.add([focus, inner]);
+    if (!this.reducedMotion) {
+      this.tweens.add({
+        targets: [focus, inner],
+        alpha: { from: lighting.activeAlpha * 0.72, to: lighting.activeAlpha * 1.18 },
+        scaleX: 1.035,
+        scaleY: 1.08,
+        duration: 2800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+    }
+  }
+
+  private drawDarkActiveLensMotes(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
+    const lighting = DARK_LENS_LIGHTING[kind];
+    const motes = [
+      this.add.circle(-size * 0.36, glowY - size * 0.18, Math.max(1.4, size * 0.018), lighting.moteColor, 0.42),
+      this.add.circle(size * 0.28, glowY - size * 0.12, Math.max(1.2, size * 0.014), lighting.focusColor, 0.34),
+      this.add.circle(size * 0.1, glowY - size * 0.28, Math.max(1.1, size * 0.012), lighting.moteColor, 0.3)
+    ];
+    group.add(motes);
+    if (!this.reducedMotion) {
+      motes.forEach((mote, index) => {
+        this.tweens.add({
+          targets: mote,
+          y: mote.y - size * (0.035 + index * 0.01),
+          alpha: index === 0 ? 0.22 : 0.18,
+          duration: 2200 + index * 360,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
+        });
+      });
+    }
   }
 
   private drawPendingSeed(width: number, height: number, frame: GardenFrame) {
@@ -900,8 +944,7 @@ class BrowserGardenScene extends Phaser.Scene {
       const sprite = this.add.image(0, 0, idleTexture).setOrigin(0.5, 1);
       const targetHeight = this.gardenSize(frame, 150, { min: 150, max: 235 });
       if (this.theme === 'dark') {
-        group.add(this.add.ellipse(0, -4, targetHeight * 0.68, targetHeight * 0.12, 0x071211, 0.24));
-        group.add(this.add.ellipse(-targetHeight * 0.08, -targetHeight * 0.56, targetHeight * 0.78, targetHeight * 0.88, 0xb9d8d2, 0.055));
+        group.add(this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x071211, 0.28));
       }
       sprite.setScale(targetHeight / sprite.height);
       this.petBaseScaleX = sprite.scaleX;
