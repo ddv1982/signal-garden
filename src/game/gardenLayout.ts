@@ -68,7 +68,15 @@ const MAX_VISIBLE_SEEDS = 50;
 export const GARDEN_DESIGN_WIDTH = 1480;
 export const GARDEN_DESIGN_HEIGHT = 484;
 export const LENS_POOL_CENTER = { x: 0.49, y: 0.66 };
-export const LENS_RING_ORDER: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
+export const LENS_RING_ORDER: LensKind[] = [
+  'word',
+  'body',
+  'emotion',
+  'image',
+  'observer',
+  'meaning',
+  'action',
+];
 export const PET_INTERACTION_OFFSET = { x: 0, y: -92 };
 export const PET_INTERACTION_SIZE = { width: 178, height: 226 };
 const MOBILE_LENS_PANEL_SAFE_HEIGHT = 144;
@@ -83,7 +91,7 @@ const LENS_PROP_RATIOS: Record<LensKind, { width: number; height: number }> = {
   image: scaledRatio(374, 253),
   observer: scaledRatio(376, 261),
   meaning: scaledRatio(340, 295),
-  action: scaledRatio(347, 272)
+  action: scaledRatio(347, 272),
 };
 
 const LENS_RING: Array<{
@@ -98,13 +106,90 @@ const LENS_RING: Array<{
   shadowAlpha: number;
   anchor: LensPropAnchor;
 }> = [
-  { kind: 'word', angle: 214, radiusX: 0.18, radiusY: 0.18, size: 104, shadowY: 20, shadowWidth: 88, shadowHeight: 22, shadowAlpha: 0.14, anchor: 'bottom' },
-  { kind: 'body', angle: 236, radiusX: 0.12, radiusY: 0.15, size: 108, shadowY: 26, shadowWidth: 98, shadowHeight: 20, shadowAlpha: 0.1, anchor: 'center' },
-  { kind: 'emotion', angle: 282, radiusX: 0.14, radiusY: 0.13, size: 108, shadowY: 23, shadowWidth: 74, shadowHeight: 22, shadowAlpha: 0.14, anchor: 'bottom' },
-  { kind: 'image', angle: 322, radiusX: 0.16, radiusY: 0.13, size: 116, shadowY: 24, shadowWidth: 98, shadowHeight: 22, shadowAlpha: 0.11, anchor: 'bottom' },
-  { kind: 'observer', angle: 8, radiusX: 0.17, radiusY: 0.14, size: 92, shadowY: 22, shadowWidth: 84, shadowHeight: 18, shadowAlpha: 0.1, anchor: 'bottom' },
-  { kind: 'meaning', angle: 76, radiusX: 0.14, radiusY: 0.17, size: 120, shadowY: 26, shadowWidth: 84, shadowHeight: 22, shadowAlpha: 0.13, anchor: 'bottom' },
-  { kind: 'action', angle: 136, radiusX: 0.15, radiusY: 0.18, size: 108, shadowY: 24, shadowWidth: 84, shadowHeight: 22, shadowAlpha: 0.14, anchor: 'bottom' }
+  {
+    kind: 'word',
+    angle: 214,
+    radiusX: 0.18,
+    radiusY: 0.18,
+    size: 104,
+    shadowY: 20,
+    shadowWidth: 88,
+    shadowHeight: 22,
+    shadowAlpha: 0.14,
+    anchor: 'bottom',
+  },
+  {
+    kind: 'body',
+    angle: 236,
+    radiusX: 0.12,
+    radiusY: 0.15,
+    size: 108,
+    shadowY: 26,
+    shadowWidth: 98,
+    shadowHeight: 20,
+    shadowAlpha: 0.1,
+    anchor: 'center',
+  },
+  {
+    kind: 'emotion',
+    angle: 282,
+    radiusX: 0.14,
+    radiusY: 0.13,
+    size: 108,
+    shadowY: 23,
+    shadowWidth: 74,
+    shadowHeight: 22,
+    shadowAlpha: 0.14,
+    anchor: 'bottom',
+  },
+  {
+    kind: 'image',
+    angle: 322,
+    radiusX: 0.16,
+    radiusY: 0.13,
+    size: 116,
+    shadowY: 24,
+    shadowWidth: 98,
+    shadowHeight: 22,
+    shadowAlpha: 0.11,
+    anchor: 'bottom',
+  },
+  {
+    kind: 'observer',
+    angle: 8,
+    radiusX: 0.17,
+    radiusY: 0.14,
+    size: 92,
+    shadowY: 22,
+    shadowWidth: 84,
+    shadowHeight: 18,
+    shadowAlpha: 0.1,
+    anchor: 'bottom',
+  },
+  {
+    kind: 'meaning',
+    angle: 76,
+    radiusX: 0.14,
+    radiusY: 0.17,
+    size: 120,
+    shadowY: 26,
+    shadowWidth: 84,
+    shadowHeight: 22,
+    shadowAlpha: 0.13,
+    anchor: 'bottom',
+  },
+  {
+    kind: 'action',
+    angle: 136,
+    radiusX: 0.15,
+    radiusY: 0.18,
+    size: 108,
+    shadowY: 24,
+    shadowWidth: 84,
+    shadowHeight: 22,
+    shadowAlpha: 0.14,
+    anchor: 'bottom',
+  },
 ];
 
 const DESKTOP_PLOTS: GardenPlot[] = [
@@ -119,7 +204,7 @@ const DESKTOP_PLOTS: GardenPlot[] = [
   { id: 'middle-right', x: 0.75, y: 0.64, band: 'middle', scale: 0.78, depth: 250 },
   { id: 'back-left', x: 0.3, y: 0.52, band: 'back', scale: 0.6, depth: 130 },
   { id: 'back-center', x: 0.5, y: 0.52, band: 'back', scale: 0.58, depth: 134 },
-  { id: 'back-right', x: 0.68, y: 0.52, band: 'back', scale: 0.6, depth: 140 }
+  { id: 'back-right', x: 0.68, y: 0.52, band: 'back', scale: 0.6, depth: 140 },
 ];
 
 const MOBILE_PLOTS: GardenPlot[] = [
@@ -130,7 +215,7 @@ const MOBILE_PLOTS: GardenPlot[] = [
   { id: 'middle-left', x: 0.22, y: 0.48, band: 'middle', scale: 0.58, depth: 205 },
   { id: 'middle-center', x: 0.48, y: 0.49, band: 'middle', scale: 0.58, depth: 205 },
   { id: 'middle-right', x: 0.68, y: 0.5, band: 'middle', scale: 0.58, depth: 215 },
-  { id: 'back-center', x: 0.78, y: 0.47, band: 'back', scale: 0.54, depth: 180 }
+  { id: 'back-center', x: 0.78, y: 0.47, band: 'back', scale: 0.54, depth: 180 },
 ];
 
 export function createGardenPlots(width: number, _height: number): GardenPlot[] {
@@ -143,9 +228,16 @@ export function availableGardenPlots(seeds: ReflectionSeed[], width: number): Ga
   return createGardenPlots(width, 0).filter((plot) => !occupied.has(plot.id));
 }
 
-export function firstAvailableGardenPlot(seeds: ReflectionSeed[], width: number): GardenPlot | null {
+export function firstAvailableGardenPlot(
+  seeds: ReflectionSeed[],
+  width: number
+): GardenPlot | null {
   const available = availableGardenPlots(seeds, width);
-  return PREFERRED_PLOT_IDS.map((id) => available.find((plot) => plot.id === id)).find(Boolean) ?? available[0] ?? null;
+  return (
+    PREFERRED_PLOT_IDS.map((id) => available.find((plot) => plot.id === id)).find(Boolean) ??
+    available[0] ??
+    null
+  );
 }
 
 export function createGardenFrame(width: number, height: number): GardenFrame {
@@ -164,14 +256,14 @@ export function createGardenFrame(width: number, height: number): GardenFrame {
     visibleX: Math.max(0, -offsetX / scale),
     visibleY: Math.max(0, -offsetY / scale),
     visibleWidth: Math.min(GARDEN_DESIGN_WIDTH, width / scale),
-    visibleHeight: Math.min(GARDEN_DESIGN_HEIGHT, height / scale)
+    visibleHeight: Math.min(GARDEN_DESIGN_HEIGHT, height / scale),
   };
 }
 
 export function gardenPoint(frame: GardenFrame, x: number, y: number) {
   return {
     x: frame.offsetX + x * frame.scale,
-    y: frame.offsetY + y * frame.scale
+    y: frame.offsetY + y * frame.scale,
   };
 }
 
@@ -180,28 +272,38 @@ export function gardenNormalizedPoint(frame: GardenFrame, x: number, y: number) 
 }
 
 export function visibleGardenPoint(frame: GardenFrame, x: number, y: number) {
-  return gardenPoint(frame, frame.visibleX + frame.visibleWidth * x, frame.visibleY + frame.visibleHeight * y);
+  return gardenPoint(
+    frame,
+    frame.visibleX + frame.visibleWidth * x,
+    frame.visibleY + frame.visibleHeight * y
+  );
 }
 
 export function gardenPlotPoint(frame: GardenFrame, plot: GardenPlot) {
   return visibleGardenPoint(frame, plot.x, plot.y);
 }
 
-export function createLensObjectPlacements(frame: GardenFrame, currentLens: LensKind | null): LensObjectPlacement[] {
+export function createLensObjectPlacements(
+  frame: GardenFrame,
+  currentLens: LensKind | null
+): LensObjectPlacement[] {
   const compact = frame.width < 560;
   // Step-by-step reveal: only the current lens prop is placed. Passing null returns
   // the full ring (used for layout audits and tests).
-  const source = currentLens ? LENS_RING.filter((placement) => placement.kind === currentLens) : LENS_RING;
+  const source = currentLens
+    ? LENS_RING.filter((placement) => placement.kind === currentLens)
+    : LENS_RING;
 
   return source.map((placement) => {
-    const point = compact && placement.kind === 'observer'
-      ? visibleGardenPoint(frame, 0.68, 0.58)
-      : lensRingPoint(
-          frame,
-          placement.angle,
-          compact ? placement.radiusX * 0.62 : placement.radiusX,
-          compact ? placement.radiusY * 0.58 : placement.radiusY
-        );
+    const point =
+      compact && placement.kind === 'observer'
+        ? visibleGardenPoint(frame, 0.68, 0.58)
+        : lensRingPoint(
+            frame,
+            placement.angle,
+            compact ? placement.radiusX * 0.62 : placement.radiusX,
+            compact ? placement.radiusY * 0.58 : placement.radiusY
+          );
     const size = lensObjectSize(frame, placement.size, compact);
     const clamped = compact ? clampLensPointForMobile(frame, point, size, placement.anchor) : point;
 
@@ -216,7 +318,7 @@ export function createLensObjectPlacements(frame: GardenFrame, currentLens: Lens
       shadowWidth: compact ? Math.min(placement.shadowWidth, 92) : placement.shadowWidth,
       shadowHeight: compact ? Math.min(placement.shadowHeight, 22) : placement.shadowHeight,
       shadowAlpha: placement.shadowAlpha,
-      anchor: placement.anchor
+      anchor: placement.anchor,
     };
 
     return compact ? separateLensPlacementFromMobilePet(frame, lensPlacement) : lensPlacement;
@@ -226,14 +328,17 @@ export function createLensObjectPlacements(frame: GardenFrame, currentLens: Lens
 export function lensObjectBounds(placement: LensObjectPlacement): LensObjectBounds {
   const halfWidth = placement.displayWidth / 2;
   const halfHeight = placement.displayHeight / 2;
-  const top = placement.anchor === 'center' ? placement.y - halfHeight : placement.y - placement.displayHeight;
+  const top =
+    placement.anchor === 'center'
+      ? placement.y - halfHeight
+      : placement.y - placement.displayHeight;
   const bottom = placement.anchor === 'center' ? placement.y + halfHeight : placement.y;
 
   return {
     left: placement.x - halfWidth,
     right: placement.x + halfWidth,
     top,
-    bottom
+    bottom,
   };
 }
 
@@ -243,7 +348,7 @@ export function lensObjectHitTarget(placement: LensObjectPlacement): CircleHitTa
   return {
     x: placement.x,
     y: placement.y + offsetY,
-    radius: placement.size * 0.48
+    radius: placement.size * 0.48,
   };
 }
 
@@ -254,11 +359,15 @@ export function petInteractionTarget(frame: GardenFrame): EllipseHitTarget {
     x: petPoint.x + PET_INTERACTION_OFFSET.x,
     y: petPoint.y + PET_INTERACTION_OFFSET.y,
     radiusX: PET_INTERACTION_SIZE.width / 2,
-    radiusY: PET_INTERACTION_SIZE.height / 2
+    radiusY: PET_INTERACTION_SIZE.height / 2,
   };
 }
 
-export function circleOverlapsEllipse(circle: CircleHitTarget, ellipse: EllipseHitTarget, padding = 0) {
+export function circleOverlapsEllipse(
+  circle: CircleHitTarget,
+  ellipse: EllipseHitTarget,
+  padding = 0
+) {
   const radiusX = ellipse.radiusX + circle.radius + padding;
   const radiusY = ellipse.radiusY + circle.radius + padding;
   const dx = (circle.x - ellipse.x) / radiusX;
@@ -268,12 +377,17 @@ export function circleOverlapsEllipse(circle: CircleHitTarget, ellipse: EllipseH
 }
 
 export function pendingSeedStartPoint(frame: GardenFrame, plot: GardenPlot | null) {
-  if (frame.width < 560) return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.72, 0.82);
+  if (frame.width < 560)
+    return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.72, 0.82);
 
   return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.64, 0.48);
 }
 
-export function createGardenSeedLayout(width: number, height: number, seedCount: number): GardenSeedLayoutItem[] {
+export function createGardenSeedLayout(
+  width: number,
+  height: number,
+  seedCount: number
+): GardenSeedLayoutItem[] {
   const count = Math.min(Math.max(seedCount, 0), MAX_VISIBLE_SEEDS);
   if (count === 0) return [];
 
@@ -282,9 +396,39 @@ export function createGardenSeedLayout(width: number, height: number, seedCount:
   const backCount = Math.max(count - frontCount - middleCount, 0);
 
   return [
-    ...createBandLayout({ startIndex: 0, count: frontCount, columns: columnsFor(width, 7), width, y: height * 0.79, rowGap: 36, scale: 1, depthStart: 300, band: 'front' }),
-    ...createBandLayout({ startIndex: frontCount, count: middleCount, columns: columnsFor(width, 9), width, y: height * 0.68, rowGap: 29, scale: 0.78, depthStart: 200, band: 'middle' }),
-    ...createBandLayout({ startIndex: frontCount + middleCount, count: backCount, columns: columnsFor(width, 10), width, y: height * 0.58, rowGap: 22, scale: 0.58, depthStart: 100, band: 'back' })
+    ...createBandLayout({
+      startIndex: 0,
+      count: frontCount,
+      columns: columnsFor(width, 7),
+      width,
+      y: height * 0.79,
+      rowGap: 36,
+      scale: 1,
+      depthStart: 300,
+      band: 'front',
+    }),
+    ...createBandLayout({
+      startIndex: frontCount,
+      count: middleCount,
+      columns: columnsFor(width, 9),
+      width,
+      y: height * 0.68,
+      rowGap: 29,
+      scale: 0.78,
+      depthStart: 200,
+      band: 'middle',
+    }),
+    ...createBandLayout({
+      startIndex: frontCount + middleCount,
+      count: backCount,
+      columns: columnsFor(width, 10),
+      width,
+      y: height * 0.58,
+      rowGap: 22,
+      scale: 0.58,
+      depthStart: 100,
+      band: 'back',
+    }),
   ];
 }
 
@@ -301,7 +445,7 @@ export function resolveGardenSeedPlacement(
       x: plot.x * width,
       y: plot.y * height,
       scale: plot.scale,
-      depth: plot.depth
+      depth: plot.depth,
     };
   }
 
@@ -310,7 +454,7 @@ export function resolveGardenSeedPlacement(
       x: clamp(seed.gardenPosition.x, 0.08, 0.92) * width,
       y: clamp(seed.gardenPosition.y, 0.52, 0.88) * height,
       scale: fallback.scale,
-      depth: fallback.depth
+      depth: fallback.depth,
     };
   }
 
@@ -318,7 +462,7 @@ export function resolveGardenSeedPlacement(
     x: fallback.x,
     y: fallback.y,
     scale: fallback.scale,
-    depth: fallback.depth
+    depth: fallback.depth,
   };
 }
 
@@ -331,7 +475,7 @@ function createBandLayout({
   rowGap,
   scale,
   depthStart,
-  band
+  band,
 }: {
   startIndex: number;
   count: number;
@@ -354,8 +498,10 @@ function createBandLayout({
     const rowSize = Math.min(safeColumns, count - row * safeColumns);
     const col = offset % safeColumns;
     const rowWidth = rowSize > 1 ? usableWidth : 0;
-    const rowOffset = row % 2 === 0 ? 0 : Math.min(usableWidth / Math.max(safeColumns - 1, 1) / 2, 18);
-    const x = rowSize === 1 ? width / 2 : sidePadding + (col * rowWidth) / (rowSize - 1) + rowOffset;
+    const rowOffset =
+      row % 2 === 0 ? 0 : Math.min(usableWidth / Math.max(safeColumns - 1, 1) / 2, 18);
+    const x =
+      rowSize === 1 ? width / 2 : sidePadding + (col * rowWidth) / (rowSize - 1) + rowOffset;
 
     return {
       index: startIndex + offset,
@@ -363,7 +509,7 @@ function createBandLayout({
       y: y + row * rowGap,
       scale,
       depth: depthStart + row * 10 + col,
-      band
+      band,
     };
   });
 }
@@ -383,7 +529,7 @@ function scaledRatio(width: number, height: number) {
 
   return {
     width: width / maxDimension,
-    height: height / maxDimension
+    height: height / maxDimension,
   };
 }
 
@@ -400,18 +546,26 @@ function lensObjectSize(frame: GardenFrame, designSize: number, compact: boolean
   return clamp(designSize * frame.scale, designSize * 0.72, designSize * 1.18);
 }
 
-function clampLensPointForMobile(frame: GardenFrame, point: { x: number; y: number }, size: number, anchor: LensPropAnchor) {
+function clampLensPointForMobile(
+  frame: GardenFrame,
+  point: { x: number; y: number },
+  size: number,
+  anchor: LensPropAnchor
+) {
   const half = size / 2;
   const topInset = anchor === 'center' ? half : size;
   const bottomInset = anchor === 'center' ? half : 0;
 
   return {
     x: clamp(point.x, Math.max(half + 12, frame.width * 0.66), frame.width - half - 12),
-    y: clamp(point.y, topInset + 18, frame.height - bottomInset - 172)
+    y: clamp(point.y, topInset + 18, frame.height - bottomInset - 172),
   };
 }
 
-function separateLensPlacementFromMobilePet(frame: GardenFrame, placement: LensObjectPlacement): LensObjectPlacement {
+function separateLensPlacementFromMobilePet(
+  frame: GardenFrame,
+  placement: LensObjectPlacement
+): LensObjectPlacement {
   const target = lensObjectHitTarget(placement);
   const petTarget = petInteractionTarget(frame);
   if (!circleOverlapsEllipse(target, petTarget, MOBILE_LENS_SAFE_GAP)) return placement;
@@ -420,8 +574,12 @@ function separateLensPlacementFromMobilePet(frame: GardenFrame, placement: LensO
   const radiusY = petTarget.radiusY + target.radius + MOBILE_LENS_SAFE_GAP;
   const dy = (target.y - petTarget.y) / radiusY;
   const requiredX = petTarget.x + radiusX * Math.sqrt(Math.max(0, 1 - dy * dy)) + 1;
-  const shiftedRight = clampLensPlacementForMobileFrame({ ...placement, x: Math.max(placement.x, requiredX) }, frame);
-  if (!circleOverlapsEllipse(lensObjectHitTarget(shiftedRight), petTarget, MOBILE_LENS_SAFE_GAP)) return shiftedRight;
+  const shiftedRight = clampLensPlacementForMobileFrame(
+    { ...placement, x: Math.max(placement.x, requiredX) },
+    frame
+  );
+  if (!circleOverlapsEllipse(lensObjectHitTarget(shiftedRight), petTarget, MOBILE_LENS_SAFE_GAP))
+    return shiftedRight;
 
   return clampLensPlacementForMobileFrame(
     { ...placement, y: placement.y - (target.y - (petTarget.y - radiusY - 1)) },
@@ -429,18 +587,28 @@ function separateLensPlacementFromMobilePet(frame: GardenFrame, placement: LensO
   );
 }
 
-function clampLensPlacementForMobileFrame(placement: LensObjectPlacement, frame: GardenFrame): LensObjectPlacement {
+function clampLensPlacementForMobileFrame(
+  placement: LensObjectPlacement,
+  frame: GardenFrame
+): LensObjectPlacement {
   const bounds = lensObjectBounds(placement);
   const target = lensObjectHitTarget(placement);
   const minX = placement.x + Math.max(0, -bounds.left, target.radius - target.x);
-  const maxX = placement.x - Math.max(0, bounds.right - frame.width, target.x + target.radius - frame.width);
+  const maxX =
+    placement.x - Math.max(0, bounds.right - frame.width, target.x + target.radius - frame.width);
   const minY = placement.y + Math.max(0, -bounds.top, target.radius - target.y);
-  const maxY = placement.y - Math.max(0, bounds.bottom - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT), target.y + target.radius - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT));
+  const maxY =
+    placement.y -
+    Math.max(
+      0,
+      bounds.bottom - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT),
+      target.y + target.radius - (frame.height - MOBILE_LENS_PANEL_SAFE_HEIGHT)
+    );
 
   return {
     ...placement,
     x: clamp(placement.x, minX, maxX),
-    y: clamp(placement.y, minY, maxY)
+    y: clamp(placement.y, minY, maxY),
   };
 }
 

@@ -11,7 +11,7 @@ mkdirSync(publicDir, { recursive: true });
 const sizes = [
   { size: 16, names: ['favicon-16x16.png', 'signal-garden-icon-16.png'] },
   { size: 32, names: ['favicon-32x32.png', 'signal-garden-icon-32.png'] },
-  { size: 180, names: ['apple-touch-icon.png', 'signal-garden-apple-touch-icon.png'] }
+  { size: 180, names: ['apple-touch-icon.png', 'signal-garden-apple-touch-icon.png'] },
 ];
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">

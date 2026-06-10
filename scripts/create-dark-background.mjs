@@ -83,8 +83,8 @@ await sharp(output, {
   raw: {
     width: info.width,
     height: info.height,
-    channels: info.channels
-  }
+    channels: info.channels,
+  },
 })
   .jpeg({ quality: 88 })
   .toFile(targetPath);
@@ -114,8 +114,16 @@ function addMoon(buffer, info, centerX, centerY, radius) {
   const moonColor = [225, 232, 209];
   const rimColor = [244, 235, 187];
 
-  for (let y = Math.max(0, Math.floor(cy - radius * 1.35)); y < Math.min(info.height, Math.ceil(cy + radius * 1.35)); y += 1) {
-    for (let x = Math.max(0, Math.floor(cx - radius * 1.35)); x < Math.min(info.width, Math.ceil(cx + radius * 1.35)); x += 1) {
+  for (
+    let y = Math.max(0, Math.floor(cy - radius * 1.35));
+    y < Math.min(info.height, Math.ceil(cy + radius * 1.35));
+    y += 1
+  ) {
+    for (
+      let x = Math.max(0, Math.floor(cx - radius * 1.35));
+      x < Math.min(info.width, Math.ceil(cx + radius * 1.35));
+      x += 1
+    ) {
       const normalizedDistance = Math.hypot(x - cx, y - cy) / radius;
       if (normalizedDistance > 1.18) continue;
 
@@ -126,13 +134,19 @@ function addMoon(buffer, info, centerX, centerY, radius) {
       const target = [
         mix(moonColor[0], craterColor[0], speckle),
         mix(moonColor[1], craterColor[1], speckle),
-        mix(moonColor[2], craterColor[2], speckle)
+        mix(moonColor[2], craterColor[2], speckle),
       ];
       const rim = smoothstep(0.62, 1, normalizedDistance) * 0.22;
 
-      buffer[index] = clamp(mix(buffer[index], mix(target[0], rimColor[0], rim), 0.82 * edge + core * 0.12));
-      buffer[index + 1] = clamp(mix(buffer[index + 1], mix(target[1], rimColor[1], rim), 0.82 * edge + core * 0.12));
-      buffer[index + 2] = clamp(mix(buffer[index + 2], mix(target[2], rimColor[2], rim), 0.82 * edge + core * 0.12));
+      buffer[index] = clamp(
+        mix(buffer[index], mix(target[0], rimColor[0], rim), 0.82 * edge + core * 0.12)
+      );
+      buffer[index + 1] = clamp(
+        mix(buffer[index + 1], mix(target[1], rimColor[1], rim), 0.82 * edge + core * 0.12)
+      );
+      buffer[index + 2] = clamp(
+        mix(buffer[index + 2], mix(target[2], rimColor[2], rim), 0.82 * edge + core * 0.12)
+      );
     }
   }
 }
@@ -145,7 +159,7 @@ function addStars(buffer, info) {
     [0.47, 0.2, 0.8, 0.2],
     [0.7, 0.11, 1.2, 0.26],
     [0.82, 0.2, 0.9, 0.18],
-    [0.9, 0.13, 0.8, 0.16]
+    [0.9, 0.13, 0.8, 0.16],
   ];
 
   for (const [centerX, centerY, radius, strength] of stars) {

@@ -9,8 +9,14 @@ const darkDir = path.join(projectRoot, 'src/assets/garden/props-dark');
 const alphaThreshold = 8;
 const boundsTolerance = 1;
 
-const lightFiles = fs.readdirSync(lightDir).filter((file) => file.endsWith('.png')).sort();
-const darkFiles = fs.readdirSync(darkDir).filter((file) => file.endsWith('.png')).sort();
+const lightFiles = fs
+  .readdirSync(lightDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
+const darkFiles = fs
+  .readdirSync(darkDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 let hasFailure = false;
 
 for (const file of lightFiles) {
@@ -28,13 +34,15 @@ for (const file of lightFiles) {
   const lightBounds = alphaBounds(light);
   const darkBounds = alphaBounds(dark);
 
-  console.log([
-    file,
-    `light=${light.width}x${light.height}`,
-    `dark=${dark.width}x${dark.height}`,
-    `lightBounds=${formatBounds(lightBounds)}`,
-    `darkBounds=${formatBounds(darkBounds)}`
-  ].join('\t'));
+  console.log(
+    [
+      file,
+      `light=${light.width}x${light.height}`,
+      `dark=${dark.width}x${dark.height}`,
+      `lightBounds=${formatBounds(lightBounds)}`,
+      `darkBounds=${formatBounds(darkBounds)}`,
+    ].join('\t')
+  );
 
   if (light.width !== dark.width || light.height !== dark.height) {
     hasFailure = true;
@@ -43,7 +51,9 @@ for (const file of lightFiles) {
 
   if (!boundsClose(lightBounds, darkBounds)) {
     hasFailure = true;
-    console.error(`  FAIL ${file}: dark alpha bounds drifted beyond ${boundsTolerance}px from light bounds`);
+    console.error(
+      `  FAIL ${file}: dark alpha bounds drifted beyond ${boundsTolerance}px from light bounds`
+    );
   }
 }
 

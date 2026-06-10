@@ -9,7 +9,10 @@ const inputDir = args.find((arg) => !arg.startsWith('--'));
 const skipChroma = args.includes('--skip-chroma');
 const defaultPropDir = path.join(projectRoot, 'src/assets/lenses/props');
 const propDir = inputDir ? path.resolve(projectRoot, inputDir) : defaultPropDir;
-const sourceSheetPath = path.join(projectRoot, 'src/assets/lenses/source/garden-lens-sheet-chromakey.png');
+const sourceSheetPath = path.join(
+  projectRoot,
+  'src/assets/lenses/source/garden-lens-sheet-chromakey.png'
+);
 const alphaThreshold = 8;
 const minimumMargin = 24;
 const minimumSourceMargin = 3;
@@ -18,10 +21,13 @@ const sourceCrops = {
   'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
   'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 },
   'image-cloud.png': { x: 1085, y: 535, width: 370, height: 235 },
-  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 }
+  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 },
 };
 
-const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).sort();
+const files = fs
+  .readdirSync(propDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 const shouldAuditSourceSheet = propDir === defaultPropDir;
 const shouldAuditChromaKey = !skipChroma;
 const sourceSheet = shouldAuditSourceSheet ? PNG.sync.read(fs.readFileSync(sourceSheetPath)) : null;
@@ -31,14 +37,21 @@ for (const file of files) {
   const filePath = path.join(propDir, file);
   const png = PNG.sync.read(fs.readFileSync(filePath));
   const metrics = collectMetrics(png);
-  const sourceMetrics = sourceSheet && sourceCrops[file] ? collectSourceCropMetrics(sourceSheet, sourceCrops[file]) : null;
+  const sourceMetrics =
+    sourceSheet && sourceCrops[file]
+      ? collectSourceCropMetrics(sourceSheet, sourceCrops[file])
+      : null;
 
   const chromaKeyLabel = shouldAuditChromaKey ? metrics.chromaKey : 'skipped';
-  console.log(`${path.relative(projectRoot, filePath)}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tchromaKey=${chromaKeyLabel}`);
+  console.log(
+    `${path.relative(projectRoot, filePath)}\t${png.width}x${png.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins.join(',')}\tchromaKey=${chromaKeyLabel}`
+  );
 
   if (metrics.margins.some((margin) => margin < minimumMargin)) {
     hasFailure = true;
-    console.error(`  FAIL ${file}: expected at least ${minimumMargin}px transparent padding on every side`);
+    console.error(
+      `  FAIL ${file}: expected at least ${minimumMargin}px transparent padding on every side`
+    );
   }
 
   if (shouldAuditChromaKey && metrics.chromaKey > 0) {
@@ -47,11 +60,15 @@ for (const file of files) {
   }
 
   if (sourceMetrics) {
-    console.log(`  sourceComponent=${sourceMetrics.bbox}\tsourceMargins=${sourceMetrics.margins.join(',')}`);
+    console.log(
+      `  sourceComponent=${sourceMetrics.bbox}\tsourceMargins=${sourceMetrics.margins.join(',')}`
+    );
 
     if (sourceMetrics.margins.some((margin) => margin < minimumSourceMargin)) {
       hasFailure = true;
-      console.error(`  FAIL ${file}: source crop should leave at least ${minimumSourceMargin}px around the main non-chroma artwork`);
+      console.error(
+        `  FAIL ${file}: source crop should leave at least ${minimumSourceMargin}px around the main non-chroma artwork`
+      );
     }
   }
 }
@@ -86,7 +103,7 @@ function collectSourceCropMetrics(sheet, crop) {
           [currentX + 1, currentY],
           [currentX - 1, currentY],
           [currentX, currentY + 1],
-          [currentX, currentY - 1]
+          [currentX, currentY - 1],
         ]) {
           if (nextX < 0 || nextY < 0 || nextX >= crop.width || nextY >= crop.height) continue;
           const nextIndex = nextY * crop.width + nextX;
@@ -109,13 +126,21 @@ function collectSourceCropMetrics(sheet, crop) {
   if (!bounds) return { bbox: 'empty', margins: [0, 0, 0, 0] };
   return {
     bbox: `${bounds.minX},${bounds.minY}..${bounds.maxX},${bounds.maxY}`,
-    margins: [bounds.minX, bounds.minY, crop.width - 1 - bounds.maxX, crop.height - 1 - bounds.maxY]
+    margins: [
+      bounds.minX,
+      bounds.minY,
+      crop.width - 1 - bounds.maxX,
+      crop.height - 1 - bounds.maxY,
+    ],
   };
 }
 
 function sourcePixelVisible(sheet, crop, x, y) {
   const index = pixelIndex(sheet, crop.x + x, crop.y + y);
-  return sheet.data[index + 3] > alphaThreshold && !isChromaKey(sheet.data[index], sheet.data[index + 1], sheet.data[index + 2]);
+  return (
+    sheet.data[index + 3] > alphaThreshold &&
+    !isChromaKey(sheet.data[index], sheet.data[index + 1], sheet.data[index + 2])
+  );
 }
 
 function collectMetrics(png) {
@@ -136,7 +161,7 @@ function collectMetrics(png) {
   return {
     bbox: `${bounds.minX},${bounds.minY}..${bounds.maxX},${bounds.maxY}`,
     margins: [bounds.minX, bounds.minY, png.width - 1 - bounds.maxX, png.height - 1 - bounds.maxY],
-    chromaKey
+    chromaKey,
   };
 }
 

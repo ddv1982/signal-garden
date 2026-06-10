@@ -11,15 +11,30 @@ import type {
   SeedBloomReflection,
   SeedWatering,
   SeedStatus,
-  SeedVisualType
+  SeedVisualType,
 } from './models';
 
 const petMoods: PetMood[] = ['curious', 'cozy', 'attentive', 'sleepy', 'proud', 'concerned'];
 const seedStatuses: SeedStatus[] = ['planted', 'sprouted', 'growing', 'blooming', 'resting'];
-const seedVisualTypes: SeedVisualType[] = ['seed', 'sprout', 'bud', 'flower', 'vine', 'lantern', 'stone'];
+const seedVisualTypes: SeedVisualType[] = [
+  'seed',
+  'sprout',
+  'bud',
+  'flower',
+  'vine',
+  'lantern',
+  'stone',
+];
 const seedBloomOutcomes: SeedBloomOutcome[] = ['done', 'adapted', 'more-care'];
 const lensKinds: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
-const innerExperienceModes: InnerExperienceMode[] = ['words', 'images', 'body', 'emotions', 'knowing', 'mixed'];
+const innerExperienceModes: InnerExperienceMode[] = [
+  'words',
+  'images',
+  'body',
+  'emotions',
+  'knowing',
+  'mixed',
+];
 const lensPromptOrders: LensPromptOrder[] = ['word-first', 'body-first', 'image-first', 'open'];
 
 type UnknownRecord = Record<string, unknown>;
@@ -57,7 +72,8 @@ export function isReflectionSeed(value: unknown): value is ReflectionSeed {
     isOptionalString(value.lastWateredAt) &&
     isOptionalNumber(value.growthPoints) &&
     isSeedVisualType(value.visualType) &&
-    (value.waterings === undefined || (Array.isArray(value.waterings) && value.waterings.every(isSeedWatering))) &&
+    (value.waterings === undefined ||
+      (Array.isArray(value.waterings) && value.waterings.every(isSeedWatering))) &&
     (value.bloomReflection === undefined || isSeedBloomReflection(value.bloomReflection)) &&
     (value.lensJourney === undefined || isLensJourney(value.lensJourney))
   );
@@ -164,8 +180,7 @@ function isStringArray(value: unknown): value is string[] {
 
 function isOptionalGardenPosition(value: unknown): value is { x: number; y: number } | undefined {
   return (
-    value === undefined ||
-    (isRecord(value) && isFiniteNumber(value.x) && isFiniteNumber(value.y))
+    value === undefined || (isRecord(value) && isFiniteNumber(value.x) && isFiniteNumber(value.y))
   );
 }
 

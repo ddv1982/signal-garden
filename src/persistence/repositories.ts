@@ -1,5 +1,14 @@
-import type { GardenState, InnerLensProfile, LensSessionDraft, ReflectionSeed } from '../../shared/models';
-import { isInnerLensProfile, isLensSessionDraft, isReflectionSeed } from '../../shared/bridgeValidation';
+import type {
+  GardenState,
+  InnerLensProfile,
+  LensSessionDraft,
+  ReflectionSeed,
+} from '../../shared/models';
+import {
+  isInnerLensProfile,
+  isLensSessionDraft,
+  isReflectionSeed,
+} from '../../shared/bridgeValidation';
 import { defaultThemePreference, isThemePreference, type ThemePreference } from '../domain/theme';
 import { getBrowserStorage, readJson, writeJson, type StorageLike } from './storage';
 
@@ -18,7 +27,7 @@ export type AppSettings = {
 const defaultSettings: AppSettings = {
   reducedMotion: false,
   onboardingCompleted: false,
-  themePreference: defaultThemePreference
+  themePreference: defaultThemePreference,
 };
 
 export function createSignalGardenRepository(storage: StorageLike | null = getBrowserStorage()) {
@@ -52,11 +61,13 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
       storage?.removeItem(lensSessionKey);
     },
     loadSettings(): AppSettings {
-      const settings = sanitizeAppSettings(readJson(storage, settingsKey, defaultSettings, isAppSettingsObject));
+      const settings = sanitizeAppSettings(
+        readJson(storage, settingsKey, defaultSettings, isAppSettingsObject)
+      );
       const storedThemePreference = readThemePreference(storage);
       return {
         ...settings,
-        themePreference: storedThemePreference ?? settings.themePreference
+        themePreference: storedThemePreference ?? settings.themePreference,
       };
     },
     saveSettings(settings: AppSettings): void {
@@ -69,10 +80,10 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
         pet: {
           name: 'Pet',
           mood: seeds.length > 0 ? 'proud' : 'curious',
-          unlockedInteractionVariants: ['headButt']
-        }
+          unlockedInteractionVariants: ['headButt'],
+        },
       };
-    }
+    },
   };
 }
 
@@ -99,7 +110,9 @@ function sanitizeAppSettings(settings: Partial<AppSettings>): AppSettings {
   return {
     reducedMotion: settings.reducedMotion ?? defaultSettings.reducedMotion,
     onboardingCompleted: settings.onboardingCompleted ?? defaultSettings.onboardingCompleted,
-    themePreference: isThemePreference(settings.themePreference) ? settings.themePreference : defaultSettings.themePreference
+    themePreference: isThemePreference(settings.themePreference)
+      ? settings.themePreference
+      : defaultSettings.themePreference,
   };
 }
 

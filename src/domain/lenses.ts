@@ -7,10 +7,18 @@ import type {
   LensResponses,
   LensSessionDraft,
   ReflectionSeed,
-  SeedVisualType
+  SeedVisualType,
 } from '../../shared/models';
 
-export const lensKinds: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
+export const lensKinds: LensKind[] = [
+  'word',
+  'body',
+  'emotion',
+  'image',
+  'observer',
+  'meaning',
+  'action',
+];
 
 export const emptyLensResponses: LensResponses = {
   wordLabel: '',
@@ -19,13 +27,13 @@ export const emptyLensResponses: LensResponses = {
   innerImage: '',
   observerNote: '',
   alternateMeaning: '',
-  tinyAction: ''
+  tinyAction: '',
 };
 
 export const defaultLensProfile: InnerLensProfile = {
   preferredMode: 'mixed',
   promptOrder: 'open',
-  completedAt: ''
+  completedAt: '',
 };
 
 export type LensDefinition = {
@@ -44,7 +52,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Loosen Word',
     fieldLabel: 'What word or story is attached?',
     helper: 'Name the label as something appearing, not as the whole of you.',
-    responseKey: 'wordLabel'
+    responseKey: 'wordLabel',
   },
   body: {
     kind: 'body',
@@ -52,7 +60,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Feel Body',
     fieldLabel: 'Where does this show up in your body?',
     helper: 'A sensation, posture, temperature, pressure, or energy is enough.',
-    responseKey: 'bodySignal'
+    responseKey: 'bodySignal',
   },
   emotion: {
     kind: 'emotion',
@@ -60,7 +68,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Name Emotion',
     fieldLabel: 'What emotion is nearby?',
     helper: 'Use one word, several words, or a rough atmosphere.',
-    responseKey: 'emotion'
+    responseKey: 'emotion',
   },
   image: {
     kind: 'image',
@@ -68,7 +76,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Shape Image',
     fieldLabel: 'If this had an image, what would it look like?',
     helper: 'A color, texture, scene, shape, or symbol can work.',
-    responseKey: 'innerImage'
+    responseKey: 'innerImage',
   },
   observer: {
     kind: 'observer',
@@ -76,7 +84,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Pause Wider',
     fieldLabel: 'What notices this experience?',
     helper: 'This can be simple: "something in me is aware of it."',
-    responseKey: 'observerNote'
+    responseKey: 'observerNote',
   },
   meaning: {
     kind: 'meaning',
@@ -84,7 +92,7 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Open Meaning',
     fieldLabel: 'What else could be true beyond the first label?',
     helper: 'Try a kinder or wider meaning without forcing positivity.',
-    responseKey: 'alternateMeaning'
+    responseKey: 'alternateMeaning',
   },
   action: {
     kind: 'action',
@@ -92,15 +100,18 @@ export const lensDefinitions: Record<LensKind, LensDefinition> = {
     actionLabel: 'Choose Action',
     fieldLabel: 'What is one tiny kind action?',
     helper: 'One doable compassionate step is enough.',
-    responseKey: 'tinyAction'
-  }
+    responseKey: 'tinyAction',
+  },
 };
 
-export function createLensProfile(preferredMode: InnerExperienceMode, promptOrder: LensPromptOrder): InnerLensProfile {
+export function createLensProfile(
+  preferredMode: InnerExperienceMode,
+  promptOrder: LensPromptOrder
+): InnerLensProfile {
   return {
     preferredMode,
     promptOrder,
-    completedAt: new Date().toISOString()
+    completedAt: new Date().toISOString(),
   };
 }
 
@@ -113,14 +124,16 @@ export function createLensSessionDraft(profile: InnerLensProfile): LensSessionDr
     responses: { ...emptyLensResponses },
     completedLensIds: [],
     startedAt: now,
-    updatedAt: now
+    updatedAt: now,
   };
 }
 
 export function lensOrderForProfile(profile: InnerLensProfile | null): LensKind[] {
   const order = profile?.promptOrder ?? 'open';
-  if (order === 'body-first') return ['body', 'emotion', 'word', 'image', 'observer', 'meaning', 'action'];
-  if (order === 'image-first') return ['image', 'emotion', 'body', 'word', 'observer', 'meaning', 'action'];
+  if (order === 'body-first')
+    return ['body', 'emotion', 'word', 'image', 'observer', 'meaning', 'action'];
+  if (order === 'image-first')
+    return ['image', 'emotion', 'body', 'word', 'observer', 'meaning', 'action'];
   return lensKinds;
 }
 
@@ -146,23 +159,29 @@ export function completeLens(
     currentLens: followingLens ?? draft.currentLens,
     responses: {
       ...draft.responses,
-      [definition.responseKey]: value.trim()
+      [definition.responseKey]: value.trim(),
     },
     completedLensIds: completed,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }
 
-export function isLensSessionComplete(draft: LensSessionDraft, profile: InnerLensProfile | null): boolean {
+export function isLensSessionComplete(
+  draft: LensSessionDraft,
+  profile: InnerLensProfile | null
+): boolean {
   const required = lensOrderForProfile(profile);
   return required.every((kind) => draft.completedLensIds.includes(kind));
 }
 
-export function createJourneyFromSession(draft: LensSessionDraft, profile: InnerLensProfile | null): LensJourney {
+export function createJourneyFromSession(
+  draft: LensSessionDraft,
+  profile: InnerLensProfile | null
+): LensJourney {
   return {
     completedAt: new Date().toISOString(),
     lensOrder: lensOrderForProfile(profile),
-    responses: { ...draft.responses }
+    responses: { ...draft.responses },
   };
 }
 
@@ -185,7 +204,7 @@ export function createReflectionSeedFromJourney(journey: LensJourney): Reflectio
     tinyAction: response.tinyAction.trim() || 'Offer myself one small kind pause.',
     status: 'planted',
     visualType,
-    lensJourney: journey
+    lensJourney: journey,
   };
 }
 

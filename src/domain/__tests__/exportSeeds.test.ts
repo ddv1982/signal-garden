@@ -10,7 +10,7 @@ describe('seed export domain', () => {
       version: 1,
       exportedAt: '2026-06-09T10:00:00.000Z',
       seedCount: 0,
-      seeds: []
+      seeds: [],
     });
   });
 

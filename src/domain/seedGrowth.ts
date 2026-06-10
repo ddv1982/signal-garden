@@ -1,4 +1,9 @@
-import type { ReflectionSeed, SeedBloomOutcome, SeedStatus, SeedVisualType } from '../../shared/models';
+import type {
+  ReflectionSeed,
+  SeedBloomOutcome,
+  SeedStatus,
+  SeedVisualType,
+} from '../../shared/models';
 
 const GROWTH_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
@@ -15,7 +20,11 @@ export type SeedBloomInput = {
   reflection: string;
 };
 
-export function waterSeed(seed: ReflectionSeed, input: SeedWateringInput, now = new Date().toISOString()): ReflectionSeed {
+export function waterSeed(
+  seed: ReflectionSeed,
+  input: SeedWateringInput,
+  now = new Date().toISOString()
+): ReflectionSeed {
   const transformedLabel = input.transformedLabel.trim();
   const kindAction = input.kindAction.trim();
   const note = input.note?.trim();
@@ -37,13 +46,17 @@ export function waterSeed(seed: ReflectionSeed, input: SeedWateringInput, now = 
         fromLabel,
         transformedLabel,
         kindAction,
-        ...(note ? { note } : {})
-      }
-    ]
+        ...(note ? { note } : {}),
+      },
+    ],
   };
 }
 
-export function bloomSeed(seed: ReflectionSeed, input: SeedBloomInput, now = new Date().toISOString()): ReflectionSeed {
+export function bloomSeed(
+  seed: ReflectionSeed,
+  input: SeedBloomInput,
+  now = new Date().toISOString()
+): ReflectionSeed {
   const reflection = input.reflection.trim();
   if (!reflection) {
     throw new Error('Seed bloom requires a reflection.');
@@ -61,8 +74,8 @@ export function bloomSeed(seed: ReflectionSeed, input: SeedBloomInput, now = new
     bloomReflection: {
       completedAt: now,
       outcome: input.outcome,
-      reflection
-    }
+      reflection,
+    },
   };
 }
 
@@ -73,7 +86,8 @@ function advanceSeedWateringStage(seed: ReflectionSeed, now: string): Reflection
 
   const currentPoints = seed.growthPoints ?? statusGrowthPoints(seed.status);
   const nextPoints = Math.min(currentPoints + 1, 2);
-  const status: SeedStatus = nextPoints <= 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
+  const status: SeedStatus =
+    nextPoints <= 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
 
   if (nextPoints === currentPoints && seed.status === status) return seed;
 
@@ -82,7 +96,7 @@ function advanceSeedWateringStage(seed: ReflectionSeed, now: string): Reflection
     status,
     growthPoints: nextPoints,
     lastGrowthAt: now,
-    visualType: visualTypeForStatus(seed, status)
+    visualType: visualTypeForStatus(seed, status),
   };
 }
 
@@ -99,7 +113,7 @@ export function assignPlotToSeed(
     plantedAt: seed.plantedAt ?? now,
     lastGrowthAt: seed.lastGrowthAt ?? now,
     growthPoints: seed.growthPoints ?? 0,
-    status: 'planted'
+    status: 'planted',
   };
 }
 
@@ -120,12 +134,16 @@ export function growthStageForSeed(seed: ReflectionSeed): SeedGrowthStage {
   return 'mature';
 }
 
-function advanceSeedGrowth(seed: ReflectionSeed, now: string, reason: 'visit' | 'journey'): ReflectionSeed {
+function advanceSeedGrowth(
+  seed: ReflectionSeed,
+  now: string,
+  reason: 'visit' | 'journey'
+): ReflectionSeed {
   if (seed.status === 'blooming') {
     return {
       ...seed,
       growthPoints: Math.max(seed.growthPoints ?? 2, 2),
-      lastGrowthAt: seed.lastGrowthAt ?? seed.plantedAt ?? seed.createdAt
+      lastGrowthAt: seed.lastGrowthAt ?? seed.plantedAt ?? seed.createdAt,
     };
   }
 
@@ -134,14 +152,15 @@ function advanceSeedGrowth(seed: ReflectionSeed, now: string, reason: 'visit' | 
   if (!shouldGrow) return seed;
 
   const nextPoints = Math.min((seed.growthPoints ?? statusGrowthPoints(seed.status)) + 1, 2);
-  const nextStatus: SeedStatus = nextPoints === 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
+  const nextStatus: SeedStatus =
+    nextPoints === 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
 
   return {
     ...seed,
     status: nextStatus,
     visualType: visualTypeForStatus(seed, nextStatus),
     growthPoints: nextPoints,
-    lastGrowthAt: now
+    lastGrowthAt: now,
   };
 }
 

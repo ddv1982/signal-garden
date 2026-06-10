@@ -1,5 +1,7 @@
 :root {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', system-ui,
+    sans-serif;
   --color-page: #fbfaf7;
   --color-surface: rgba(255, 255, 255, 0.78);
   --color-surface-strong: rgba(255, 255, 255, 0.92);
@@ -30,7 +32,9 @@
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-pill: 999px;
-  --transition-control: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.2s ease, transform 0.16s ease, color 0.16s ease;
+  --transition-control:
+    background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.2s ease,
+    transform 0.16s ease, color 0.16s ease;
   --weight-heading: 650;
   --weight-subheading: 620;
   --weight-strong: 600;
@@ -47,7 +51,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   --color-page: #142223;
   --color-surface: rgba(31, 48, 50, 0.72);
   --color-surface-strong: rgba(33, 52, 54, 0.8);
@@ -564,7 +568,7 @@ span.lens-chip {
 }
 
 .lens-chip.complete::before {
-  content: "✓";
+  content: '✓';
   font-size: 0.72rem;
   margin-right: 5px;
   opacity: 0.7;
@@ -698,7 +702,9 @@ span.lens-chip {
   border-radius: var(--radius-pill);
   flex: 1 1 0;
   height: 4px;
-  transition: background-color 0.3s ease, flex-grow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    flex-grow 0.3s ease;
 }
 
 .meter-step.complete {
@@ -729,7 +735,9 @@ span.lens-chip {
   margin-top: 6px;
   min-height: 42px;
   padding: 10px 12px;
-  transition: border-color 0.16s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.2s ease;
   width: 100%;
 }
 
@@ -822,7 +830,7 @@ span.lens-chip {
   align-items: center;
   background:
     linear-gradient(rgba(29, 29, 31, 0.22), rgba(29, 29, 31, 0.22)),
-    url("./assets/garden/background-v4.webp") center / cover;
+    url('./assets/garden/background-v4.webp') center / cover;
   display: flex;
   inset: 0;
   justify-content: center;
@@ -831,10 +839,10 @@ span.lens-chip {
   z-index: 20;
 }
 
-:root[data-theme="dark"] .onboarding-backdrop {
+:root[data-theme='dark'] .onboarding-backdrop {
   background:
     linear-gradient(rgba(20, 34, 35, 0.24), rgba(20, 34, 35, 0.24)),
-    url("./assets/garden/background-dusk-v3.jpg") center / cover;
+    url('./assets/garden/background-dusk-v3.jpg') center / cover;
 }
 
 .onboarding-panel {

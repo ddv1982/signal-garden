@@ -1,106 +1,172 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <!-- skill:running-bug-review-board v0.3 -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Signal Garden QA Report - June 9, 2026</title>
-  <link rel="stylesheet" href="./assets.css">
-</head>
-<body>
-  <header class="masthead">
-    <div class="masthead-inner">
-      <h1 class="masthead-title"><a href="./">Signal Garden QA Report</a></h1>
-      <p class="masthead-meta"><time datetime="2026-06-09">June 9, 2026</time> · docs/qa/report</p>
-    </div>
-  </header>
-
-  <main>
-    <article class="verdict">
-      <p class="eyebrow">Web app · Desktop and mobile manual QA · Release smoke</p>
-      <h2 class="verdict-word is-yes">YES</h2>
-      <p class="verdict-line">
-        Current branch sign-off: the P1 mobile active-lens regression is resolved, the targeted mobile Chrome repro passes, and the broader e2e suite passes after the pet debug local harness timeout was extended for slower browsers. The historical NO below is retained only as the original QA finding context.
-      </p>
-    </article>
-
-    <section class="section">
-      <p class="eyebrow">Historical status</p>
-      <h2>Report context</h2>
-      <p>This page preserves the June 9, 2026 QA finding that motivated the mobile active-lens fix. The current branch has fresh passing coverage for the targeted mobile regression and the broader e2e suite.</p>
-    </section>
-
-    <section class="section">
-      <p class="eyebrow">Run Scope</p>
-      <h2>Manual Test Plan</h2>
-      <div class="matrix">
-        <div>
-          <p class="meta">Desktop</p>
-          <p>Onboarding, canvas signal start, seven lens prompts, seed creation, Plant Here, archive details, watering validation, valid watering, export, delete, reduced motion.</p>
-        </div>
-        <div>
-          <p class="meta">Mobile 390px</p>
-          <p>Garden fit, tab navigation, canvas signal start, full lens journey, placement panel, Plant Here, archive dialog, settings, persistence, reduced motion.</p>
-        </div>
-        <div>
-          <p class="meta">Automation</p>
-          <p>Typecheck, unit tests, production build, full Playwright e2e suite, targeted mobile e2e repro, standalone export download check.</p>
-        </div>
+  <head>
+    <!-- skill:running-bug-review-board v0.3 -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signal Garden QA Report - June 9, 2026</title>
+    <link rel="stylesheet" href="./assets.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead-inner">
+        <h1 class="masthead-title"><a href="./">Signal Garden QA Report</a></h1>
+        <p class="masthead-meta">
+          <time datetime="2026-06-09">June 9, 2026</time> · docs/qa/report
+        </p>
       </div>
-    </section>
+    </header>
 
-    <section class="section">
-      <p class="eyebrow">Bug Status</p>
-      <h2>What was broken</h2>
-
-      <article class="bug">
-        <p class="eyebrow"><span class="pri">P1</span><span class="sep">·</span>Mobile<span class="sep">·</span>Resolved in current branch<span class="sep">·</span>Hit target</p>
-        <h2>Active lens object tap misses and hits the pet instead on mobile</h2>
-        <p class="deck">After dismissing the lens panel on mobile, tapping the expected active lens object coordinate does not reopen the panel.</p>
-        <p class="impact">A mobile user can get stuck in the core reflection loop if they close the prompt and try to resume by tapping the active lens object.</p>
-        <p><strong>Actual:</strong> The panel stays closed and the garden reports "Your pet notices you back."</p>
-        <p><strong>Expected:</strong> Tapping the active lens object reopens the current lens panel.</p>
-        <ol>
-          <li>Open the app at the mobile Chrome viewport.</li>
-          <li>Complete onboarding.</li>
-          <li>Start the lens journey from the canvas signal.</li>
-          <li>Press Escape to dismiss the lens panel.</li>
-          <li>Tap the expected active word lens object area.</li>
-        </ol>
-        <p><strong>Historical evidence:</strong> `corepack pnpm run e2e` failed at `e2e/garden-loop.spec.ts:79` in the `mobile-chrome` project. The isolated repro also failed.</p>
-        <p><strong>Resolution note:</strong> The current branch keeps the active mobile lens hit circle separated from the pet ellipse and exposes `data-active-lens-x` / `data-active-lens-y` from the same hit target used for Phaser interactivity. Fresh browser-based release sign-off passed for the targeted mobile regression and the full e2e suite on this branch.</p>
+    <main>
+      <article class="verdict">
+        <p class="eyebrow">Web app · Desktop and mobile manual QA · Release smoke</p>
+        <h2 class="verdict-word is-yes">YES</h2>
+        <p class="verdict-line">
+          Current branch sign-off: the P1 mobile active-lens regression is resolved, the targeted
+          mobile Chrome repro passes, and the broader e2e suite passes after the pet debug local
+          harness timeout was extended for slower browsers. The historical NO below is retained only
+          as the original QA finding context.
+        </p>
       </article>
 
-      <article class="bug">
-        <p class="eyebrow"><span class="pri">P2</span><span class="sep">·</span>Data controls<span class="sep">·</span>Open<span class="sep">·</span>Filename</p>
-        <h2>Export filename can show yesterday's date outside UTC</h2>
-        <p class="deck">The seed export content is correct, but the generated filename uses UTC date formatting.</p>
-        <p class="impact">Users in time zones ahead of UTC can receive an export file dated one day earlier than their local day.</p>
-        <p><strong>Actual:</strong> In the Europe/Amsterdam June 9, 2026 session, export downloaded `signal-garden-seeds-2026-06-08.json`.</p>
-        <p><strong>Expected:</strong> The filename should use the user's local date, for example `signal-garden-seeds-2026-06-09.json`.</p>
-        <p><strong>Evidence:</strong> Standalone Playwright export check returned `{"suggestedFilename":"signal-garden-seeds-2026-06-08.json","includesSeed":true,"bytes":646}`. Cause is `new Date().toISOString().slice(0, 10)` in `src/App.tsx:245`.</p>
-      </article>
-    </section>
+      <section class="section">
+        <p class="eyebrow">Historical status</p>
+        <h2>Report context</h2>
+        <p>
+          This page preserves the June 9, 2026 QA finding that motivated the mobile active-lens fix.
+          The current branch has fresh passing coverage for the targeted mobile regression and the
+          broader e2e suite.
+        </p>
+      </section>
 
-    <section class="section">
-      <p class="eyebrow">Passed Coverage</p>
-      <h2>What worked</h2>
-      <ul>
-        <li class="pass">Desktop full garden loop: passed.</li>
-        <li class="pass">Mobile full garden loop through signal start and Plant Here: passed.</li>
-        <li class="pass">Archive dialog on mobile and desktop: passed.</li>
-        <li class="pass">Watering validation and successful watering: passed.</li>
-        <li class="pass">Delete Seeds clears visible garden and archive: passed.</li>
-        <li class="pass">Reduced motion persists and reports still motion after reload: passed.</li>
-        <li class="pass">Mobile 390px horizontal overflow check: passed with document width 390px.</li>
-        <li class="pass">No console errors observed during manual desktop/mobile pass.</li>
-      </ul>
-    </section>
+      <section class="section">
+        <p class="eyebrow">Run Scope</p>
+        <h2>Manual Test Plan</h2>
+        <div class="matrix">
+          <div>
+            <p class="meta">Desktop</p>
+            <p>
+              Onboarding, canvas signal start, seven lens prompts, seed creation, Plant Here,
+              archive details, watering validation, valid watering, export, delete, reduced motion.
+            </p>
+          </div>
+          <div>
+            <p class="meta">Mobile 390px</p>
+            <p>
+              Garden fit, tab navigation, canvas signal start, full lens journey, placement panel,
+              Plant Here, archive dialog, settings, persistence, reduced motion.
+            </p>
+          </div>
+          <div>
+            <p class="meta">Automation</p>
+            <p>
+              Typecheck, unit tests, production build, full Playwright e2e suite, targeted mobile
+              e2e repro, standalone export download check.
+            </p>
+          </div>
+        </div>
+      </section>
 
-    <section class="section">
-      <p class="eyebrow">Command Results</p>
-      <h2>Release Smoke</h2>
-      <pre><code>corepack pnpm run typecheck
+      <section class="section">
+        <p class="eyebrow">Bug Status</p>
+        <h2>What was broken</h2>
+
+        <article class="bug">
+          <p class="eyebrow">
+            <span class="pri">P1</span><span class="sep">·</span>Mobile<span class="sep">·</span
+            >Resolved in current branch<span class="sep">·</span>Hit target
+          </p>
+          <h2>Active lens object tap misses and hits the pet instead on mobile</h2>
+          <p class="deck">
+            After dismissing the lens panel on mobile, tapping the expected active lens object
+            coordinate does not reopen the panel.
+          </p>
+          <p class="impact">
+            A mobile user can get stuck in the core reflection loop if they close the prompt and try
+            to resume by tapping the active lens object.
+          </p>
+          <p>
+            <strong>Actual:</strong> The panel stays closed and the garden reports "Your pet notices
+            you back."
+          </p>
+          <p>
+            <strong>Expected:</strong> Tapping the active lens object reopens the current lens
+            panel.
+          </p>
+          <ol>
+            <li>Open the app at the mobile Chrome viewport.</li>
+            <li>Complete onboarding.</li>
+            <li>Start the lens journey from the canvas signal.</li>
+            <li>Press Escape to dismiss the lens panel.</li>
+            <li>Tap the expected active word lens object area.</li>
+          </ol>
+          <p>
+            <strong>Historical evidence:</strong> `corepack pnpm run e2e` failed at
+            `e2e/garden-loop.spec.ts:79` in the `mobile-chrome` project. The isolated repro also
+            failed.
+          </p>
+          <p>
+            <strong>Resolution note:</strong> The current branch keeps the active mobile lens hit
+            circle separated from the pet ellipse and exposes `data-active-lens-x` /
+            `data-active-lens-y` from the same hit target used for Phaser interactivity. Fresh
+            browser-based release sign-off passed for the targeted mobile regression and the full
+            e2e suite on this branch.
+          </p>
+        </article>
+
+        <article class="bug">
+          <p class="eyebrow">
+            <span class="pri">P2</span><span class="sep">·</span>Data controls<span class="sep"
+              >·</span
+            >Open<span class="sep">·</span>Filename
+          </p>
+          <h2>Export filename can show yesterday's date outside UTC</h2>
+          <p class="deck">
+            The seed export content is correct, but the generated filename uses UTC date formatting.
+          </p>
+          <p class="impact">
+            Users in time zones ahead of UTC can receive an export file dated one day earlier than
+            their local day.
+          </p>
+          <p>
+            <strong>Actual:</strong> In the Europe/Amsterdam June 9, 2026 session, export downloaded
+            `signal-garden-seeds-2026-06-08.json`.
+          </p>
+          <p>
+            <strong>Expected:</strong> The filename should use the user's local date, for example
+            `signal-garden-seeds-2026-06-09.json`.
+          </p>
+          <p>
+            <strong>Evidence:</strong> Standalone Playwright export check returned
+            `{"suggestedFilename":"signal-garden-seeds-2026-06-08.json","includesSeed":true,"bytes":646}`.
+            Cause is `new Date().toISOString().slice(0, 10)` in `src/App.tsx:245`.
+          </p>
+        </article>
+      </section>
+
+      <section class="section">
+        <p class="eyebrow">Passed Coverage</p>
+        <h2>What worked</h2>
+        <ul>
+          <li class="pass">Desktop full garden loop: passed.</li>
+          <li class="pass">Mobile full garden loop through signal start and Plant Here: passed.</li>
+          <li class="pass">Archive dialog on mobile and desktop: passed.</li>
+          <li class="pass">Watering validation and successful watering: passed.</li>
+          <li class="pass">Delete Seeds clears visible garden and archive: passed.</li>
+          <li class="pass">
+            Reduced motion persists and reports still motion after reload: passed.
+          </li>
+          <li class="pass">
+            Mobile 390px horizontal overflow check: passed with document width 390px.
+          </li>
+          <li class="pass">No console errors observed during manual desktop/mobile pass.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <p class="eyebrow">Command Results</p>
+        <h2>Release Smoke</h2>
+        <pre><code>corepack pnpm run typecheck
 PASS
 
 corepack pnpm run test
@@ -129,7 +195,7 @@ PASS - 1 passed
 corepack pnpm run e2e
 PASS - 21 passed, 11 skipped
 </code></pre>
-    </section>
-  </main>
-</body>
+      </section>
+    </main>
+  </body>
 </html>

@@ -43,18 +43,30 @@
                 typeof settings === 'object' &&
                 !Array.isArray(settings) &&
                 typeof settings.reducedMotion === 'boolean' &&
-                (settings.onboardingCompleted === undefined || typeof settings.onboardingCompleted === 'boolean');
-              if (validSettings && (settings.themePreference === 'light' || settings.themePreference === 'dark' || settings.themePreference === 'system')) {
+                (settings.onboardingCompleted === undefined ||
+                  typeof settings.onboardingCompleted === 'boolean');
+              if (
+                validSettings &&
+                (settings.themePreference === 'light' ||
+                  settings.themePreference === 'dark' ||
+                  settings.themePreference === 'system')
+              ) {
                 preference = settings.themePreference;
               }
             }
           }
-          var systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var systemTheme =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
           var activeTheme = preference === 'system' ? systemTheme : preference;
           document.documentElement.dataset.theme = activeTheme;
           document.documentElement.style.colorScheme = activeTheme;
         } catch (error) {
-          var fallbackTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var fallbackTheme =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
           document.documentElement.dataset.theme = fallbackTheme;
           document.documentElement.style.colorScheme = fallbackTheme;
         }

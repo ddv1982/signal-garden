@@ -4,7 +4,7 @@ import {
   isInnerLensProfile,
   isLensSessionDraft,
   isReflectionSeed,
-  parseStoredJson
+  parseStoredJson,
 } from '../bridgeValidation';
 import type { GardenState, InnerLensProfile, LensSessionDraft, ReflectionSeed } from '../models';
 
@@ -17,7 +17,7 @@ const seed: ReflectionSeed = {
   dreams: ['rest'],
   tinyAction: 'Take one breath.',
   status: 'planted',
-  visualType: 'seed'
+  visualType: 'seed',
 };
 
 const seedWithJourney: ReflectionSeed = {
@@ -35,13 +35,13 @@ const seedWithJourney: ReflectionSeed = {
       createdAt: '2026-06-06T12:10:00.000Z',
       fromLabel: 'I am noticing the story that I am behind',
       transformedLabel: 'This is one story, not the whole of me.',
-      kindAction: 'Take one breath.'
-    }
+      kindAction: 'Take one breath.',
+    },
   ],
   bloomReflection: {
     completedAt: '2026-06-06T12:15:00.000Z',
     outcome: 'adapted',
-    reflection: 'This became a smaller kind step.'
+    reflection: 'This became a smaller kind step.',
   },
   lensJourney: {
     completedAt: '2026-06-06T12:05:00.000Z',
@@ -53,9 +53,9 @@ const seedWithJourney: ReflectionSeed = {
       innerImage: 'gray cloud',
       observerNote: 'awareness is here',
       alternateMeaning: 'I may need rest',
-      tinyAction: 'Take one breath.'
-    }
-  }
+      tinyAction: 'Take one breath.',
+    },
+  },
 };
 
 const garden: GardenState = {
@@ -63,14 +63,14 @@ const garden: GardenState = {
   pet: {
     name: 'Pet',
     mood: 'curious',
-    unlockedInteractionVariants: ['headButt']
-  }
+    unlockedInteractionVariants: ['headButt'],
+  },
 };
 
 const profile: InnerLensProfile = {
   preferredMode: 'body',
   promptOrder: 'body-first',
-  completedAt: '2026-06-06T12:00:00.000Z'
+  completedAt: '2026-06-06T12:00:00.000Z',
 };
 
 const draft: LensSessionDraft = {
@@ -85,8 +85,8 @@ const draft: LensSessionDraft = {
     innerImage: '',
     observerNote: '',
     alternateMeaning: '',
-    tinyAction: ''
-  }
+    tinyAction: '',
+  },
 };
 
 describe('stored data validation', () => {

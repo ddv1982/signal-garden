@@ -7,17 +7,22 @@ const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
 const inputDir = args.find((arg) => !arg.startsWith('--'));
 const skipMatte = args.includes('--skip-matte');
-const frameDir = inputDir ? path.resolve(projectRoot, inputDir) : path.join(projectRoot, 'src/assets/companion/frames');
+const frameDir = inputDir
+  ? path.resolve(projectRoot, inputDir)
+  : path.join(projectRoot, 'src/assets/companion/frames');
 const shouldAuditMatte = !skipMatte;
 const expectedSize = 512;
 const alphaThreshold = 8;
 const edgeInset = 12;
 const disconnectedComponentThreshold = 80;
 const allowedDetachedComponents = {
-  'plant-proud.png': 6
+  'plant-proud.png': 6,
 };
 
-const files = fs.readdirSync(frameDir).filter((file) => file.endsWith('.png')).sort();
+const files = fs
+  .readdirSync(frameDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 let hasFailure = false;
 
 for (const file of files) {
@@ -27,16 +32,18 @@ for (const file of files) {
   const allowedExtras = allowedDetachedComponents[file] ?? 0;
   const unexpectedExtras = metrics.extraComponents.slice(allowedExtras);
 
-  console.log([
-    path.relative(projectRoot, filePath),
-    `${png.width}x${png.height}`,
-    `bbox=${metrics.bbox}`,
-    `edgeAlpha=${metrics.edgeAlpha}`,
-    `edgeMatte=${shouldAuditMatte ? metrics.edgeMatte : 'skipped'}`,
-    `bottomMargin=${metrics.bottomMargin}`,
-    `visualCenterX=${metrics.visualCenterX}`,
-    `extras=${metrics.extraComponents.length}`
-  ].join('\t'));
+  console.log(
+    [
+      path.relative(projectRoot, filePath),
+      `${png.width}x${png.height}`,
+      `bbox=${metrics.bbox}`,
+      `edgeAlpha=${metrics.edgeAlpha}`,
+      `edgeMatte=${shouldAuditMatte ? metrics.edgeMatte : 'skipped'}`,
+      `bottomMargin=${metrics.bottomMargin}`,
+      `visualCenterX=${metrics.visualCenterX}`,
+      `extras=${metrics.extraComponents.length}`,
+    ].join('\t')
+  );
 
   if (png.width !== expectedSize || png.height !== expectedSize) {
     hasFailure = true;
@@ -50,14 +57,19 @@ for (const file of files) {
 
   if (shouldAuditMatte && metrics.edgeMatte > 0) {
     hasFailure = true;
-    console.error(`  FAIL ${file}: green/olive matte pixels remain on the transparent silhouette edge`);
+    console.error(
+      `  FAIL ${file}: green/olive matte pixels remain on the transparent silhouette edge`
+    );
   }
 
   if (unexpectedExtras.length > 0) {
     hasFailure = true;
     console.error(
       `  FAIL ${file}: unexpected detached alpha components ${unexpectedExtras
-        .map((component) => `${component.count}@${component.minX},${component.minY}..${component.maxX},${component.maxY}`)
+        .map(
+          (component) =>
+            `${component.count}@${component.minX},${component.minY}..${component.maxX},${component.maxY}`
+        )
         .join('; ')}`
     );
   }
@@ -78,17 +90,25 @@ function collectMetrics(png) {
     if (y < minY) minY = y;
     if (x > maxX) maxX = x;
     if (y > maxY) maxY = y;
-    if (x < edgeInset || y < edgeInset || x >= png.width - edgeInset || y >= png.height - edgeInset) edgeAlpha += 1;
+    if (x < edgeInset || y < edgeInset || x >= png.width - edgeInset || y >= png.height - edgeInset)
+      edgeAlpha += 1;
     if (
       hasTransparentNeighbor(png, x, y, 6) &&
-      isPetMatteSpill(png.data[index], png.data[index + 1], png.data[index + 2], png.data[index + 3])
+      isPetMatteSpill(
+        png.data[index],
+        png.data[index + 1],
+        png.data[index + 2],
+        png.data[index + 3]
+      )
     ) {
       edgeMatte += 1;
     }
   });
 
   const components = collectComponents(png);
-  const extraComponents = components.slice(1).filter((component) => component.count > disconnectedComponentThreshold);
+  const extraComponents = components
+    .slice(1)
+    .filter((component) => component.count > disconnectedComponentThreshold);
 
   return {
     bbox: maxX >= 0 ? `${minX},${minY}..${maxX},${maxY}` : 'empty',
@@ -96,7 +116,7 @@ function collectMetrics(png) {
     visualCenterX: maxX >= 0 ? ((minX + maxX) / 2).toFixed(1) : 'n/a',
     edgeAlpha,
     edgeMatte,
-    extraComponents
+    extraComponents,
   };
 }
 
@@ -126,7 +146,7 @@ function collectComponents(png) {
           [currentX + 1, currentY],
           [currentX - 1, currentY],
           [currentX, currentY + 1],
-          [currentX, currentY - 1]
+          [currentX, currentY - 1],
         ]) {
           if (nextX < 0 || nextY < 0 || nextX >= png.width || nextY >= png.height) continue;
           const nextIndex = indexFor(nextX, nextY);
@@ -169,15 +189,24 @@ function hasTransparentNeighbor(png, x, y, radius) {
 }
 
 function isPetMatteSpill(red, green, blue, alpha = 255) {
-  return isPetGreenSpill(red, green, blue, alpha) || isPetOliveMatte(red, green, blue, alpha) || isPetOpaqueYellowGreenMatte(red, green, blue, alpha);
+  return (
+    isPetGreenSpill(red, green, blue, alpha) ||
+    isPetOliveMatte(red, green, blue, alpha) ||
+    isPetOpaqueYellowGreenMatte(red, green, blue, alpha)
+  );
 }
 
 function isPetGreenSpill(red, green, blue, alpha = 255) {
-  return isGreenChromaFringe(red, green, blue, alpha) || (alpha < 252 && green > red + 8 && green > blue + 8);
+  return (
+    isGreenChromaFringe(red, green, blue, alpha) ||
+    (alpha < 252 && green > red + 8 && green > blue + 8)
+  );
 }
 
 function isGreenChromaFringe(red, green, blue, alpha = 255) {
-  return alpha < 252 && green > 145 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210;
+  return (
+    alpha < 252 && green > 145 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210
+  );
 }
 
 function isPetOliveMatte(red, green, blue, alpha = 255) {

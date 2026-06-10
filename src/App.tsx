@@ -6,7 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore
+  useSyncExternalStore,
 } from 'react';
 import type {
   InnerExperienceMode,
@@ -14,7 +14,7 @@ import type {
   LensPromptOrder,
   LensSessionDraft,
   ReflectionSeed,
-  SeedBloomOutcome
+  SeedBloomOutcome,
 } from '../shared/models';
 import { seedCardAccessibilityLabel, seedStatusLabel } from './domain/accessibilityCopy';
 import { seedExportFilename, serializeSeedExport } from './domain/exportSeeds';
@@ -22,7 +22,7 @@ import {
   resolveActiveTheme,
   systemThemeFromMatches,
   type ActiveTheme,
-  type ThemePreference
+  type ThemePreference,
 } from './domain/theme';
 import {
   completeLens,
@@ -32,7 +32,7 @@ import {
   createReflectionSeedFromJourney,
   isLensSessionComplete,
   lensDefinitions,
-  lensOrderForProfile
+  lensOrderForProfile,
 } from './domain/lenses';
 import { advanceGardenGrowth, assignPlotToSeed, bloomSeed, waterSeed } from './domain/seedGrowth';
 import { createSignalGardenRepository } from './persistence/repositories';
@@ -46,7 +46,9 @@ type Tab = 'home' | 'garden' | 'archive' | 'settings';
 type SeedDialogTab = 'overview' | 'water' | 'history';
 
 const repository = createSignalGardenRepository();
-const GardenCanvas = lazy(() => import('./components/GardenCanvas').then((module) => ({ default: module.GardenCanvas })));
+const GardenCanvas = lazy(() =>
+  import('./components/GardenCanvas').then((module) => ({ default: module.GardenCanvas }))
+);
 
 const modeOptions: Array<{ value: InnerExperienceMode; label: string }> = [
   { value: 'words', label: 'Words' },
@@ -54,35 +56,39 @@ const modeOptions: Array<{ value: InnerExperienceMode; label: string }> = [
   { value: 'body', label: 'Body' },
   { value: 'emotions', label: 'Emotions' },
   { value: 'knowing', label: 'Quiet knowing' },
-  { value: 'mixed', label: 'Mixed' }
+  { value: 'mixed', label: 'Mixed' },
 ];
 
 const orderOptions: Array<{ value: LensPromptOrder; label: string }> = [
   { value: 'open', label: 'Open path' },
   { value: 'word-first', label: 'Words first' },
   { value: 'body-first', label: 'Body first' },
-  { value: 'image-first', label: 'Images first' }
+  { value: 'image-first', label: 'Images first' },
 ];
 
 const bloomOutcomeOptions: Array<{ value: SeedBloomOutcome; label: string }> = [
   { value: 'done', label: 'It happened' },
   { value: 'adapted', label: 'It changed' },
-  { value: 'more-care', label: 'It needs more care' }
+  { value: 'more-care', label: 'It needs more care' },
 ];
 
 const themePreferenceOptions: Array<{ value: ThemePreference; label: string }> = [
   { value: 'system', label: 'Follow system' },
   { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' }
+  { value: 'dark', label: 'Dark' },
 ];
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
-  const [seeds, setSeeds] = useState<ReflectionSeed[]>(() => advanceGardenGrowth(repository.loadSeeds()));
+  const [seeds, setSeeds] = useState<ReflectionSeed[]>(() =>
+    advanceGardenGrowth(repository.loadSeeds())
+  );
   const [settings, setSettings] = useState(() => repository.loadSettings());
   const systemTheme = useSyncExternalStore(subscribeToSystemTheme, readSystemTheme);
   const [profile, setProfile] = useState(() => repository.loadLensProfile());
-  const [lensDraft, setLensDraft] = useState<LensSessionDraft | null>(() => repository.loadLensSessionDraft());
+  const [lensDraft, setLensDraft] = useState<LensSessionDraft | null>(() =>
+    repository.loadLensSessionDraft()
+  );
   const [selectedSeed, setSelectedSeed] = useState<ReflectionSeed | null>(null);
   const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(null);
   const [lensPanelOpen, setLensPanelOpen] = useState(false);
@@ -94,7 +100,10 @@ export function App() {
   const [bloomReflection, setBloomReflection] = useState('');
   const [bloomError, setBloomError] = useState('');
   const [seedDialogTab, setSeedDialogTab] = useState<SeedDialogTab>('overview');
-  const [lastWateringEvent, setLastWateringEvent] = useState<{ seedId: string; eventId: string } | null>(null);
+  const [lastWateringEvent, setLastWateringEvent] = useState<{
+    seedId: string;
+    eventId: string;
+  } | null>(null);
   const [petMessage, setPetMessage] = useState('Your pet is nearby.');
   const [gardenCanvasWidth, setGardenCanvasWidth] = useState(720);
   const [onboardingMode, setOnboardingMode] = useState<InnerExperienceMode>('mixed');
@@ -109,7 +118,8 @@ export function App() {
   const currentLensDefinition = currentLens ? lensDefinitions[currentLens] : null;
   const lensOrder = lensOrderForProfile(profile);
   const lensStepNumber = currentLens ? lensOrder.indexOf(currentLens) + 1 : 0;
-  const petDebug = import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
+  const petDebug =
+    import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
   const accessiblePlantPlot = firstAvailableGardenPlot(seeds, gardenCanvasWidth);
   const activeTheme = resolveActiveTheme(settings.themePreference, systemTheme);
 
@@ -225,7 +235,10 @@ export function App() {
   function plantPendingSeed(position: { plotId: string; x: number; y: number }) {
     if (!pendingSeed) return;
 
-    const plantedSeed = assignPlotToSeed(pendingSeed, position.plotId, { x: position.x, y: position.y });
+    const plantedSeed = assignPlotToSeed(pendingSeed, position.plotId, {
+      x: position.x,
+      y: position.y,
+    });
     setSeeds((current) => [plantedSeed, ...current]);
     setPendingSeed(null);
     setPetMessage('Your pet gives a proud head-butt. A new seed is planted.');
@@ -241,7 +254,7 @@ export function App() {
 
     const watered = waterSeed(seed, {
       transformedLabel,
-      kindAction
+      kindAction,
     });
     const latestWatering = watered.waterings?.[watered.waterings.length - 1];
     setSeeds((current) => current.map((item) => (item.id === seed.id ? watered : item)));
@@ -262,13 +275,16 @@ export function App() {
 
     const bloomed = bloomSeed(seed, {
       outcome: bloomOutcome,
-      reflection
+      reflection,
     });
     setSeeds((current) => current.map((item) => (item.id === seed.id ? bloomed : item)));
     setSelectedSeed(bloomed);
     resetWateringForm();
     setSeedDialogTab('overview');
-    setLastWateringEvent({ seedId: seed.id, eventId: `bloom-${bloomed.bloomReflection?.completedAt ?? Date.now()}` });
+    setLastWateringEvent({
+      seedId: seed.id,
+      eventId: `bloom-${bloomed.bloomReflection?.completedAt ?? Date.now()}`,
+    });
     setPetMessage('The seed becomes a flower.');
   }
 
@@ -294,10 +310,16 @@ export function App() {
   }
 
   return (
-    <main className="app-shell" data-theme-preference={settings.themePreference} data-active-theme={activeTheme}>
+    <main
+      className="app-shell"
+      data-theme-preference={settings.themePreference}
+      data-active-theme={activeTheme}
+    >
       <header className="topbar">
         <div className="app-brand">
-          <span className="brand-mark" aria-hidden="true">SG</span>
+          <span className="brand-mark" aria-hidden="true">
+            SG
+          </span>
           <div>
             <p className="eyebrow">Signal Garden</p>
             <span>A living garden for shifting perspective.</span>
@@ -353,15 +375,19 @@ export function App() {
             <p className="eyebrow">Lens journey</p>
             <h2>Move one signal through words, body, image, meaning, and action.</h2>
             <p>
-              Your pet helps you notice inner signals without turning them into who you are.
-              Each completed journey becomes a seed in your Dream Garden.
+              Your pet helps you notice inner signals without turning them into who you are. Each
+              completed journey becomes a seed in your Dream Garden.
             </p>
             <button type="button" className="primary-action" onClick={() => setActiveTab('garden')}>
               Enter the Garden
             </button>
           </div>
           <div className="home-visual" aria-live="polite">
-            <img className="home-garden-art" src={activeTheme === 'dark' ? gardenBackgroundDarkUrl : gardenBackgroundUrl} alt="" />
+            <img
+              className="home-garden-art"
+              src={activeTheme === 'dark' ? gardenBackgroundDarkUrl : gardenBackgroundUrl}
+              alt=""
+            />
             <img
               className="home-companion-art"
               src={activeTheme === 'dark' ? companionIdleDarkUrl : companionIdleUrl}
@@ -379,7 +405,9 @@ export function App() {
         <section className="garden-view">
           <h1 className="sr-only">Dream Garden</h1>
           <div className="garden-stage">
-            <Suspense fallback={<div className="garden-canvas loading-canvas">Garden is waking up.</div>}>
+            <Suspense
+              fallback={<div className="garden-canvas loading-canvas">Garden is waking up.</div>}
+            >
               <GardenCanvas
                 state={gardenState}
                 reducedMotion={settings.reducedMotion}
@@ -411,9 +439,14 @@ export function App() {
             {(lensDraft || pendingSeed) && (
               <div className="lens-progress" aria-label="Lens journey progress">
                 {lensOrder.map((kind) => {
-                  const complete = Boolean(lensDraft?.completedLensIds.includes(kind)) || Boolean(pendingSeed);
+                  const complete =
+                    Boolean(lensDraft?.completedLensIds.includes(kind)) || Boolean(pendingSeed);
                   const active = currentLens === kind && !pendingSeed;
-                  const className = active ? 'lens-chip active' : complete ? 'lens-chip complete' : 'lens-chip';
+                  const className = active
+                    ? 'lens-chip active'
+                    : complete
+                      ? 'lens-chip complete'
+                      : 'lens-chip';
 
                   return active && lensDraft ? (
                     <button
@@ -451,7 +484,9 @@ export function App() {
                 }}
               >
                 <div>
-                  <p className="eyebrow">Current lens · Step {lensStepNumber} of {lensOrder.length}</p>
+                  <p className="eyebrow">
+                    Current lens · Step {lensStepNumber} of {lensOrder.length}
+                  </p>
                   <h3 id="lens-panel-title">{currentLensDefinition.title}</h3>
                   <div className="lens-step-meter" aria-hidden="true">
                     {lensOrder.map((kind) => (
@@ -478,7 +513,9 @@ export function App() {
                   />
                 </label>
                 <div className="form-actions">
-                  <button type="button" onClick={clearLensJourney}>Let it rest</button>
+                  <button type="button" onClick={clearLensJourney}>
+                    Let it rest
+                  </button>
                   <button type="submit" className="primary-action">
                     {isLastLens(lensDraft.currentLens, lensOrder) ? 'Make Seed' : 'Continue'}
                   </button>
@@ -503,7 +540,7 @@ export function App() {
                       plantPendingSeed({
                         plotId: accessiblePlantPlot.id,
                         x: accessiblePlantPlot.x,
-                        y: accessiblePlantPlot.y
+                        y: accessiblePlantPlot.y,
                       });
                     }
                   }}
@@ -512,10 +549,13 @@ export function App() {
                 </button>
               </div>
             )}
-            <div className="sr-only" aria-live="polite">{petMessage}</div>
+            <div className="sr-only" aria-live="polite">
+              {petMessage}
+            </div>
             <div className="sr-only garden-keyboard-controls">
               <p>
-                Dream Garden keyboard controls. Start the glowing signal to begin a lens journey. Use Plant Here when a seed is ready.
+                Dream Garden keyboard controls. Start the glowing signal to begin a lens journey.
+                Use Plant Here when a seed is ready.
               </p>
               <button
                 type="button"
@@ -576,15 +616,18 @@ export function App() {
             <p className="eyebrow">Local data</p>
             <h2>Saved in this browser.</h2>
             <p>
-              Reflection text, seeds, the lens profile, drafts, and settings stay in this browser through localStorage.
-              No OpenAI text model reads or interprets your reflections in this prototype.
+              Reflection text, seeds, the lens profile, drafts, and settings stay in this browser
+              through localStorage. No OpenAI text model reads or interprets your reflections in
+              this prototype.
             </p>
           </div>
           <label className="toggle">
             <input
               type="checkbox"
               checked={settings.reducedMotion}
-              onChange={(event) => setSettings((current) => ({ ...current, reducedMotion: event.target.checked }))}
+              onChange={(event) =>
+                setSettings((current) => ({ ...current, reducedMotion: event.target.checked }))
+              }
             />
             Reduce garden motion
           </label>
@@ -594,7 +637,9 @@ export function App() {
               {themePreferenceOptions.map((option) => (
                 <label
                   key={option.value}
-                  className={settings.themePreference === option.value ? 'segment selected' : 'segment'}
+                  className={
+                    settings.themePreference === option.value ? 'segment selected' : 'segment'
+                  }
                 >
                   <input
                     type="radio"
@@ -609,25 +654,41 @@ export function App() {
             </div>
           </fieldset>
           <div className="settings-actions">
-            <button type="button" onClick={() => {
-              setSettings((current) => ({ ...current, onboardingCompleted: false }));
-              setProfile(null);
-              setLensDraft(null);
-              setLensPanelOpen(false);
-              setLensInput('');
-              repository.clearLensProfile();
-              repository.clearLensSessionDraft();
-            }}>
+            <button
+              type="button"
+              onClick={() => {
+                setSettings((current) => ({ ...current, onboardingCompleted: false }));
+                setProfile(null);
+                setLensDraft(null);
+                setLensPanelOpen(false);
+                setLensInput('');
+                repository.clearLensProfile();
+                repository.clearLensSessionDraft();
+              }}
+            >
               Reset Lens Profile
             </button>
-            <button type="button" onClick={exportSeeds} disabled={seeds.length === 0}>Export Seed Data</button>
-            <button type="button" className="danger" onClick={deleteAllSeeds} disabled={seeds.length === 0}>Delete Seeds</button>
+            <button type="button" onClick={exportSeeds} disabled={seeds.length === 0}>
+              Export Seed Data
+            </button>
+            <button
+              type="button"
+              className="danger"
+              onClick={deleteAllSeeds}
+              disabled={seeds.length === 0}
+            >
+              Delete Seeds
+            </button>
           </div>
         </section>
       )}
 
       {needsOnboarding && (
-        <section className="onboarding-backdrop" aria-labelledby="onboarding-title" data-testid="onboarding-panel">
+        <section
+          className="onboarding-backdrop"
+          aria-labelledby="onboarding-title"
+          data-testid="onboarding-panel"
+        >
           <form
             className="onboarding-panel"
             onSubmit={(event) => {
@@ -638,13 +699,17 @@ export function App() {
             <p className="eyebrow">Inner lens profile</p>
             <h2 id="onboarding-title">How does experience usually arrive for you?</h2>
             <p>
-              This only changes the order and emphasis of garden prompts. It is stored locally and is not a diagnosis.
+              This only changes the order and emphasis of garden prompts. It is stored locally and
+              is not a diagnosis.
             </p>
             <fieldset>
               <legend>Most familiar signal</legend>
               <div className="segmented-grid">
                 {modeOptions.map((option) => (
-                  <label key={option.value} className={onboardingMode === option.value ? 'segment selected' : 'segment'}>
+                  <label
+                    key={option.value}
+                    className={onboardingMode === option.value ? 'segment selected' : 'segment'}
+                  >
                     <input
                       type="radio"
                       name="preferred-mode"
@@ -661,7 +726,10 @@ export function App() {
               <legend>Gentle path</legend>
               <div className="segmented-grid">
                 {orderOptions.map((option) => (
-                  <label key={option.value} className={onboardingOrder === option.value ? 'segment selected' : 'segment'}>
+                  <label
+                    key={option.value}
+                    className={onboardingOrder === option.value ? 'segment selected' : 'segment'}
+                  >
                     <input
                       type="radio"
                       name="prompt-order"
@@ -674,7 +742,9 @@ export function App() {
                 ))}
               </div>
             </fieldset>
-            <button type="submit" className="primary-action">Start in the Garden</button>
+            <button type="submit" className="primary-action">
+              Start in the Garden
+            </button>
           </form>
         </section>
       )}
@@ -688,9 +758,18 @@ export function App() {
         >
           <div className="dialog-heading">
             <p className="eyebrow">{seedStatusLabel(selectedSeed.status)} seed</p>
-            <button ref={seedDialogCloseRef} type="button" aria-label="Close seed details" onClick={closeSeedDetails}>Close</button>
+            <button
+              ref={seedDialogCloseRef}
+              type="button"
+              aria-label="Close seed details"
+              onClick={closeSeedDetails}
+            >
+              Close
+            </button>
           </div>
-          <h2 id="seed-dialog-title">{selectedSeed.unhookedText || selectedSeed.labelText || 'A tiny kind action'}</h2>
+          <h2 id="seed-dialog-title">
+            {selectedSeed.unhookedText || selectedSeed.labelText || 'A tiny kind action'}
+          </h2>
           <div className="seed-dialog-tabs" role="tablist" aria-label="Seed details">
             {(['overview', 'water', 'history'] as SeedDialogTab[]).map((tab) => (
               <button
@@ -715,17 +794,32 @@ export function App() {
               </div>
               <div className="seed-progress" aria-label="Seed growth progress">
                 {['Seed', 'Sprout', 'Bud', 'Flower'].map((step, index) => (
-                  <span key={step} className={index <= growthIndexForSeed(selectedSeed) ? 'complete' : ''}>
+                  <span
+                    key={step}
+                    className={index <= growthIndexForSeed(selectedSeed) ? 'complete' : ''}
+                  >
                     {step}
                   </span>
                 ))}
               </div>
-              <p><strong>Goal:</strong> {selectedSeed.tinyAction}</p>
+              <p>
+                <strong>Goal:</strong> {selectedSeed.tinyAction}
+              </p>
               {selectedSeed.bloomReflection && (
-                <p><strong>Bloom reflection:</strong> {selectedSeed.bloomReflection.reflection}</p>
+                <p>
+                  <strong>Bloom reflection:</strong> {selectedSeed.bloomReflection.reflection}
+                </p>
               )}
-              <button type="button" className="primary-action" onClick={() => setSeedDialogTab('water')}>
-                {selectedSeed.bloomReflection ? 'Review Growth' : selectedSeed.waterings && selectedSeed.waterings.length >= 2 ? 'Reflect to Flower' : 'Water Seed'}
+              <button
+                type="button"
+                className="primary-action"
+                onClick={() => setSeedDialogTab('water')}
+              >
+                {selectedSeed.bloomReflection
+                  ? 'Review Growth'
+                  : selectedSeed.waterings && selectedSeed.waterings.length >= 2
+                    ? 'Reflect to Flower'
+                    : 'Water Seed'}
               </button>
             </section>
           )}
@@ -751,7 +845,10 @@ export function App() {
                     <legend>Did this goal/action happen, change, or need more care?</legend>
                     <div className="segmented-grid">
                       {bloomOutcomeOptions.map((option) => (
-                        <label key={option.value} className={bloomOutcome === option.value ? 'segment selected' : 'segment'}>
+                        <label
+                          key={option.value}
+                          className={bloomOutcome === option.value ? 'segment selected' : 'segment'}
+                        >
                           <input
                             type="radio"
                             name="bloom-outcome"
@@ -776,10 +873,18 @@ export function App() {
                       required
                     />
                   </label>
-                  {bloomError && <p className="form-error" role="alert">{bloomError}</p>}
+                  {bloomError && (
+                    <p className="form-error" role="alert">
+                      {bloomError}
+                    </p>
+                  )}
                   <div className="form-actions">
-                    <button type="button" onClick={resetWateringForm}>Let it rest</button>
-                    <button type="submit" className="primary-action">Bloom Into Flower</button>
+                    <button type="button" onClick={resetWateringForm}>
+                      Let it rest
+                    </button>
+                    <button type="submit" className="primary-action">
+                      Bloom Into Flower
+                    </button>
                   </div>
                 </form>
               ) : (
@@ -815,10 +920,18 @@ export function App() {
                       required
                     />
                   </label>
-                  {wateringError && <p className="form-error" role="alert">{wateringError}</p>}
+                  {wateringError && (
+                    <p className="form-error" role="alert">
+                      {wateringError}
+                    </p>
+                  )}
                   <div className="form-actions">
-                    <button type="button" onClick={resetWateringForm}>Let it rest</button>
-                    <button type="submit" className="primary-action">Water Seed</button>
+                    <button type="button" onClick={resetWateringForm}>
+                      Let it rest
+                    </button>
+                    <button type="submit" className="primary-action">
+                      Water Seed
+                    </button>
                   </div>
                 </form>
               )}
@@ -830,31 +943,61 @@ export function App() {
               <details>
                 <summary>Original lens journey</summary>
                 <div className="journey-detail">
-                  <p><strong>Action:</strong> {selectedSeed.tinyAction}</p>
-                  {selectedSeed.emotions.length > 0 && <p><strong>Emotions:</strong> {selectedSeed.emotions.join(', ')}</p>}
-                  {selectedSeed.bodySignals.length > 0 && <p><strong>Body:</strong> {selectedSeed.bodySignals.join(', ')}</p>}
-                  {selectedSeed.values.length > 0 && <p><strong>Meaning:</strong> {selectedSeed.values.join(', ')}</p>}
-                  {selectedSeed.dreams.length > 0 && <p><strong>Image:</strong> {selectedSeed.dreams.join(', ')}</p>}
+                  <p>
+                    <strong>Action:</strong> {selectedSeed.tinyAction}
+                  </p>
+                  {selectedSeed.emotions.length > 0 && (
+                    <p>
+                      <strong>Emotions:</strong> {selectedSeed.emotions.join(', ')}
+                    </p>
+                  )}
+                  {selectedSeed.bodySignals.length > 0 && (
+                    <p>
+                      <strong>Body:</strong> {selectedSeed.bodySignals.join(', ')}
+                    </p>
+                  )}
+                  {selectedSeed.values.length > 0 && (
+                    <p>
+                      <strong>Meaning:</strong> {selectedSeed.values.join(', ')}
+                    </p>
+                  )}
+                  {selectedSeed.dreams.length > 0 && (
+                    <p>
+                      <strong>Image:</strong> {selectedSeed.dreams.join(', ')}
+                    </p>
+                  )}
                   {selectedSeed.lensJourney?.lensOrder.map((kind) => {
                     const definition = lensDefinitions[kind];
                     const value = selectedSeed.lensJourney?.responses[definition.responseKey];
                     if (!value) return null;
-                    return <p key={kind}><strong>{definition.actionLabel}:</strong> {value}</p>;
+                    return (
+                      <p key={kind}>
+                        <strong>{definition.actionLabel}:</strong> {value}
+                      </p>
+                    );
                   })}
                 </div>
               </details>
               <details>
                 <summary>Watering history</summary>
                 <div className="watering-history">
-                  {selectedSeed.waterings && selectedSeed.waterings.length > 0 ? selectedSeed.waterings.map((watering, index) => (
-                    <p key={watering.id}>
-                      <strong>{index + 1}. {watering.transformedLabel}</strong>
-                      <span>{watering.kindAction}</span>
-                    </p>
-                  )) : <p>No waterings yet.</p>}
+                  {selectedSeed.waterings && selectedSeed.waterings.length > 0 ? (
+                    selectedSeed.waterings.map((watering, index) => (
+                      <p key={watering.id}>
+                        <strong>
+                          {index + 1}. {watering.transformedLabel}
+                        </strong>
+                        <span>{watering.kindAction}</span>
+                      </p>
+                    ))
+                  ) : (
+                    <p>No waterings yet.</p>
+                  )}
                   {selectedSeed.bloomReflection && (
                     <p>
-                      <strong>Flower: {bloomOutcomeLabel(selectedSeed.bloomReflection.outcome)}</strong>
+                      <strong>
+                        Flower: {bloomOutcomeLabel(selectedSeed.bloomReflection.outcome)}
+                      </strong>
                       <span>{selectedSeed.bloomReflection.reflection}</span>
                     </p>
                   )}
@@ -922,27 +1065,28 @@ function seedStageCopy(seed: ReflectionSeed) {
     return {
       eyebrow: 'Flower',
       title: 'This seed has bloomed.',
-      description: 'The action has become a flower in the garden.'
+      description: 'The action has become a flower in the garden.',
     };
   }
   if (index === 2) {
     return {
       eyebrow: 'Growing plant',
       title: 'A bud is forming.',
-      description: 'One final reflection can decide whether this becomes a flower.'
+      description: 'One final reflection can decide whether this becomes a flower.',
     };
   }
   if (index === 1) {
     return {
       eyebrow: 'Sprout',
       title: 'The seed has sprouted.',
-      description: 'Water it once more by noticing what changed and choosing the next kind version.'
+      description:
+        'Water it once more by noticing what changed and choosing the next kind version.',
     };
   }
   return {
     eyebrow: 'Seed',
     title: 'This seed is planted.',
-    description: 'Water it with one softened label and one small action.'
+    description: 'Water it with one softened label and one small action.',
   };
 }
 
@@ -952,7 +1096,7 @@ function wateringPromptForSeed(seed: ReflectionSeed) {
       label: 'What did you notice after trying this?',
       labelPlaceholder: 'Name what shifted, even if it was small.',
       actionLabel: 'What is the next kind version?',
-      actionPlaceholder: seed.tinyAction
+      actionPlaceholder: seed.tinyAction,
     };
   }
 
@@ -960,7 +1104,7 @@ function wateringPromptForSeed(seed: ReflectionSeed) {
     label: 'How can this label soften today?',
     labelPlaceholder: `The story "${seed.labelText || seed.tinyAction}" can soften into one passing thought.`,
     actionLabel: 'What small action gives this seed water?',
-    actionPlaceholder: seed.tinyAction
+    actionPlaceholder: seed.tinyAction,
   };
 }
 

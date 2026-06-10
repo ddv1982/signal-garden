@@ -6,10 +6,10 @@ const buildSourceMap = process.env.BUILD_SOURCE_MAPS === 'true' ? 'hidden' : fal
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173
+    port: 5173,
   },
   preview: {
-    port: 4173
+    port: 4173,
   },
   build: {
     sourcemap: buildSourceMap,
@@ -18,16 +18,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          phaser: ['phaser']
-        }
-      }
-    }
+          phaser: ['phaser'],
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',
-    include: [
-      'src/**/*.test.ts',
-      'shared/**/*.test.ts'
-    ]
-  }
+    include: ['src/**/*.test.ts', 'shared/**/*.test.ts'],
+  },
 });

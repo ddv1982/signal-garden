@@ -9,18 +9,19 @@ const alphaThreshold = 8;
 const cleanupMasks = {
   'groom.png': [
     { x: 100, y: 36, width: 76, height: 16 },
-    { x: 100, y: 460, width: 190, height: 42 }
+    { x: 100, y: 460, width: 190, height: 42 },
   ],
-  'nap-curl.png': [
-    { x: 440, y: 330, width: 52, height: 130 }
-  ],
+  'nap-curl.png': [{ x: 440, y: 330, width: 52, height: 130 }],
   'settle-back.png': [
     { x: 20, y: 245, width: 94, height: 130 },
-    { x: 462, y: 432, width: 30, height: 42 }
-  ]
+    { x: 462, y: 432, width: 30, height: 42 },
+  ],
 };
 
-const files = fs.readdirSync(frameDir).filter((file) => file.endsWith('.png')).sort();
+const files = fs
+  .readdirSync(frameDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 
 for (const fileName of files) {
   const filePath = path.join(frameDir, fileName);
@@ -51,7 +52,12 @@ function defringeGreenKeyEdges(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isPetMatteSpill(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isPetMatteSpill(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 4)) continue;
 
       const replacement = nearestOpaqueObjectColor(png, x, y, 14);
@@ -101,7 +107,12 @@ function softenRemainingGreenSpill(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isPetMatteSpill(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isPetMatteSpill(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 6)) continue;
       png.data[index + 3] = 0;
     }
@@ -136,7 +147,8 @@ function warmOpaqueSilhouetteMatte(png) {
       const red = png.data[index];
       const green = png.data[index + 1];
       const blue = png.data[index + 2];
-      if (alpha <= alphaThreshold || !isPetOpaqueYellowGreenMatte(red, green, blue, alpha)) continue;
+      if (alpha <= alphaThreshold || !isPetOpaqueYellowGreenMatte(red, green, blue, alpha))
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 6)) continue;
 
       const warmRed = Math.min(255, Math.max(red, green + 6));
@@ -182,11 +194,16 @@ function nearestOpaqueObjectColor(png, x, y, maxRadius) {
 }
 
 function isGreenChromaFringe(red, green, blue, alpha = 255) {
-  return alpha < 252 && green > 145 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210;
+  return (
+    alpha < 252 && green > 145 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210
+  );
 }
 
 function isPetGreenSpill(red, green, blue, alpha = 255) {
-  return isGreenChromaFringe(red, green, blue, alpha) || (alpha < 252 && green > red + 8 && green > blue + 8);
+  return (
+    isGreenChromaFringe(red, green, blue, alpha) ||
+    (alpha < 252 && green > red + 8 && green > blue + 8)
+  );
 }
 
 function isPetOliveMatte(red, green, blue, alpha = 255) {
@@ -202,7 +219,11 @@ function isPetOpaqueYellowGreenMatte(red, green, blue, alpha = 255) {
 }
 
 function isPetMatteSpill(red, green, blue, alpha = 255) {
-  return isPetGreenSpill(red, green, blue, alpha) || isPetOliveMatte(red, green, blue, alpha) || isPetOpaqueYellowGreenMatte(red, green, blue, alpha);
+  return (
+    isPetGreenSpill(red, green, blue, alpha) ||
+    isPetOliveMatte(red, green, blue, alpha) ||
+    isPetOpaqueYellowGreenMatte(red, green, blue, alpha)
+  );
 }
 
 function hasTransparentNeighbor(png, x, y, radius) {

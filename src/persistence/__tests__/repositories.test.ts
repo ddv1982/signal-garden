@@ -18,7 +18,7 @@ describe('createSignalGardenRepository', () => {
       dreams: [],
       tinyAction: 'Offer myself one small kind pause.',
       status: 'planted',
-      visualType: 'seed'
+      visualType: 'seed',
     };
 
     repository.saveSeeds([seed]);
@@ -73,7 +73,7 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: true,
       onboardingCompleted: false,
-      themePreference: 'system'
+      themePreference: 'system',
     });
   });
 
@@ -84,14 +84,14 @@ describe('createSignalGardenRepository', () => {
     repository.saveSettings({
       reducedMotion: false,
       onboardingCompleted: true,
-      themePreference: 'dark'
+      themePreference: 'dark',
     });
 
     expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBe('dark');
     expect(repository.loadSettings()).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
-      themePreference: 'dark'
+      themePreference: 'dark',
     });
   });
 
@@ -105,7 +105,7 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
-      themePreference: 'dark'
+      themePreference: 'dark',
     });
   });
 
@@ -120,7 +120,7 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
-      themePreference: 'light'
+      themePreference: 'light',
     });
   });
 
@@ -134,7 +134,7 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
-      themePreference: 'system'
+      themePreference: 'system',
     });
   });
 
@@ -149,7 +149,7 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: true,
       onboardingCompleted: true,
-      themePreference: 'system'
+      themePreference: 'system',
     });
   });
 });
@@ -166,6 +166,6 @@ function createMemoryStorage(): StorageLike {
     },
     removeItem(key) {
       values.delete(key);
-    }
+    },
   };
 }

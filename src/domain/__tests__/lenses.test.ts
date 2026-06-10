@@ -6,7 +6,7 @@ import {
   createLensSessionDraft,
   createReflectionSeedFromJourney,
   isLensSessionComplete,
-  lensOrderForProfile
+  lensOrderForProfile,
 } from '../lenses';
 
 describe('lens domain', () => {
@@ -14,9 +14,12 @@ describe('lens domain', () => {
     expect(lensOrderForProfile(createLensProfile('body', 'body-first')).slice(0, 3)).toEqual([
       'body',
       'emotion',
-      'word'
+      'word',
     ]);
-    expect(lensOrderForProfile(createLensProfile('images', 'image-first')).slice(0, 2)).toEqual(['image', 'emotion']);
+    expect(lensOrderForProfile(createLensProfile('images', 'image-first')).slice(0, 2)).toEqual([
+      'image',
+      'emotion',
+    ]);
   });
 
   it('turns a completed lens session into a seed with archive-compatible fields', () => {

@@ -15,7 +15,7 @@ import {
   pendingSeedStartPoint,
   petInteractionTarget,
   resolveGardenSeedPlacement,
-  type GardenSeedLayoutItem
+  type GardenSeedLayoutItem,
 } from '../gardenLayout';
 
 describe('createGardenSeedLayout', () => {
@@ -63,7 +63,7 @@ describe('createGardenPlots', () => {
       'middle-right',
       'back-left',
       'back-center',
-      'back-right'
+      'back-right',
     ]);
     expect(mobile.map((plot) => plot.id)).toEqual([
       'front-left',
@@ -73,9 +73,11 @@ describe('createGardenPlots', () => {
       'middle-left',
       'middle-center',
       'middle-right',
-      'back-center'
+      'back-center',
     ]);
-    expect(desktop.every((plot) => plot.x > 0 && plot.x < 1 && plot.y > 0 && plot.y < 1)).toBe(true);
+    expect(desktop.every((plot) => plot.x > 0 && plot.x < 1 && plot.y > 0 && plot.y < 1)).toBe(
+      true
+    );
   });
 
   it('projects mobile plots into the visible cropped garden frame', () => {
@@ -108,7 +110,8 @@ describe('createGardenPlots', () => {
   });
 
   it('keeps designed planting plots off the central walking path', () => {
-    const isOnCentralPath = (plot: { x: number; y: number }) => plot.y > 0.83 && plot.x > 0.34 && plot.x < 0.66;
+    const isOnCentralPath = (plot: { x: number; y: number }) =>
+      plot.y > 0.83 && plot.x > 0.34 && plot.x < 0.66;
 
     expect(createGardenPlots(960, 640).filter(isOnCentralPath)).toEqual([]);
     expect(createGardenPlots(390, 680).filter(isOnCentralPath)).toEqual([]);
@@ -128,14 +131,18 @@ describe('available garden plots', () => {
   });
 
   it('uses the mobile plot set below the canvas-width threshold', () => {
-    const seeds = [seedWithPlot('front-right'), seedWithPlot('front-center'), seedWithPlot('front-left')];
+    const seeds = [
+      seedWithPlot('front-right'),
+      seedWithPlot('front-center'),
+      seedWithPlot('front-left'),
+    ];
 
     expect(availableGardenPlots(seeds, 390).map((plot) => plot.id)).toEqual([
       'front-far-right',
       'middle-left',
       'middle-center',
       'middle-right',
-      'back-center'
+      'back-center',
     ]);
     expect(firstAvailableGardenPlot(seeds, 390)?.id).toBe('front-far-right');
   });
@@ -199,8 +206,12 @@ describe('pool-centered lens object layout', () => {
   it('keeps the cloud and observer pool from overlapping in the full constellation', () => {
     [createGardenFrame(2048, 900), createGardenFrame(1440, 760)].forEach((frame) => {
       const placements = createLensObjectPlacements(frame, null);
-      const imageBounds = lensObjectBounds(placements.find((placement) => placement.kind === 'image')!);
-      const observerBounds = lensObjectBounds(placements.find((placement) => placement.kind === 'observer')!);
+      const imageBounds = lensObjectBounds(
+        placements.find((placement) => placement.kind === 'image')!
+      );
+      const observerBounds = lensObjectBounds(
+        placements.find((placement) => placement.kind === 'observer')!
+      );
 
       expect(rectsOverlap(imageBounds, observerBounds)).toBe(false);
     });
@@ -241,20 +252,22 @@ describe('pool-centered lens object layout', () => {
   });
 
   it('keeps mobile active lens hit targets away from the pet and bottom panel', () => {
-    [createGardenFrame(390, 758), createGardenFrame(390, 844), createGardenFrame(360, 664)].forEach((frame) => {
-      const petTarget = petInteractionTarget(frame);
+    [createGardenFrame(390, 758), createGardenFrame(390, 844), createGardenFrame(360, 664)].forEach(
+      (frame) => {
+        const petTarget = petInteractionTarget(frame);
 
-      LENS_RING_ORDER.forEach((kind) => {
-        const [placement] = createLensObjectPlacements(frame, kind);
-        const hitTarget = lensObjectHitTarget(placement);
+        LENS_RING_ORDER.forEach((kind) => {
+          const [placement] = createLensObjectPlacements(frame, kind);
+          const hitTarget = lensObjectHitTarget(placement);
 
-        expect(circleOverlapsEllipse(hitTarget, petTarget, 8)).toBe(false);
-        expect(hitTarget.x - hitTarget.radius).toBeGreaterThanOrEqual(0);
-        expect(hitTarget.x + hitTarget.radius).toBeLessThanOrEqual(frame.width);
-        expect(hitTarget.y - hitTarget.radius).toBeGreaterThanOrEqual(0);
-        expect(hitTarget.y + hitTarget.radius).toBeLessThanOrEqual(frame.height - 144);
-      });
-    });
+          expect(circleOverlapsEllipse(hitTarget, petTarget, 8)).toBe(false);
+          expect(hitTarget.x - hitTarget.radius).toBeGreaterThanOrEqual(0);
+          expect(hitTarget.x + hitTarget.radius).toBeLessThanOrEqual(frame.width);
+          expect(hitTarget.y - hitTarget.radius).toBeGreaterThanOrEqual(0);
+          expect(hitTarget.y + hitTarget.radius).toBeLessThanOrEqual(frame.height - 144);
+        });
+      }
+    );
   });
 });
 
@@ -287,13 +300,13 @@ describe('resolveGardenSeedPlacement', () => {
     y: 200,
     scale: 0.5,
     depth: 10,
-    band: 'front'
+    band: 'front',
   };
 
   it('uses the responsive plot position before a stored legacy garden position', () => {
     const seed = {
       ...seedWithPlot('front-right'),
-      gardenPosition: { x: 0.62, y: 0.8 }
+      gardenPosition: { x: 0.62, y: 0.8 },
     };
     const placement = resolveGardenSeedPlacement(seed, fallback, 390, 680);
 
@@ -306,7 +319,7 @@ describe('resolveGardenSeedPlacement', () => {
   it('falls back to stored garden position when the plot id is not in the current plot set', () => {
     const seed = {
       ...seedWithPlot('back-left'),
-      gardenPosition: { x: 0.8, y: 0.84 }
+      gardenPosition: { x: 0.8, y: 0.84 },
     };
     const placement = resolveGardenSeedPlacement(seed, fallback, 390, 680);
 
@@ -328,7 +341,7 @@ function seedWithPlot(gardenPlotId: string): ReflectionSeed {
     tinyAction: 'Pause.',
     status: 'planted',
     gardenPlotId,
-    visualType: 'seed'
+    visualType: 'seed',
   };
 }
 
@@ -336,5 +349,10 @@ function rectsOverlap(
   first: { left: number; right: number; top: number; bottom: number },
   second: { left: number; right: number; top: number; bottom: number }
 ) {
-  return first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
+  return (
+    first.left < second.right &&
+    first.right > second.left &&
+    first.top < second.bottom &&
+    first.bottom > second.top
+  );
 }

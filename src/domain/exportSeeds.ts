@@ -10,13 +10,16 @@ export type SeedExport = {
   seeds: ReflectionSeed[];
 };
 
-export function createSeedExport(seeds: ReflectionSeed[], exportedAt = new Date().toISOString()): SeedExport {
+export function createSeedExport(
+  seeds: ReflectionSeed[],
+  exportedAt = new Date().toISOString()
+): SeedExport {
   return {
     app: 'Signal Garden',
     version: SEED_EXPORT_VERSION,
     exportedAt,
     seedCount: seeds.length,
-    seeds
+    seeds,
   };
 }
 

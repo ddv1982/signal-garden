@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2022"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -21,20 +17,10 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@src/*": [
-        "src/*"
-      ],
-      "@shared/*": [
-        "shared/*"
-      ],
-      "@game/*": [
-        "src/game/*"
-      ]
+      "@src/*": ["src/*"],
+      "@shared/*": ["shared/*"],
+      "@game/*": ["src/game/*"]
     }
   },
-  "include": [
-    "src",
-    "shared",
-    "vite.config.ts"
-  ]
+  "include": ["src", "shared", "vite.config.ts"]
 }

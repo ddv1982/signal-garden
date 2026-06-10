@@ -6,7 +6,7 @@ import {
   createGardenGame,
   type GardenGameHandle,
   type PetFrameId,
-  type PetSequenceId
+  type PetSequenceId,
 } from '../game/GardenGame';
 
 type GardenCanvasProps = {
@@ -28,7 +28,11 @@ type GardenCanvasProps = {
 
 type GardenCanvasCallbacks = Pick<
   GardenCanvasProps,
-  'onPetTapped' | 'onSeedSelected' | 'onSignalRequested' | 'onLensObjectSelected' | 'onPendingSeedPlanted'
+  | 'onPetTapped'
+  | 'onSeedSelected'
+  | 'onSignalRequested'
+  | 'onLensObjectSelected'
+  | 'onPendingSeedPlanted'
 >;
 
 const petDebugFrames: Array<{ id: PetFrameId; label: string }> = [
@@ -43,7 +47,7 @@ const petDebugFrames: Array<{ id: PetFrameId; label: string }> = [
   { id: 'napCurl', label: 'Nap' },
   { id: 'sleeping', label: 'Sleep' },
   { id: 'wake', label: 'Wake' },
-  { id: 'plantProud', label: 'Proud' }
+  { id: 'plantProud', label: 'Proud' },
 ];
 
 const petDebugSequences: Array<{ id: PetSequenceId; label: string }> = [
@@ -53,7 +57,7 @@ const petDebugSequences: Array<{ id: PetSequenceId; label: string }> = [
   { id: 'groom', label: 'Groom' },
   { id: 'sleep', label: 'Sleep' },
   { id: 'wake', label: 'Wake' },
-  { id: 'plantProud', label: 'Plant proud' }
+  { id: 'plantProud', label: 'Plant proud' },
 ];
 
 export function GardenCanvas({
@@ -70,7 +74,7 @@ export function GardenCanvas({
   onSignalRequested,
   onLensObjectSelected,
   onPendingSeedPlanted,
-  onCanvasWidthChange
+  onCanvasWidthChange,
 }: GardenCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<GardenGameHandle | null>(null);
@@ -79,7 +83,7 @@ export function GardenCanvas({
     onSeedSelected,
     onSignalRequested,
     onLensObjectSelected,
-    onPendingSeedPlanted
+    onPendingSeedPlanted,
   });
 
   useEffect(() => {
@@ -88,7 +92,7 @@ export function GardenCanvas({
       onSeedSelected,
       onSignalRequested,
       onLensObjectSelected,
-      onPendingSeedPlanted
+      onPendingSeedPlanted,
     };
   });
 
@@ -137,7 +141,7 @@ export function GardenCanvas({
       onSeedSelected: (seed) => callbacksRef.current.onSeedSelected(seed),
       onSignalRequested: () => callbacksRef.current.onSignalRequested(),
       onLensObjectSelected: (kind) => callbacksRef.current.onLensObjectSelected(kind),
-      onPendingSeedPlanted: (position) => callbacksRef.current.onPendingSeedPlanted(position)
+      onPendingSeedPlanted: (position) => callbacksRef.current.onPendingSeedPlanted(position),
     });
 
     return () => {
@@ -151,7 +155,15 @@ export function GardenCanvas({
   }, []);
 
   useEffect(() => {
-    gameRef.current?.update(state, reducedMotion, theme, pendingSeed, currentLens, lensSessionActive, lastWateringEvent);
+    gameRef.current?.update(
+      state,
+      reducedMotion,
+      theme,
+      pendingSeed,
+      currentLens,
+      lensSessionActive,
+      lastWateringEvent
+    );
   }, [state, reducedMotion, theme, pendingSeed, currentLens, lensSessionActive, lastWateringEvent]);
 
   return (
@@ -166,7 +178,11 @@ export function GardenCanvas({
         aria-label={gardenAccessibilityLabel(state.seeds.length)}
       />
       {petDebug && (
-        <div className="pet-debug-panel" data-testid="pet-debug-panel" aria-label="Pet animation debug controls">
+        <div
+          className="pet-debug-panel"
+          data-testid="pet-debug-panel"
+          aria-label="Pet animation debug controls"
+        >
           <div>
             <strong>Freeze pose</strong>
             <div>

@@ -9,18 +9,18 @@ const assetGroups = [
   {
     from: 'src/assets/companion/frames',
     to: 'src/assets/companion/frames-dark',
-    kind: 'companion'
+    kind: 'companion',
   },
   {
     from: 'src/assets/garden/props',
     to: 'src/assets/garden/props-dark',
-    kind: 'garden'
+    kind: 'garden',
   },
   {
     from: 'src/assets/lenses/props',
     to: 'src/assets/lenses/props-dark',
-    kind: 'lens'
-  }
+    kind: 'lens',
+  },
 ];
 
 for (const group of assetGroups) {
@@ -28,7 +28,10 @@ for (const group of assetGroups) {
   const targetDir = path.join(projectRoot, group.to);
   fs.mkdirSync(targetDir, { recursive: true });
 
-  for (const file of fs.readdirSync(sourceDir).filter((item) => item.endsWith('.png')).sort()) {
+  for (const file of fs
+    .readdirSync(sourceDir)
+    .filter((item) => item.endsWith('.png'))
+    .sort()) {
     const sourcePath = path.join(sourceDir, file);
     const targetPath = path.join(targetDir, file);
     const source = PNG.sync.read(fs.readFileSync(sourcePath));
@@ -65,20 +68,51 @@ function tintForDarkMode(source, kind, file) {
     const contrastAmount = profile.contrast * (shadowPixel ? 0.55 : 1);
     const alphaFactor = alpha < 224 ? softAlphaFactor(alpha, profile) : 1;
 
-    output.data[index] = gradeChannel(red, exposure, contrastAmount, tint[0], tintAmount, profile.redBias);
-    output.data[index + 1] = gradeChannel(green, exposure, contrastAmount, tint[1], tintAmount, profile.greenBias);
-    output.data[index + 2] = gradeChannel(blue, exposure, contrastAmount, tint[2], tintAmount, profile.blueBias);
+    output.data[index] = gradeChannel(
+      red,
+      exposure,
+      contrastAmount,
+      tint[0],
+      tintAmount,
+      profile.redBias
+    );
+    output.data[index + 1] = gradeChannel(
+      green,
+      exposure,
+      contrastAmount,
+      tint[1],
+      tintAmount,
+      profile.greenBias
+    );
+    output.data[index + 2] = gradeChannel(
+      blue,
+      exposure,
+      contrastAmount,
+      tint[2],
+      tintAmount,
+      profile.blueBias
+    );
 
     if (shadowPixel && profile.shadowLift > 0) {
       output.data[index] = clamp(output.data[index] + profile.moonTint[0] * profile.shadowLift);
-      output.data[index + 1] = clamp(output.data[index + 1] + profile.moonTint[1] * profile.shadowLift);
-      output.data[index + 2] = clamp(output.data[index + 2] + profile.moonTint[2] * profile.shadowLift);
+      output.data[index + 1] = clamp(
+        output.data[index + 1] + profile.moonTint[1] * profile.shadowLift
+      );
+      output.data[index + 2] = clamp(
+        output.data[index + 2] + profile.moonTint[2] * profile.shadowLift
+      );
     }
 
     if (brightPixel && profile.highlightWarmth > 0 && warmPixel) {
-      output.data[index] = clamp(output.data[index] + profile.warmTint[0] * profile.highlightWarmth);
-      output.data[index + 1] = clamp(output.data[index + 1] + profile.warmTint[1] * profile.highlightWarmth);
-      output.data[index + 2] = clamp(output.data[index + 2] + profile.warmTint[2] * profile.highlightWarmth);
+      output.data[index] = clamp(
+        output.data[index] + profile.warmTint[0] * profile.highlightWarmth
+      );
+      output.data[index + 1] = clamp(
+        output.data[index + 1] + profile.warmTint[1] * profile.highlightWarmth
+      );
+      output.data[index + 2] = clamp(
+        output.data[index + 2] + profile.warmTint[2] * profile.highlightWarmth
+      );
     }
 
     output.data[index + 3] = clamp(alpha * alphaFactor);
@@ -106,7 +140,7 @@ function darkProfileFor(kind, file) {
     softAlphaFloor: 0.82,
     redBias: 1,
     greenBias: 1,
-    blueBias: 1.04
+    blueBias: 1.04,
   };
 
   if (kind === 'companion') {
@@ -126,7 +160,7 @@ function darkProfileFor(kind, file) {
       softAlphaScale: 1,
       redBias: 0.98,
       greenBias: 1,
-      blueBias: 1.03
+      blueBias: 1.03,
     };
   }
 
@@ -142,7 +176,7 @@ function darkProfileFor(kind, file) {
       shadowExposure: 0.92,
       contrast: 0.045,
       shadowLift: 0.045,
-      blueBias: 1.01
+      blueBias: 1.01,
     };
   }
 
@@ -159,7 +193,7 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.72,
       redBias: 0.98,
       greenBias: 1,
-      blueBias: 1.03
+      blueBias: 1.03,
     },
     'body-ripple.png': {
       moonTint: [114, 178, 204],
@@ -171,7 +205,7 @@ function darkProfileFor(kind, file) {
       contrast: 0.03,
       softAlphaScale: 0.54,
       softAlphaFloor: 0.5,
-      blueBias: 1.04
+      blueBias: 1.04,
     },
     'emotion-lantern.png': {
       moonTint: [122, 146, 166],
@@ -182,7 +216,7 @@ function darkProfileFor(kind, file) {
       warmTintAmount: 0.18,
       highlightWarmth: 0.026,
       softAlphaScale: 0.78,
-      softAlphaFloor: 0.7
+      softAlphaFloor: 0.7,
     },
     'image-cloud.png': {
       moonTint: [150, 162, 184],
@@ -197,7 +231,7 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.46,
       redBias: 0.98,
       greenBias: 1,
-      blueBias: 1.04
+      blueBias: 1.04,
     },
     'meaning-gate.png': {
       moonTint: [126, 156, 148],
@@ -211,7 +245,7 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.64,
       redBias: 0.98,
       greenBias: 1,
-      blueBias: 1.03
+      blueBias: 1.03,
     },
     'observer-pool.png': {
       moonTint: [108, 170, 196],
@@ -223,7 +257,7 @@ function darkProfileFor(kind, file) {
       contrast: 0.03,
       softAlphaScale: 0.52,
       softAlphaFloor: 0.48,
-      blueBias: 1.04
+      blueBias: 1.04,
     },
     'word-stones.png': {
       moonTint: [132, 152, 162],
@@ -237,8 +271,8 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.56,
       redBias: 0.99,
       greenBias: 1,
-      blueBias: 1.03
-    }
+      blueBias: 1.03,
+    },
   };
 
   return { ...base, ...(lensProfiles[file] ?? {}) };

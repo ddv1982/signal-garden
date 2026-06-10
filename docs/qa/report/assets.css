@@ -8,10 +8,14 @@
   --accent: #a5391a;
   --quote: #2a2a2a;
   --warn-ink: #3a1a0a;
-  --font-display: ui-sans-serif, -apple-system, "SF Pro Display", BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-text: ui-sans-serif, -apple-system, "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-serif: ui-serif, Charter, "Iowan Old Style", "Times New Roman", Georgia, serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono", monospace;
+  --font-display:
+    ui-sans-serif, -apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+  --font-text:
+    ui-sans-serif, -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+  --font-serif: ui-serif, Charter, 'Iowan Old Style', 'Times New Roman', Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Monaco, 'Cascadia Mono', monospace;
 }
 
 * {
@@ -83,12 +87,12 @@ main {
 
 .verdict-word.is-no::after {
   color: var(--accent);
-  content: ".";
+  content: '.';
 }
 
 .verdict-word.is-yes::after {
   color: #2f7a45;
-  content: ".";
+  content: '.';
 }
 
 .verdict-line,

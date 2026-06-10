@@ -5,7 +5,10 @@ import { PNG } from 'pngjs';
 const projectRoot = new URL('..', import.meta.url).pathname;
 const frameDir = path.join(projectRoot, 'src/assets/companion/frames');
 const outputPath = path.join(projectRoot, 'docs/screenshots/pet-animation-contact-sheet.png');
-const frameFiles = fs.readdirSync(frameDir).filter((file) => file.endsWith('.png')).sort();
+const frameFiles = fs
+  .readdirSync(frameDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 const cellWidth = 256;
 const cellHeight = 286;
 const columns = 4;
@@ -27,8 +30,20 @@ for (const [index, frameFile] of frameFiles.entries()) {
 
   fillChecker(originX, originY, cellWidth, cellHeight);
   composite(source, imageX, imageY, scale);
-  drawLine(originX + Math.floor(cellWidth / 2), originY + 8, originX + Math.floor(cellWidth / 2), originY + 238, [215, 60, 60, 255]);
-  drawLine(originX + 20, imageY + Math.floor((source.height - 1) * scale), originX + cellWidth - 20, imageY + Math.floor((source.height - 1) * scale), [60, 110, 215, 255]);
+  drawLine(
+    originX + Math.floor(cellWidth / 2),
+    originY + 8,
+    originX + Math.floor(cellWidth / 2),
+    originY + 238,
+    [215, 60, 60, 255]
+  );
+  drawLine(
+    originX + 20,
+    imageY + Math.floor((source.height - 1) * scale),
+    originX + cellWidth - 20,
+    imageY + Math.floor((source.height - 1) * scale),
+    [60, 110, 215, 255]
+  );
   drawRect(
     imageX + Math.floor(bounds.minX * scale),
     imageY + Math.floor(bounds.minY * scale),
@@ -61,9 +76,15 @@ function composite(source, originX, originY, scale) {
       const targetX = originX + Math.floor(sourceX * scale);
       const targetY = originY + Math.floor(sourceY * scale);
       const targetIndex = (targetY * sheet.width + targetX) * 4;
-      sheet.data[targetIndex] = Math.round(source.data[sourceIndex] * alpha + sheet.data[targetIndex] * (1 - alpha));
-      sheet.data[targetIndex + 1] = Math.round(source.data[sourceIndex + 1] * alpha + sheet.data[targetIndex + 1] * (1 - alpha));
-      sheet.data[targetIndex + 2] = Math.round(source.data[sourceIndex + 2] * alpha + sheet.data[targetIndex + 2] * (1 - alpha));
+      sheet.data[targetIndex] = Math.round(
+        source.data[sourceIndex] * alpha + sheet.data[targetIndex] * (1 - alpha)
+      );
+      sheet.data[targetIndex + 1] = Math.round(
+        source.data[sourceIndex + 1] * alpha + sheet.data[targetIndex + 1] * (1 - alpha)
+      );
+      sheet.data[targetIndex + 2] = Math.round(
+        source.data[sourceIndex + 2] * alpha + sheet.data[targetIndex + 2] * (1 - alpha)
+      );
       sheet.data[targetIndex + 3] = 255;
     }
   }

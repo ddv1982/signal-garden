@@ -4,7 +4,10 @@ import { PNG } from 'pngjs';
 
 const projectRoot = new URL('..', import.meta.url).pathname;
 const propDir = path.join(projectRoot, 'src/assets/lenses/props');
-const sourceSheetPath = path.join(projectRoot, 'src/assets/lenses/source/garden-lens-sheet-chromakey.png');
+const sourceSheetPath = path.join(
+  projectRoot,
+  'src/assets/lenses/source/garden-lens-sheet-chromakey.png'
+);
 const alphaThreshold = 8;
 const outputPadding = 24;
 const sourceCrops = {
@@ -12,15 +15,20 @@ const sourceCrops = {
   'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
   'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 },
   'image-cloud.png': { x: 1085, y: 535, width: 370, height: 235 },
-  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 }
+  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 },
 };
 
-const files = fs.readdirSync(propDir).filter((file) => file.endsWith('.png')).sort();
+const files = fs
+  .readdirSync(propDir)
+  .filter((file) => file.endsWith('.png'))
+  .sort();
 const sourceSheet = PNG.sync.read(fs.readFileSync(sourceSheetPath));
 
 for (const file of files) {
   const filePath = path.join(propDir, file);
-  const source = sourceCrops[file] ? cropSourceSheet(sourceSheet, sourceCrops[file]) : PNG.sync.read(fs.readFileSync(filePath));
+  const source = sourceCrops[file]
+    ? cropSourceSheet(sourceSheet, sourceCrops[file])
+    : PNG.sync.read(fs.readFileSync(filePath));
   removeChromaKeyBackground(source);
   removeDetachedEdgeArtifacts(source);
   if (file === 'emotion-lantern.png') removeSmallDetachedArtifacts(source, 80);
@@ -40,7 +48,9 @@ for (const file of files) {
   fs.writeFileSync(filePath, PNG.sync.write(cleaned));
 
   const metrics = collectMetrics(cleaned);
-  console.log(`${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tchromaKey=${metrics.chromaKey}`);
+  console.log(
+    `${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tchromaKey=${metrics.chromaKey}`
+  );
 }
 
 function cropSourceSheet(sheet, crop) {
@@ -106,7 +116,12 @@ function defringeChromaKeyEdges(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])
+      )
+        continue;
 
       const replacement = nearestOpaqueObjectColor(png, x, y);
       replacements.push({ index, replacement });
@@ -129,7 +144,12 @@ function removePinkMatteEdges(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha > 120 || !isPinkMatteFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha > 120 ||
+        !isPinkMatteFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 3)) continue;
       png.data[index + 3] = 0;
     }
@@ -143,7 +163,12 @@ function defringeGreenKeyEdges(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isGreenChromaFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isGreenChromaFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 2)) continue;
 
       const replacement = nearestOpaqueObjectColor(png, x, y, 14, true);
@@ -170,7 +195,12 @@ function softenGreenMatteEdges(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isGreenMatteFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isGreenMatteFringe(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 3)) continue;
 
       const replacement = nearestOpaqueObjectColor(png, x, y, 14, true);
@@ -188,7 +218,14 @@ function softenGreenMatteEdges(png) {
     png.data[index + 1] = replacement[1];
     png.data[index + 2] = replacement[2];
 
-    if (isGreenMatteFringe(png.data[index], png.data[index + 1], png.data[index + 2], png.data[index + 3])) {
+    if (
+      isGreenMatteFringe(
+        png.data[index],
+        png.data[index + 1],
+        png.data[index + 2],
+        png.data[index + 3]
+      )
+    ) {
       png.data[index + 3] = 0;
     }
   }
@@ -199,7 +236,12 @@ function softenCloudBrightHalo(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha >= 252 || !isBrightCloudHalo(png.data[index], png.data[index + 1], png.data[index + 2], alpha)) continue;
+      if (
+        alpha <= 0 ||
+        alpha >= 252 ||
+        !isBrightCloudHalo(png.data[index], png.data[index + 1], png.data[index + 2], alpha)
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 3)) continue;
       png.data[index + 3] = Math.min(alpha, 45);
     }
@@ -236,7 +278,12 @@ function featherAlphaEdges(png) {
 
       const alpha = Math.round((solidNeighbors / 9) * 255);
       const replacement = nearestOpaqueObjectColor(png, x, y, 4, true);
-      replacements.push({ index: pixelIndex(png, x, y), alpha, replacement, sourceAlpha: sourceAlpha[maskIndex] });
+      replacements.push({
+        index: pixelIndex(png, x, y),
+        alpha,
+        replacement,
+        sourceAlpha: sourceAlpha[maskIndex],
+      });
     }
   }
 
@@ -362,7 +409,7 @@ function collectComponents(png) {
           [currentX + 1, currentY],
           [currentX - 1, currentY],
           [currentX, currentY + 1],
-          [currentX, currentY - 1]
+          [currentX, currentY - 1],
         ]) {
           if (nextX < 0 || nextY < 0 || nextX >= png.width || nextY >= png.height) continue;
           const nextIndex = nextY * png.width + nextX;
@@ -388,7 +435,8 @@ function collectMetrics(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha > 5 && isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2])) chromaKey += 1;
+      if (alpha > 5 && isChromaKey(png.data[index], png.data[index + 1], png.data[index + 2]))
+        chromaKey += 1;
     }
   }
 
@@ -396,7 +444,7 @@ function collectMetrics(png) {
   return {
     bbox: `${bounds.minX},${bounds.minY}..${bounds.maxX},${bounds.maxY}`,
     margins: `${bounds.minX},${bounds.minY},${png.width - 1 - bounds.maxX},${png.height - 1 - bounds.maxY}`,
-    chromaKey
+    chromaKey,
   };
 }
 
@@ -426,7 +474,12 @@ function alphaBounds(png) {
 }
 
 function touchesImageEdge(component, png) {
-  return component.minX === 0 || component.minY === 0 || component.maxX === png.width - 1 || component.maxY === png.height - 1;
+  return (
+    component.minX === 0 ||
+    component.minY === 0 ||
+    component.maxX === png.width - 1 ||
+    component.maxY === png.height - 1
+  );
 }
 
 function isChromaKey(red, green, blue) {
@@ -438,7 +491,9 @@ function isMagentaChromaKey(red, green, blue) {
 }
 
 function isGreenChromaFringe(red, green, blue, alpha = 255) {
-  return alpha < 252 && green > 220 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210;
+  return (
+    alpha < 252 && green > 220 && green - red > 34 && green - blue > 34 && Math.max(red, blue) < 210
+  );
 }
 
 function isGreenMatteFringe(red, green, blue, alpha = 255) {
@@ -454,7 +509,12 @@ function removeObserverLowerPinkMatte(png) {
     for (let x = 0; x < png.width; x += 1) {
       const index = pixelIndex(png, x, y);
       const alpha = png.data[index + 3];
-      if (alpha <= 0 || alpha > 230 || !isLowerPinkMatte(png.data[index], png.data[index + 1], png.data[index + 2])) continue;
+      if (
+        alpha <= 0 ||
+        alpha > 230 ||
+        !isLowerPinkMatte(png.data[index], png.data[index + 1], png.data[index + 2])
+      )
+        continue;
       if (!hasTransparentNeighbor(png, x, y, 4)) continue;
       png.data[index + 3] = 0;
     }
@@ -466,7 +526,9 @@ function isBrightCloudHalo(red, green, blue, alpha = 255) {
 }
 
 function isPinkMatteFringe(red, green, blue, alpha = 255) {
-  return alpha <= 120 && red > 220 && blue > 150 && green < 210 && red - green > 30 && blue - green > 0;
+  return (
+    alpha <= 120 && red > 220 && blue > 150 && green < 210 && red - green > 30 && blue - green > 0
+  );
 }
 
 function isLowerPinkMatte(red, green, blue) {

@@ -7,7 +7,10 @@ export function isThemePreference(value: unknown): value is ThemePreference {
   return value === 'system' || value === 'light' || value === 'dark';
 }
 
-export function resolveActiveTheme(preference: ThemePreference, systemTheme: ActiveTheme): ActiveTheme {
+export function resolveActiveTheme(
+  preference: ThemePreference,
+  systemTheme: ActiveTheme
+): ActiveTheme {
   return preference === 'system' ? systemTheme : preference;
 }
 

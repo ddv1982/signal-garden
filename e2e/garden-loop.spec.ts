@@ -7,8 +7,13 @@ test.describe('garden-first lens journey', () => {
     await page.reload();
   });
 
-  test('creates a lens profile, completes a lens journey, plants a seed, and persists it', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Full seven-lens journey is covered on desktop; mobile covers onboarding and persistence smoke paths.');
+  test('creates a lens profile, completes a lens journey, plants a seed, and persists it', async ({
+    page,
+  }) => {
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Full seven-lens journey is covered on desktop; mobile covers onboarding and persistence smoke paths.'
+    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await expect(page.getByTestId('garden-canvas')).toBeVisible();
@@ -27,18 +32,23 @@ test.describe('garden-first lens journey', () => {
 
     await expect(page.getByText('Place the seed in an open soil spot.')).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-plot-mode', 'planting');
-    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-available-plots', /[1-9]/);
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
+      'data-available-plots',
+      /[1-9]/
+    );
     await page.getByTestId('plant-here').click();
 
     await expect(page.getByText('1 saved seed')).toBeVisible();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        gardenPlotId: 'front-right',
-        gardenPosition: { x: 0.72, y: 0.75 },
-        growthPoints: 0,
-        status: 'planted'
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          gardenPlotId: 'front-right',
+          gardenPosition: { x: 0.72, y: 0.75 },
+          growthPoints: 0,
+          status: 'planted',
+        },
+      ]);
     await page.reload();
     await expect(page.getByText('1 saved seed')).toBeVisible();
 
@@ -49,7 +59,9 @@ test.describe('garden-first lens journey', () => {
     await dialog.getByRole('tab', { name: 'History' }).click();
     await dialog.getByText('Original lens journey').click();
     await expect(dialog.getByText('Action: Take one soft pause', { exact: true })).toBeVisible();
-    await expect(dialog.getByText('Pause Wider: awareness is here too', { exact: true })).toBeVisible();
+    await expect(
+      dialog.getByText('Pause Wider: awareness is here too', { exact: true })
+    ).toBeVisible();
     await expect(dialog.getByText('Image: a small gray cloud', { exact: true })).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Grow Seed' })).toHaveCount(0);
   });
@@ -67,7 +79,10 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('starts a lens journey from the canvas signal', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Mobile canvas coverage uses active lens-object interactions; the signal hit target is desktop-stable.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Mobile canvas coverage uses active lens-object interactions; the signal hit target is desktop-stable.'
+    );
     await completeOnboarding(page);
 
     await clickCanvasFraction(page, 0.72, 0.5);
@@ -94,7 +109,10 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('plants a completed seed from the canvas soil and persists it', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Full seven-lens journey is covered on desktop.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Full seven-lens journey is covered on desktop.'
+    );
     test.setTimeout(120_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -103,13 +121,18 @@ test.describe('garden-first lens journey', () => {
     await clickCanvasFraction(page, 0.72, 0.75);
 
     await expect(page.getByText('1 saved seed')).toBeVisible();
-    await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-selected-plot', 'front-right');
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        gardenPlotId: 'front-right',
-        status: 'planted'
-      }
-    ]);
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
+      'data-selected-plot',
+      'front-right'
+    );
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          gardenPlotId: 'front-right',
+          status: 'planted',
+        },
+      ]);
     await page.reload();
     await expect(page.getByText('1 saved seed')).toBeVisible();
   });
@@ -144,8 +167,18 @@ test.describe('garden-first lens journey', () => {
     const lensProgress = page.locator('.lens-progress');
     await expect(lensProgress).toBeVisible();
     await expect(page.getByText('Loosen the word stones')).toBeVisible();
-    await expect.poll(() => lensProgress.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
-    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+    await expect
+      .poll(() =>
+        lensProgress.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+        )
+      )
+      .toBe(true);
   });
 
   test('persists a manual light override while the system is dark', async ({ page }) => {
@@ -163,7 +196,9 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'light');
   });
 
-  test('persists a manual dark override while the system is light and can return to system', async ({ page }) => {
+  test('persists a manual dark override while the system is light and can return to system', async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.reload();
     await completeOnboarding(page);
@@ -185,60 +220,60 @@ test.describe('garden-first lens journey', () => {
       colorScheme: 'light' as const,
       themePreference: 'dark',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'dedicated manual light preference',
       colorScheme: 'dark' as const,
       themePreference: 'light',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
-      expectedTheme: 'light'
+      expectedTheme: 'light',
     },
     {
       name: 'dedicated system dark preference',
       colorScheme: 'dark' as const,
       themePreference: 'system',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'system' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'dedicated preference over legacy settings',
       colorScheme: 'light' as const,
       themePreference: 'dark',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'legacy manual dark preference',
       colorScheme: 'light' as const,
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'invalid dedicated preference',
       colorScheme: 'dark' as const,
       themePreference: 'night',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'invalid legacy preference',
       colorScheme: 'dark' as const,
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'night' },
-      expectedTheme: 'dark'
+      expectedTheme: 'dark',
     },
     {
       name: 'invalid settings shape with manual theme',
       colorScheme: 'light' as const,
       settings: { themePreference: 'dark' },
-      expectedTheme: 'light'
+      expectedTheme: 'light',
     },
     {
       name: 'malformed persisted settings',
       colorScheme: 'dark' as const,
       settings: '{not-json',
-      expectedTheme: 'dark'
-    }
+      expectedTheme: 'dark',
+    },
   ]) {
     test(`sets first-paint theme from ${scenario.name} before React loads`, async ({ page }) => {
       await assertBootstrapTheme(page, scenario);
@@ -246,7 +281,10 @@ test.describe('garden-first lens journey', () => {
   }
 
   test('advances an older seed after a later lens journey', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Full repeated journey growth is covered on desktop.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Full repeated journey growth is covered on desktop.'
+    );
     test.setTimeout(90_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -255,16 +293,21 @@ test.describe('garden-first lens journey', () => {
 
     await completeLensJourney(page);
 
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'sprouted',
-        growthPoints: 1
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'sprouted',
+          growthPoints: 1,
+        },
+      ]);
   });
 
   test('waters a planted seed, advances growth, and persists the watering', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Full seven-lens journey is covered on desktop.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Full seven-lens journey is covered on desktop.'
+    );
     test.setTimeout(90_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -277,22 +320,34 @@ test.describe('garden-first lens journey', () => {
     await expect(dialog.getByRole('button', { name: 'Grow Seed' })).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
     await dialog.getByLabel('How can this label soften today?').fill('   ');
-    await dialog.getByLabel('What small action gives this seed water?').fill('Take one gentle breath.');
+    await dialog
+      .getByLabel('What small action gives this seed water?')
+      .fill('Take one gentle breath.');
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await expect(dialog.getByText('Add both a softened label and one small action before watering.')).toBeVisible();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'planted',
-        growthPoints: 0
-      }
-    ]);
+    await expect(
+      dialog.getByText('Add both a softened label and one small action before watering.')
+    ).toBeVisible();
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'planted',
+          growthPoints: 0,
+        },
+      ]);
     await dialog.getByRole('button', { name: 'Let it rest' }).click();
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await expect(dialog.getByText('Add both a softened label and one small action before watering.')).toHaveCount(0);
+    await expect(
+      dialog.getByText('Add both a softened label and one small action before watering.')
+    ).toHaveCount(0);
     await expect(dialog.getByLabel('How can this label soften today?')).toHaveValue('');
     await expect(dialog.getByLabel('What small action gives this seed water?')).toHaveValue('');
-    await dialog.getByLabel('How can this label soften today?').fill('This is one story, not the whole of me.');
-    await dialog.getByLabel('What small action gives this seed water?').fill('Take one gentle breath.');
+    await dialog
+      .getByLabel('How can this label soften today?')
+      .fill('This is one story, not the whole of me.');
+    await dialog
+      .getByLabel('What small action gives this seed water?')
+      .fill('Take one gentle breath.');
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
 
     await dialog.getByRole('tab', { name: 'History' }).click();
@@ -301,91 +356,110 @@ test.describe('garden-first lens journey', () => {
     await expect(dialog.getByText('Take one gentle breath.')).toBeVisible();
     await dialog.getByRole('tab', { name: 'Water' }).click();
     await expect(page.getByText('You watered this seed with one kind action.')).toHaveCount(0);
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'sprouted',
-        growthPoints: 1,
-        visualType: 'sprout',
-        waterings: [
-          {
-            transformedLabel: 'This is one story, not the whole of me.',
-            kindAction: 'Take one gentle breath.'
-          }
-        ]
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'sprouted',
+          growthPoints: 1,
+          visualType: 'sprout',
+          waterings: [
+            {
+              transformedLabel: 'This is one story, not the whole of me.',
+              kindAction: 'Take one gentle breath.',
+            },
+          ],
+        },
+      ]);
 
     await dialog.getByRole('button', { name: 'Close' }).click();
     await page.getByRole('button', { name: 'Garden' }).click();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-watered-seed', /\S/);
-    const firstWateringEvent = await page.getByTestId('garden-canvas').getAttribute('data-watering-event');
+    const firstWateringEvent = await page
+      .getByTestId('garden-canvas')
+      .getAttribute('data-watering-event');
     expect(firstWateringEvent).toBeTruthy();
 
     await page.getByRole('button', { name: 'Archive' }).click();
     await page.getByRole('button', { name: /I am noticing the story that I am behind/i }).click();
     await dialog.getByRole('tab', { name: 'Water' }).click();
-    await dialog.getByLabel('What did you notice after trying this?').fill('This story is smaller today.');
+    await dialog
+      .getByLabel('What did you notice after trying this?')
+      .fill('This story is smaller today.');
     await dialog.getByLabel('What is the next kind version?').fill('Step outside for one minute.');
     await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'growing',
-        growthPoints: 2,
-        visualType: 'bud',
-        waterings: [
-          {
-            kindAction: 'Take one gentle breath.'
-          },
-          {
-            kindAction: 'Step outside for one minute.'
-          }
-        ]
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'growing',
+          growthPoints: 2,
+          visualType: 'bud',
+          waterings: [
+            {
+              kindAction: 'Take one gentle breath.',
+            },
+            {
+              kindAction: 'Step outside for one minute.',
+            },
+          ],
+        },
+      ]);
     await expect(dialog.getByTestId('bloom-form')).toBeVisible();
-    await dialog.getByLabel('What does this seed become now?').fill('This became one small flower of trust.');
+    await dialog
+      .getByLabel('What does this seed become now?')
+      .fill('This became one small flower of trust.');
     await dialog.getByRole('button', { name: 'Bloom Into Flower' }).click();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'blooming',
-        growthPoints: 3,
-        visualType: 'flower',
-        bloomReflection: {
-          outcome: 'done',
-          reflection: 'This became one small flower of trust.'
-        }
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'blooming',
+          growthPoints: 3,
+          visualType: 'flower',
+          bloomReflection: {
+            outcome: 'done',
+            reflection: 'This became one small flower of trust.',
+          },
+        },
+      ]);
     await dialog.getByRole('button', { name: 'Close' }).click();
     await page.getByRole('button', { name: 'Garden' }).click();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-watering-event', /\S/);
-    const secondWateringEvent = await page.getByTestId('garden-canvas').getAttribute('data-watering-event');
+    const secondWateringEvent = await page
+      .getByTestId('garden-canvas')
+      .getAttribute('data-watering-event');
     expect(secondWateringEvent).toBeTruthy();
     expect(secondWateringEvent).not.toBe(firstWateringEvent);
 
     await page.reload();
     await expect(page.getByText('1 saved seed')).toBeVisible();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        status: 'blooming',
-        visualType: 'flower',
-        waterings: [
-          {
-            kindAction: 'Take one gentle breath.'
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          status: 'blooming',
+          visualType: 'flower',
+          waterings: [
+            {
+              kindAction: 'Take one gentle breath.',
+            },
+            {
+              kindAction: 'Step outside for one minute.',
+            },
+          ],
+          bloomReflection: {
+            reflection: 'This became one small flower of trust.',
           },
-          {
-            kindAction: 'Step outside for one minute.'
-          }
-        ],
-        bloomReflection: {
-          reflection: 'This became one small flower of trust.'
-        }
-      }
-    ]);
+        },
+      ]);
   });
 
   test('accessible planting skips an occupied preferred plot', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Desktop plot ordering is covered here; mobile keeps smoke coverage.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Desktop plot ordering is covered here; mobile keeps smoke coverage.'
+    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await seedStoredGarden(page, ['front-right']);
@@ -395,18 +469,23 @@ test.describe('garden-first lens journey', () => {
     await page.getByTestId('plant-here').click();
 
     await expect(page.getByText('2 saved seeds')).toBeVisible();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        gardenPlotId: 'front-center'
-      },
-      {
-        gardenPlotId: 'front-right'
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          gardenPlotId: 'front-center',
+        },
+        {
+          gardenPlotId: 'front-right',
+        },
+      ]);
   });
 
   test('accessible planting is disabled when designed plots are full', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Desktop full-plot behavior is covered here; mobile keeps smoke coverage.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Desktop full-plot behavior is covered here; mobile keeps smoke coverage.'
+    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await seedStoredGarden(page, [
@@ -421,7 +500,7 @@ test.describe('garden-first lens journey', () => {
       'middle-right',
       'back-left',
       'back-center',
-      'back-right'
+      'back-right',
     ]);
     await page.reload();
     await completeLensJourney(page);
@@ -432,7 +511,10 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('accessible planting uses the measured mobile canvas width', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Desktop browser is resized here to exercise the canvas-width threshold deterministically.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Desktop browser is resized here to exercise the canvas-width threshold deterministically.'
+    );
     test.setTimeout(60_000);
     await page.setViewportSize({ width: 500, height: 760 });
     await completeOnboarding(page);
@@ -443,24 +525,29 @@ test.describe('garden-first lens journey', () => {
     await page.getByTestId('plant-here').click();
 
     await expect(page.getByText('4 saved seeds')).toBeVisible();
-    await expect.poll(() => storedSeeds(page)).toMatchObject([
-      {
-        gardenPlotId: 'front-far-right'
-      },
-      {
-        gardenPlotId: 'front-right'
-      },
-      {
-        gardenPlotId: 'front-center'
-      },
-      {
-        gardenPlotId: 'front-left'
-      }
-    ]);
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          gardenPlotId: 'front-far-right',
+        },
+        {
+          gardenPlotId: 'front-right',
+        },
+        {
+          gardenPlotId: 'front-center',
+        },
+        {
+          gardenPlotId: 'front-left',
+        },
+      ]);
   });
 
   test('reports sleeping pet state without idle breathing motion', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Sleep debug sequence coverage is desktop-stable; mobile keeps no-bounce and reduced-motion coverage.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Sleep debug sequence coverage is desktop-stable; mobile keeps no-bounce and reduced-motion coverage.'
+    );
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -475,10 +562,18 @@ test.describe('garden-first lens journey', () => {
     await expect(canvas).toHaveAttribute('data-pet-motion', 'sleeping');
   });
 
-  test('pet debug mode can freeze every pose and trigger representative sequences', async ({ page }) => {
+  test('pet debug mode can freeze every pose and trigger representative sequences', async ({
+    page,
+  }) => {
     test.setTimeout(60_000);
-    test.skip(!!process.env.CI, 'Pet debug pose review is a local visual QA harness; CI covers user-facing pet behavior and reduced-motion sequence smoke.');
-    test.skip(test.info().project.name === 'mobile-chrome', 'Exhaustive pet pose review is covered on desktop; mobile keeps reduced-motion and canvas smoke coverage.');
+    test.skip(
+      !!process.env.CI,
+      'Pet debug pose review is a local visual QA harness; CI covers user-facing pet behavior and reduced-motion sequence smoke.'
+    );
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Exhaustive pet pose review is covered on desktop; mobile keeps reduced-motion and canvas smoke coverage.'
+    );
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -500,7 +595,7 @@ test.describe('garden-first lens journey', () => {
       'napCurl',
       'sleeping',
       'wake',
-      'plantProud'
+      'plantProud',
     ];
 
     for (const frame of frames) {
@@ -512,14 +607,16 @@ test.describe('garden-first lens journey', () => {
     const sequences: Array<{ id: string; state: string; finalState: string }> = [
       { id: 'stretch', state: 'attention', finalState: 'idle' },
       { id: 'sleep', state: 'napStart', finalState: 'sleep' },
-      { id: 'wake', state: 'attention', finalState: 'idle' }
+      { id: 'wake', state: 'attention', finalState: 'idle' },
     ];
 
     for (const sequence of sequences) {
       await page.getByTestId(`pet-debug-sequence-${sequence.id}`).click();
       await expect(canvas).toHaveAttribute('data-pet-debug-preview', sequence.id);
       await expect(canvas).toHaveAttribute('data-pet-state', sequence.state);
-      await expect(canvas).toHaveAttribute('data-pet-state', sequence.finalState, { timeout: 20_000 });
+      await expect(canvas).toHaveAttribute('data-pet-state', sequence.finalState, {
+        timeout: 20_000,
+      });
     }
   });
 
@@ -539,7 +636,10 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('pet debug sequences respect reduced motion', async ({ page }) => {
-    test.skip(test.info().project.name === 'mobile-chrome', 'Debug sequence controls are exercised on desktop; mobile reduced-motion behavior is covered by the regular reduced-motion test.');
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Debug sequence controls are exercised on desktop; mobile reduced-motion behavior is covered by the regular reduced-motion test.'
+    );
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -579,12 +679,7 @@ async function completeOnboarding(page: Page) {
   await expect(page.getByTestId('onboarding-panel')).toBeHidden();
 }
 
-async function fillLens(
-  page: Page,
-  label: string,
-  value: string,
-  buttonName = 'Continue'
-) {
+async function fillLens(page: Page, label: string, value: string, buttonName = 'Continue') {
   await expect(page.getByTestId('lens-panel')).toBeVisible();
   await page.getByLabel(label).fill(value);
   await page.getByTestId('lens-panel').getByRole('button', { name: buttonName }).click();
@@ -615,11 +710,15 @@ async function startLensJourney(page: Page) {
 }
 
 async function storedSeeds(page: Page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]'));
+  return page.evaluate(() =>
+    JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]')
+  );
 }
 
 async function storedSettings(page: Page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('signal-garden/settings/vite/v1') ?? '{}'));
+  return page.evaluate(() =>
+    JSON.parse(localStorage.getItem('signal-garden/settings/vite/v1') ?? '{}')
+  );
 }
 
 async function assertBootstrapTheme(
@@ -632,23 +731,33 @@ async function assertBootstrapTheme(
   }
 ) {
   await page.emulateMedia({ colorScheme: scenario.colorScheme });
-  await page.route('**/src/main.tsx', (route) => route.fulfill({
-    contentType: 'application/javascript',
-    body: ''
-  }));
-  await page.addInitScript(({ settings, themePreference }) => {
-    localStorage.removeItem('signal-garden/theme-preference/vite/v1');
-    localStorage.removeItem('signal-garden/settings/vite/v1');
-    if (themePreference !== undefined) {
-      localStorage.setItem('signal-garden/theme-preference/vite/v1', themePreference);
-    }
-    localStorage.setItem('signal-garden/settings/vite/v1', typeof settings === 'string' ? settings : JSON.stringify(settings));
-  }, { settings: scenario.settings, themePreference: scenario.themePreference });
+  await page.route('**/src/main.tsx', (route) =>
+    route.fulfill({
+      contentType: 'application/javascript',
+      body: '',
+    })
+  );
+  await page.addInitScript(
+    ({ settings, themePreference }) => {
+      localStorage.removeItem('signal-garden/theme-preference/vite/v1');
+      localStorage.removeItem('signal-garden/settings/vite/v1');
+      if (themePreference !== undefined) {
+        localStorage.setItem('signal-garden/theme-preference/vite/v1', themePreference);
+      }
+      localStorage.setItem(
+        'signal-garden/settings/vite/v1',
+        typeof settings === 'string' ? settings : JSON.stringify(settings)
+      );
+    },
+    { settings: scenario.settings, themePreference: scenario.themePreference }
+  );
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', scenario.expectedTheme);
-  await expect.poll(() => page.evaluate(() => document.documentElement.style.colorScheme)).toBe(scenario.expectedTheme);
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.style.colorScheme))
+    .toBe(scenario.expectedTheme);
   await expect(page.locator('#root')).toBeEmpty();
 }
 
@@ -666,7 +775,7 @@ async function seedStoredGarden(page: Page, plotIds: string[]) {
       gardenPlotId: plotId,
       gardenPosition: { x: 0.5, y: 0.8 },
       growthPoints: 0,
-      visualType: 'seed'
+      visualType: 'seed',
     }));
     localStorage.setItem('signal-garden/reflection-seeds/vite/v1', JSON.stringify(seeds));
   }, plotIds);
@@ -677,7 +786,10 @@ async function clickCanvasFraction(page: Page, xFraction: number, yFraction: num
   await expect(wrapper).toBeVisible();
 
   const phaserCanvas = wrapper.locator('canvas').first();
-  const box = (await phaserCanvas.count()) > 0 ? await phaserCanvas.boundingBox() : await wrapper.boundingBox();
+  const box =
+    (await phaserCanvas.count()) > 0
+      ? await phaserCanvas.boundingBox()
+      : await wrapper.boundingBox();
   if (!box) throw new Error('Garden canvas missing');
 
   await page.mouse.click(box.x + box.width * xFraction, box.y + box.height * yFraction);
@@ -690,7 +802,7 @@ async function clickActiveLensTarget(page: Page) {
 
   const [xFraction, yFraction] = await wrapper.evaluate((element) => [
     Number((element as HTMLElement).dataset.activeLensX),
-    Number((element as HTMLElement).dataset.activeLensY)
+    Number((element as HTMLElement).dataset.activeLensY),
   ]);
 
   if (!Number.isFinite(xFraction) || !Number.isFinite(yFraction)) {

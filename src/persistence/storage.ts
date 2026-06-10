@@ -13,7 +13,12 @@ export function getBrowserStorage(): StorageLike | null {
   }
 }
 
-export function readJson<T>(storage: StorageLike | null, key: string, fallback: T, validate: (value: unknown) => value is T): T {
+export function readJson<T>(
+  storage: StorageLike | null,
+  key: string,
+  fallback: T,
+  validate: (value: unknown) => value is T
+): T {
   if (!storage) return fallback;
 
   try {
