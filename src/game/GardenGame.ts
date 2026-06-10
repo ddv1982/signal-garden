@@ -325,6 +325,7 @@ class BrowserGardenScene extends Phaser.Scene {
   private seedGroups: Phaser.GameObjects.Container[] = [];
   private signalGroup?: Phaser.GameObjects.Container;
   private gardenPlots: GardenPlot[] = [];
+  private lastRevealedLens: LensKind | null = null;
 
   constructor(options: GardenGameOptions) {
     super('BrowserGardenScene');
@@ -519,6 +520,7 @@ class BrowserGardenScene extends Phaser.Scene {
     this.drawSeeds(width, height, frame);
     this.drawPlantingPlots(width, height, frame);
     this.drawSignal(frame);
+    this.drawAmbientMotes(frame);
     this.drawLensObjects(frame);
     this.drawPendingSeed(width, height, frame);
     this.drawPet(frame);
@@ -779,9 +781,19 @@ class BrowserGardenScene extends Phaser.Scene {
   }
 
   private drawLensObjects(frame: GardenFrame) {
-    if (!this.lensSessionActive || this.pendingSeed) return;
+    if (!this.lensSessionActive || this.pendingSeed) {
+      this.lastRevealedLens = null;
+      return;
+    }
 
     const placements = createLensObjectPlacements(frame, this.currentLens);
+    const lensChanged = this.currentLens !== this.lastRevealedLens;
+    const animateReveal = lensChanged && !this.reducedMotion;
+    if (animateReveal && this.lastRevealedLens) {
+      this.drawLensFarewell(frame, this.lastRevealedLens);
+    }
+    this.lastRevealedLens = this.currentLens;
+    this.drawLensFocusVignette(frame);
 
     placements.forEach((placement) => {
       const active = this.currentLens === placement.kind;
@@ -806,6 +818,7 @@ class BrowserGardenScene extends Phaser.Scene {
       const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x241a18 : 0x5c4a36, dark ? placement.shadowAlpha * 0.72 : placement.shadowAlpha);
       group.add([glow, shadow]);
       if (active && dark) {
+        this.drawDarkActiveLensInnerFill(group, placement.kind, size, glowY);
         this.drawDarkActiveLensFocusBase(group, placement.kind, size, glowY);
       }
       if (!this.addPropImage(group, `lens-${placement.kind}`, 0, 0, size, placement.anchor)) {
@@ -813,6 +826,7 @@ class BrowserGardenScene extends Phaser.Scene {
       }
       if (active) {
         if (dark) {
+          this.drawDarkActiveLensOrbit(group, placement.kind, size, glowY);
           this.drawDarkActiveLensMotes(group, placement.kind, size, glowY);
         } else {
           group.add(this.add.circle(0, glowY, size * 0.5, 0xfff1ad, 0).setStrokeStyle(2, 0xfff1ad, 0.52));
@@ -829,7 +843,133 @@ class BrowserGardenScene extends Phaser.Scene {
           ease: 'Sine.easeInOut'
         });
       }
+      if (animateReveal) {
+        const restingY = group.y;
+        group.setAlpha(0);
+        group.setScale(0.94);
+        group.y = restingY + 14;
+        this.tweens.add({
+          targets: group,
+          alpha: 1,
+          scale: 1,
+          y: restingY,
+          duration: 520,
+          delay: 220,
+          ease: 'Sine.easeOut'
+        });
+      }
     });
+  }
+
+  private drawLensFarewell(frame: GardenFrame, kind: LensKind) {
+    const [placement] = createLensObjectPlacements(frame, kind);
+    if (!placement) return;
+
+    const group = this.add.container(placement.x, placement.y).setDepth(600);
+    const dark = this.theme === 'dark';
+    const shadow = this.add.ellipse(
+      0,
+      placement.shadowY,
+      placement.shadowWidth,
+      placement.shadowHeight,
+      dark ? 0x241a18 : 0x5c4a36,
+      dark ? placement.shadowAlpha * 0.72 : placement.shadowAlpha
+    );
+    group.add(shadow);
+    if (!this.addPropImage(group, `lens-${kind}`, 0, 0, placement.size, placement.anchor)) {
+      group.add(this.add.circle(0, -placement.size * 0.3, placement.size * 0.3, 0xe6d1b7, 0.72));
+    }
+    this.tweens.add({
+      targets: group,
+      alpha: 0,
+      scale: 0.96,
+      y: placement.y + 10,
+      duration: 360,
+      ease: 'Sine.easeIn',
+      onComplete: () => group.destroy()
+    });
+  }
+
+  private drawAmbientMotes(frame: GardenFrame) {
+    if (this.reducedMotion) return;
+
+    const dark = this.theme === 'dark';
+    const color = dark ? 0xffe9b0 : 0xfff7df;
+    const count = 9;
+    for (let index = 0; index < count; index += 1) {
+      const x = frame.width * (0.08 + Math.random() * 0.84);
+      const y = frame.height * (0.18 + Math.random() * 0.5);
+      const radius = dark ? 2 + Math.random() * 1.6 : 2.4 + Math.random() * 2;
+      const baseAlpha = dark ? 0.14 + Math.random() * 0.14 : 0.1 + Math.random() * 0.1;
+      const mote = this.add.circle(x, y, radius, color, baseAlpha).setDepth(350);
+      this.tweens.add({
+        targets: mote,
+        y: y - (12 + Math.random() * 16),
+        alpha: { from: baseAlpha * 0.55, to: baseAlpha * 1.45 },
+        duration: 4200 + Math.random() * 2600,
+        delay: Math.random() * 1800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+    }
+  }
+
+  private drawLensFocusVignette(frame: GardenFrame) {
+    const dark = this.theme === 'dark';
+    this.add
+      .rectangle(frame.width / 2, frame.height / 2, frame.width, frame.height, dark ? 0x060d10 : 0x2c2417, dark ? 0.16 : 0.08)
+      .setDepth(540);
+  }
+
+  private drawDarkActiveLensInnerFill(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
+    const lighting = DARK_LENS_LIGHTING[kind];
+    const fillAlpha = Math.max(0.16, lighting.activeAlpha * 1.35);
+    const fill = this.add.circle(
+      0,
+      glowY,
+      size * 0.42,
+      lighting.focusColor,
+      this.reducedMotion ? fillAlpha * 0.84 : fillAlpha
+    );
+    group.add(fill);
+    if (!this.reducedMotion) {
+      this.tweens.add({
+        targets: fill,
+        alpha: { from: fillAlpha * 0.82, to: fillAlpha * 1.12 },
+        scale: 1.018,
+        duration: 3600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+    }
+  }
+
+  private drawDarkActiveLensOrbit(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
+    const lighting = DARK_LENS_LIGHTING[kind];
+    const orbitAlpha = this.reducedMotion ? 0.42 : 0.5;
+    const orbit = this.add.circle(0, glowY, size * 0.5, lighting.focusColor, 0).setStrokeStyle(2, lighting.focusColor, orbitAlpha);
+    const innerOrbit = this.add.circle(
+      -size * 0.03,
+      glowY - size * 0.02,
+      size * 0.38,
+      lighting.moteColor,
+      0
+    ).setStrokeStyle(1, lighting.moteColor, this.reducedMotion ? 0.18 : 0.24);
+
+    group.add([orbit, innerOrbit]);
+    if (!this.reducedMotion) {
+      this.tweens.add({
+        targets: [orbit, innerOrbit],
+        alpha: { from: 0.82, to: 1 },
+        scale: 1.025,
+        duration: 3600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+    }
   }
 
   private drawDarkLensGlow(kind: LensKind, size: number, glowY: number, active: boolean) {

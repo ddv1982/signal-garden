@@ -100,6 +100,7 @@ export function App() {
   const currentLens = lensDraft?.currentLens ?? null;
   const currentLensDefinition = currentLens ? lensDefinitions[currentLens] : null;
   const lensOrder = lensOrderForProfile(profile);
+  const lensStepNumber = currentLens ? lensOrder.indexOf(currentLens) + 1 : 0;
   const petDebug = import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
   const accessiblePlantPlot = firstAvailableGardenPlot(seeds, gardenCanvasWidth);
   const activeTheme = resolveActiveTheme(settings.themePreference, systemTheme);
@@ -435,6 +436,7 @@ export function App() {
             )}
             {lensPanelOpen && lensDraft && currentLensDefinition && !pendingSeed && (
               <form
+                key={currentLens}
                 className="signal-panel lens-panel"
                 data-testid="lens-panel"
                 role="dialog"
@@ -450,8 +452,22 @@ export function App() {
                 }}
               >
                 <div>
-                  <p className="eyebrow">Current lens</p>
+                  <p className="eyebrow">Current lens · Step {lensStepNumber} of {lensOrder.length}</p>
                   <h3 id="lens-panel-title">{currentLensDefinition.title}</h3>
+                  <div className="lens-step-meter" aria-hidden="true">
+                    {lensOrder.map((kind) => (
+                      <span
+                        key={kind}
+                        className={
+                          kind === currentLens
+                            ? 'meter-step active'
+                            : lensDraft.completedLensIds.includes(kind)
+                              ? 'meter-step complete'
+                              : 'meter-step'
+                        }
+                      />
+                    ))}
+                  </div>
                 </div>
                 <label>
                   {currentLensDefinition.fieldLabel}

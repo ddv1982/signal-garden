@@ -24,6 +24,13 @@
   --text-tertiary: #6e6e73;
   --text-inverse: #fbfaf7;
   --shadow-floating: 0 18px 44px rgba(29, 29, 31, 0.12);
+  --shadow-control: 0 1px 2px rgba(29, 29, 31, 0.06);
+  --shadow-control-hover: 0 4px 14px rgba(29, 29, 31, 0.14);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --transition-control: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.2s ease, transform 0.16s ease, color 0.16s ease;
   --weight-heading: 650;
   --weight-subheading: 620;
   --weight-strong: 600;
@@ -65,6 +72,8 @@
   --text-tertiary: #acbbb3;
   --text-inverse: #182928;
   --shadow-floating: 0 20px 52px rgba(4, 14, 16, 0.3);
+  --shadow-control: 0 1px 2px rgba(4, 14, 16, 0.2);
+  --shadow-control-hover: 0 4px 14px rgba(4, 14, 16, 0.34);
 }
 
 * {
@@ -98,14 +107,26 @@ legend {
 
 button {
   border: 1px solid var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-control-bg);
+  box-shadow: var(--shadow-control);
   color: var(--text-primary);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: var(--weight-control);
   min-height: 42px;
   padding: 0 16px;
+  transition: var(--transition-control);
+}
+
+button:hover:not(:disabled) {
+  box-shadow: var(--shadow-control-hover);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  box-shadow: var(--shadow-control);
+  transform: translateY(0);
 }
 
 button:focus-visible,
@@ -167,7 +188,8 @@ button:disabled {
   align-items: center;
   background: var(--color-primary);
   border: 1px solid rgba(29, 29, 31, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(38, 83, 63, 0.2);
   color: var(--text-inverse);
   display: inline-flex;
   flex: 0 0 auto;
@@ -219,30 +241,30 @@ strong {
 
 .eyebrow {
   color: var(--text-tertiary);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: var(--weight-heading);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   margin: 0 0 4px;
   text-transform: uppercase;
 }
 
 .tabs {
-  -webkit-backdrop-filter: blur(12px) saturate(1.05);
-  backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
+  backdrop-filter: blur(18px) saturate(1.16);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   display: flex;
   gap: 4px;
   padding: 3px;
 }
 
 .theme-toggle {
-  -webkit-backdrop-filter: blur(12px) saturate(1.05);
-  backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
+  backdrop-filter: blur(18px) saturate(1.16);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   display: flex;
   flex: 0 0 auto;
   gap: 3px;
@@ -252,6 +274,8 @@ strong {
 .theme-button {
   align-items: center;
   border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: none;
   display: inline-flex;
   height: 34px;
   justify-content: center;
@@ -277,8 +301,10 @@ strong {
 
 .tab {
   border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: none;
   min-height: 34px;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 
 .tab.active {
@@ -290,7 +316,7 @@ strong {
 .garden-view {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   margin: 0 auto;
   max-width: 1180px;
   padding: clamp(24px, 4vw, 44px);
@@ -341,10 +367,12 @@ strong {
 .primary-action {
   background: var(--color-primary);
   border-color: var(--color-primary);
+  box-shadow: 0 2px 10px rgba(38, 83, 63, 0.22);
   color: var(--text-inverse);
+  font-weight: var(--weight-strong);
 }
 
-.primary-action:hover {
+.primary-action:hover:not(:disabled) {
   background: var(--color-primary-strong);
   border-color: var(--color-primary-strong);
 }
@@ -371,7 +399,7 @@ strong {
   aspect-ratio: 16 / 10;
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: grid;
   gap: 12px;
   min-height: 320px;
@@ -407,7 +435,7 @@ strong {
 .home-visual p {
   background: var(--color-hud-bg);
   border: 1px solid var(--color-hud-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   margin: 0;
   padding: 10px 12px;
@@ -424,7 +452,7 @@ strong {
   align-items: center;
   background: var(--color-primary-soft);
   border: 1px solid rgba(47, 101, 79, 0.18);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--color-primary-strong);
   display: inline-flex;
   flex: 0 0 auto;
@@ -460,11 +488,11 @@ strong {
 
 .garden-status {
   align-items: center;
-  -webkit-backdrop-filter: blur(10px) saturate(1.08);
-  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(16px) saturate(1.14);
+  backdrop-filter: blur(16px) saturate(1.14);
   background: var(--color-hud-bg);
   border: 1px solid var(--color-hud-border);
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   color: var(--text-primary);
   display: inline-flex;
   font-weight: var(--weight-strong);
@@ -479,11 +507,11 @@ strong {
 
 .lens-progress {
   align-items: center;
-  -webkit-backdrop-filter: blur(12px) saturate(1.08);
-  backdrop-filter: blur(12px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
+  backdrop-filter: blur(18px) saturate(1.16);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-hud-border);
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
@@ -502,7 +530,8 @@ strong {
   backdrop-filter: blur(8px);
   background: var(--color-control-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
+  box-shadow: none;
   color: var(--text-primary);
   display: inline-flex;
   flex: 0 0 auto;
@@ -510,30 +539,41 @@ strong {
   justify-content: center;
   font-size: 0.82rem;
   min-height: 30px;
-  padding: 0 9px;
+  padding: 0 11px;
+  transition: var(--transition-control);
   white-space: nowrap;
 }
 
 span.lens-chip {
   cursor: default;
-  opacity: 0.72;
+  opacity: 0.6;
 }
 
 .lens-chip.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
+  box-shadow: 0 2px 10px rgba(29, 29, 31, 0.16);
   color: var(--text-inverse);
+  font-weight: var(--weight-strong);
 }
 
 .lens-chip.complete {
   background: var(--color-complete);
   border-color: var(--color-complete-border);
+  opacity: 0.9;
+}
+
+.lens-chip.complete::before {
+  content: "✓";
+  font-size: 0.72rem;
+  margin-right: 5px;
+  opacity: 0.7;
 }
 
 .garden-keyboard-controls {
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   bottom: 16px;
   box-shadow: var(--shadow-floating);
   display: grid;
@@ -558,7 +598,7 @@ span.lens-chip {
 .pet-debug-panel {
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   bottom: 14px;
   box-shadow: var(--shadow-floating);
   display: grid;
@@ -602,19 +642,19 @@ span.lens-chip {
 
 .signal-panel,
 .placement-panel {
-  -webkit-backdrop-filter: blur(16px) saturate(1.12);
-  backdrop-filter: blur(16px) saturate(1.12);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
   background:
     linear-gradient(145deg, rgba(255, 246, 220, 0.055), rgba(255, 246, 220, 0)),
     var(--color-surface-strong);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: 0 18px 52px rgba(4, 14, 16, 0.24);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 18px 52px rgba(4, 14, 16, 0.22);
   color: var(--text-primary);
   display: grid;
-  gap: 12px;
+  gap: 14px;
   max-width: 360px;
-  padding: 16px;
+  padding: 18px;
   position: absolute;
   right: 22px;
   top: 22px;
@@ -622,11 +662,53 @@ span.lens-chip {
   z-index: 3;
 }
 
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.signal-panel,
+.placement-panel {
+  animation: panel-in 0.28s ease-out both;
+}
+
 .signal-panel h3 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: var(--weight-strong);
+  letter-spacing: -0.01em;
   line-height: 1.2;
   margin: 0;
+}
+
+.lens-step-meter {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.meter-step {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  flex: 1 1 0;
+  height: 4px;
+  transition: background-color 0.3s ease, flex-grow 0.3s ease;
+}
+
+.meter-step.complete {
+  background: var(--color-primary);
+  opacity: 0.45;
+}
+
+.meter-step.active {
+  background: var(--color-primary);
+  flex-grow: 2.2;
 }
 
 .signal-panel label,
@@ -640,13 +722,14 @@ span.lens-chip {
   backdrop-filter: blur(8px);
   background: var(--color-input-bg);
   border: 1px solid var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   display: block;
   font-weight: 500;
   margin-top: 6px;
   min-height: 42px;
-  padding: 9px 11px;
+  padding: 10px 12px;
+  transition: border-color 0.16s ease, box-shadow 0.2s ease;
   width: 100%;
 }
 
@@ -665,7 +748,7 @@ span.lens-chip {
 .journey-detail {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: grid;
   gap: 8px;
   margin: 16px 0;
@@ -679,7 +762,7 @@ span.lens-chip {
 .watering-history {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: grid;
   gap: 8px;
   margin: 16px 0;
@@ -713,7 +796,7 @@ span.lens-chip {
 .watering-form textarea {
   background: var(--color-input-bg);
   border: 1px solid var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font: inherit;
   font-weight: 500;
@@ -757,7 +840,7 @@ span.lens-chip {
 .onboarding-panel {
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 24px 80px rgba(29, 29, 31, 0.18);
   display: grid;
   gap: 18px;
@@ -790,7 +873,7 @@ span.lens-chip {
   align-items: center;
   background: var(--color-control-bg);
   border: 1px solid var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   font-weight: var(--weight-control);
@@ -869,7 +952,7 @@ span.lens-chip {
 .seed-dialog {
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 24px 80px rgba(29, 29, 31, 0.16);
   color: var(--text-primary);
   max-height: min(86vh, 760px);
@@ -893,7 +976,7 @@ span.lens-chip {
 .seed-dialog-tabs {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(3, 1fr);
@@ -920,7 +1003,7 @@ span.lens-chip {
 .seed-stage-card {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: grid;
   gap: 6px;
   padding: 14px;
@@ -945,7 +1028,7 @@ span.lens-chip {
 .seed-progress span {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--text-tertiary);
   font-size: 0.78rem;
   font-weight: var(--weight-strong);
@@ -963,7 +1046,7 @@ span.lens-chip {
 .seed-dialog details {
   background: var(--color-control-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px;
 }
 
@@ -1068,7 +1151,7 @@ span.lens-chip {
   }
 
   .lens-chip {
-    border-radius: 7px;
+    border-radius: var(--radius-pill);
     font-size: 0.76rem;
     min-height: 27px;
     padding: 0 7px;
@@ -1092,5 +1175,20 @@ span.lens-chip {
     left: 12px;
     right: 12px;
     max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  button:hover:not(:disabled),
+  button:active:not(:disabled) {
+    transform: none;
   }
 }

@@ -189,7 +189,9 @@ export function gardenPlotPoint(frame: GardenFrame, plot: GardenPlot) {
 
 export function createLensObjectPlacements(frame: GardenFrame, currentLens: LensKind | null): LensObjectPlacement[] {
   const compact = frame.width < 560;
-  const source = compact && currentLens ? LENS_RING.filter((placement) => placement.kind === currentLens) : LENS_RING;
+  // Step-by-step reveal: only the current lens prop is placed. Passing null returns
+  // the full ring (used for layout audits and tests).
+  const source = currentLens ? LENS_RING.filter((placement) => placement.kind === currentLens) : LENS_RING;
 
   return source.map((placement) => {
     const point = compact && placement.kind === 'observer'

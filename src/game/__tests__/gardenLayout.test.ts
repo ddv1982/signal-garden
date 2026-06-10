@@ -163,19 +163,29 @@ describe('available garden plots', () => {
 });
 
 describe('pool-centered lens object layout', () => {
-  it('projects the desktop lens constellation in journey order', () => {
+  it('projects the full constellation in journey order when no lens is active', () => {
     const frame = createGardenFrame(2048, 900);
-    const placements = createLensObjectPlacements(frame, 'word');
+    const placements = createLensObjectPlacements(frame, null);
 
     expect(placements.map((placement) => placement.kind)).toEqual(LENS_RING_ORDER);
+  });
+
+  it('reveals only the current lens prop on desktop', () => {
+    const frame = createGardenFrame(2048, 900);
+
+    LENS_RING_ORDER.forEach((kind) => {
+      const placements = createLensObjectPlacements(frame, kind);
+
+      expect(placements.map((placement) => placement.kind)).toEqual([kind]);
+    });
   });
 
   it('keeps desktop lens bounds inside the garden and clear of the right panel safe zone', () => {
     [createGardenFrame(2048, 900), createGardenFrame(1440, 760)].forEach((frame) => {
       const panelSafeLeft = frame.width * 0.7;
-      const placements = createLensObjectPlacements(frame, 'word');
 
-      placements.forEach((placement) => {
+      LENS_RING_ORDER.forEach((kind) => {
+        const [placement] = createLensObjectPlacements(frame, kind);
         const bounds = lensObjectBounds(placement);
 
         expect(bounds.left).toBeGreaterThanOrEqual(0);
@@ -186,9 +196,9 @@ describe('pool-centered lens object layout', () => {
     });
   });
 
-  it('keeps the cloud and observer pool from overlapping on desktop', () => {
+  it('keeps the cloud and observer pool from overlapping in the full constellation', () => {
     [createGardenFrame(2048, 900), createGardenFrame(1440, 760)].forEach((frame) => {
-      const placements = createLensObjectPlacements(frame, 'observer');
+      const placements = createLensObjectPlacements(frame, null);
       const imageBounds = lensObjectBounds(placements.find((placement) => placement.kind === 'image')!);
       const observerBounds = lensObjectBounds(placements.find((placement) => placement.kind === 'observer')!);
 
