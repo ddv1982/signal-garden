@@ -82,13 +82,15 @@ export function GardenCanvas({
     onPendingSeedPlanted
   });
 
-  callbacksRef.current = {
-    onPetTapped,
-    onSeedSelected,
-    onSignalRequested,
-    onLensObjectSelected,
-    onPendingSeedPlanted
-  };
+  useEffect(() => {
+    callbacksRef.current = {
+      onPetTapped,
+      onSeedSelected,
+      onSignalRequested,
+      onLensObjectSelected,
+      onPendingSeedPlanted
+    };
+  });
 
   useEffect(() => {
     const element = containerRef.current;
@@ -117,11 +119,12 @@ export function GardenCanvas({
   }, [onCanvasWidthChange]);
 
   useEffect(() => {
-    if (!containerRef.current || gameRef.current) return;
+    const container = containerRef.current;
+    if (!container || gameRef.current) return;
 
-    containerRef.current.replaceChildren();
+    container.replaceChildren();
     gameRef.current = createGardenGame({
-      parent: containerRef.current,
+      parent: container,
       state,
       reducedMotion,
       theme,
@@ -140,8 +143,11 @@ export function GardenCanvas({
     return () => {
       gameRef.current?.destroy();
       gameRef.current = null;
-      containerRef.current?.replaceChildren();
+      container.replaceChildren();
     };
+    // Props beyond `parent` only configure the initial game; later changes flow
+    // through the update() effect below, so this intentionally runs once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

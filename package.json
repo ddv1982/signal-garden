@@ -22,7 +22,10 @@
     "lens:clean": "node scripts/clean-lens-props.mjs",
     "pet:audit": "node scripts/audit-pet-frames.mjs",
     "pet:audit:dark": "node scripts/audit-pet-frames.mjs src/assets/companion/frames-dark --skip-matte",
-    "pet:sheet": "node scripts/render-pet-frame-sheet.mjs"
+    "pet:sheet": "node scripts/render-pet-frame-sheet.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "phaser": "3.90.0",
@@ -30,15 +33,22 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@types/node": "^24.10.1",
     "@types/react": "~19.0.10",
     "@types/react-dom": "19.0.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^10.4.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
     "jsdom": "^27.3.0",
     "pngjs": "^7.0.0",
+    "prettier": "^3.8.4",
     "sharp": "^0.34.5",
     "typescript": "~5.8.3",
+    "typescript-eslint": "^8.61.0",
     "vite": "^7.2.7",
     "vitest": "^4.1.8"
   }

@@ -1,4 +1,13 @@
-import { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore
+} from 'react';
 import type {
   InnerExperienceMode,
   LensKind,
@@ -71,14 +80,13 @@ export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
   const [seeds, setSeeds] = useState<ReflectionSeed[]>(() => advanceGardenGrowth(repository.loadSeeds()));
   const [settings, setSettings] = useState(() => repository.loadSettings());
-  const [systemTheme, setSystemTheme] = useState<ActiveTheme>(() => readSystemTheme());
+  const systemTheme = useSyncExternalStore(subscribeToSystemTheme, readSystemTheme);
   const [profile, setProfile] = useState(() => repository.loadLensProfile());
   const [lensDraft, setLensDraft] = useState<LensSessionDraft | null>(() => repository.loadLensSessionDraft());
   const [selectedSeed, setSelectedSeed] = useState<ReflectionSeed | null>(null);
   const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(null);
   const [lensPanelOpen, setLensPanelOpen] = useState(false);
   const [lensInput, setLensInput] = useState('');
-  const [wateringOpen, setWateringOpen] = useState(false);
   const [wateringLabel, setWateringLabel] = useState('');
   const [wateringAction, setWateringAction] = useState('');
   const [wateringError, setWateringError] = useState('');
@@ -107,21 +115,6 @@ export function App() {
 
   useEffect(() => repository.saveSeeds(seeds), [seeds]);
   useEffect(() => repository.saveSettings(settings), [settings]);
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (event: MediaQueryListEvent) => setSystemTheme(systemThemeFromMatches(event.matches));
-    setSystemTheme(systemThemeFromMatches(mediaQuery.matches));
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-
-    mediaQuery.addListener(handleChange);
-
-    return () => mediaQuery.removeListener(handleChange);
-  }, []);
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = activeTheme;
     document.documentElement.style.colorScheme = activeTheme;
@@ -143,13 +136,19 @@ export function App() {
     if (lensPanelOpen) lensInputRef.current?.focus();
   }, [lensPanelOpen, currentLens]);
 
-  useEffect(() => {
+  function openSeedDetails(seed: ReflectionSeed) {
     resetWateringForm();
     setSeedDialogTab('overview');
-  }, [selectedSeed?.id]);
+    setSelectedSeed(seed);
+  }
+
+  function closeSeedDetails() {
+    resetWateringForm();
+    setSeedDialogTab('overview');
+    setSelectedSeed(null);
+  }
 
   function resetWateringForm() {
-    setWateringOpen(false);
     setWateringLabel('');
     setWateringAction('');
     setWateringError('');
@@ -286,7 +285,7 @@ export function App() {
   function deleteAllSeeds() {
     setSeeds([]);
     repository.clearSeeds();
-    setSelectedSeed(null);
+    closeSeedDetails();
     setPetMessage('Your pet settles beside the empty garden.');
   }
 
@@ -390,7 +389,7 @@ export function App() {
                 lensSessionActive={Boolean(lensDraft)}
                 petDebug={petDebug}
                 onPetTapped={() => setPetMessage('Your pet notices you back.')}
-                onSeedSelected={setSelectedSeed}
+                onSeedSelected={openSeedDetails}
                 lastWateringEvent={lastWateringEvent}
                 onSignalRequested={beginLensJourney}
                 onLensObjectSelected={openLens}
@@ -531,7 +530,7 @@ export function App() {
                   key={seed.id}
                   type="button"
                   aria-label={seedCardAccessibilityLabel(seed)}
-                  onClick={() => setSelectedSeed(seed)}
+                  onClick={() => openSeedDetails(seed)}
                 >
                   Open seed
                 </button>
@@ -560,7 +559,7 @@ export function App() {
                 type="button"
                 className="seed-card"
                 aria-label={seedCardAccessibilityLabel(seed)}
-                onClick={() => setSelectedSeed(seed)}
+                onClick={() => openSeedDetails(seed)}
               >
                 <span>{seedStatusLabel(seed.status)} seed</span>
                 <strong>{seed.unhookedText || seed.labelText || seed.tinyAction}</strong>
@@ -685,14 +684,11 @@ export function App() {
           ref={seedDialogRef}
           className="seed-dialog"
           aria-labelledby="seed-dialog-title"
-          onClose={() => {
-            setSelectedSeed(null);
-            resetWateringForm();
-          }}
+          onClose={closeSeedDetails}
         >
           <div className="dialog-heading">
             <p className="eyebrow">{seedStatusLabel(selectedSeed.status)} seed</p>
-            <button ref={seedDialogCloseRef} type="button" aria-label="Close seed details" onClick={() => setSelectedSeed(null)}>Close</button>
+            <button ref={seedDialogCloseRef} type="button" aria-label="Close seed details" onClick={closeSeedDetails}>Close</button>
           </div>
           <h2 id="seed-dialog-title">{selectedSeed.unhookedText || selectedSeed.labelText || 'A tiny kind action'}</h2>
           <div className="seed-dialog-tabs" role="tablist" aria-label="Seed details">
@@ -879,6 +875,17 @@ function isLastLens(current: LensKind, order: LensKind[]) {
 function readSystemTheme(): ActiveTheme {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
   return systemThemeFromMatches(window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+function subscribeToSystemTheme(onChange: () => void) {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => {};
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (typeof mediaQuery.addEventListener === 'function') {
+    mediaQuery.addEventListener('change', onChange);
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }
+  mediaQuery.addListener(onChange);
+  return () => mediaQuery.removeListener(onChange);
 }
 
 function SunIcon() {
