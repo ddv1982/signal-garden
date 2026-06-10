@@ -567,7 +567,7 @@ class BrowserGardenScene extends Phaser.Scene {
       const background = this.add.image(width / 2, height / 2, backgroundTexture).setDepth(0);
       background.setScale(frame.scale);
 
-      this.add.rectangle(width / 2, height / 2, width, height, this.theme === 'dark' ? 0x0e2425 : 0xfff6e8, this.theme === 'dark' ? 0.06 : 0.08).setDepth(2);
+      this.add.rectangle(width / 2, height / 2, width, height, this.theme === 'dark' ? 0x07191f : 0xfff6e8, this.theme === 'dark' ? 0.12 : 0.08).setDepth(2);
       return;
     }
 
@@ -746,8 +746,8 @@ class BrowserGardenScene extends Phaser.Scene {
     const point = this.visibleGardenPoint(frame, 0.72, 0.5);
     const group = this.add.container(point.x, point.y).setDepth(260);
     const dark = this.theme === 'dark';
-    group.add(this.add.circle(0, 0, 20, dark ? 0xe2d58a : 0xffe0a1, 0.96));
-    group.add(this.add.circle(0, 0, 9, dark ? 0xf0909a : 0xdb6f7a, 0.86));
+    group.add(this.add.circle(0, 0, 20, dark ? 0xaec9bd : 0xffe0a1, dark ? 0.88 : 0.96));
+    group.add(this.add.circle(0, 0, 9, dark ? 0xe9859c : 0xdb6f7a, 0.86));
     for (let index = 0; index < 6; index += 1) {
       const angle = (Math.PI * 2 * index) / 6;
       group.add(this.add.circle(Math.cos(angle) * 34, Math.sin(angle) * 28, index % 2 === 0 ? 4 : 3, dark ? 0xd8f4e6 : 0xfff1ad, dark ? 0.68 : 0.78));

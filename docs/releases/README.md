@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.15`](./0.1.15.md) — deepens dark mode into a true moonlit night garden with a visible moon and darker foreground assets
 - [`0.1.14`](./0.1.14.md) — softens moonlit companion and lens cutouts with profiled dark assets and per-lens scene lighting
 - [`0.1.13`](./0.1.13.md) — opens the garden to system-following light and dark appearances with moonlit assets and first-paint protection
 - [`0.1.12`](./0.1.12.md) — replaces the patched garden backdrop with a cleaned asset and removes the visible sky splice
