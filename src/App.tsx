@@ -31,7 +31,7 @@ import { firstAvailableGardenPlot } from './game/gardenLayout';
 import companionIdleUrl from './assets/companion/frames/idle-sit.png';
 import companionIdleDarkUrl from './assets/companion/frames-dark/idle-sit.png';
 import gardenBackgroundUrl from './assets/garden/background-v4.webp';
-import gardenBackgroundDarkUrl from './assets/garden/background-dark.jpg';
+import gardenBackgroundDarkUrl from './assets/garden/background-dusk-v3.jpg';
 
 type Tab = 'home' | 'garden' | 'archive' | 'settings';
 type SeedDialogTab = 'overview' | 'water' | 'history';

@@ -41,30 +41,30 @@
 }
 
 :root[data-theme="dark"] {
-  --color-page: #0d1718;
-  --color-surface: rgba(20, 34, 35, 0.82);
-  --color-surface-strong: rgba(24, 42, 43, 0.94);
-  --color-surface-muted: #152627;
-  --color-border: rgba(216, 244, 230, 0.16);
-  --color-border-strong: rgba(216, 244, 230, 0.28);
+  --color-page: #142223;
+  --color-surface: rgba(31, 48, 50, 0.72);
+  --color-surface-strong: rgba(33, 52, 54, 0.8);
+  --color-surface-muted: #213437;
+  --color-border: rgba(236, 213, 174, 0.18);
+  --color-border-strong: rgba(236, 213, 174, 0.34);
   --color-primary: #9ccfbb;
   --color-primary-strong: #c4e6d6;
   --color-primary-soft: rgba(156, 207, 187, 0.17);
-  --color-accent: #d9b06e;
-  --color-control-bg: rgba(27, 47, 48, 0.86);
-  --color-input-bg: rgba(10, 22, 23, 0.72);
-  --color-hud-bg: rgba(12, 24, 25, 0.78);
-  --color-hud-border: rgba(216, 244, 230, 0.18);
-  --color-panel-glass: rgba(16, 32, 33, 0.82);
+  --color-accent: #e2b879;
+  --color-control-bg: rgba(34, 53, 55, 0.66);
+  --color-input-bg: rgba(20, 35, 38, 0.56);
+  --color-hud-bg: rgba(25, 40, 43, 0.66);
+  --color-hud-border: rgba(236, 213, 174, 0.22);
+  --color-panel-glass: rgba(28, 44, 47, 0.62);
   --color-complete: rgba(217, 176, 110, 0.18);
   --color-complete-border: rgba(217, 176, 110, 0.34);
   --color-danger: #ffadad;
   --focus-ring: rgba(156, 207, 187, 0.4);
-  --text-primary: #f2f2e9;
-  --text-secondary: #c7d2ca;
-  --text-tertiary: #9baba4;
-  --text-inverse: #10201f;
-  --shadow-floating: 0 20px 52px rgba(0, 0, 0, 0.34);
+  --text-primary: #f5f1e6;
+  --text-secondary: #d5ddd0;
+  --text-tertiary: #acbbb3;
+  --text-inverse: #182928;
+  --shadow-floating: 0 20px 52px rgba(4, 14, 16, 0.3);
 }
 
 * {
@@ -227,6 +227,8 @@ strong {
 }
 
 .tabs {
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  backdrop-filter: blur(12px) saturate(1.05);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -236,6 +238,8 @@ strong {
 }
 
 .theme-toggle {
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+  backdrop-filter: blur(12px) saturate(1.05);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -456,6 +460,8 @@ strong {
 
 .garden-status {
   align-items: center;
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(10px) saturate(1.08);
   background: var(--color-hud-bg);
   border: 1px solid var(--color-hud-border);
   border-radius: 8px;
@@ -472,14 +478,18 @@ strong {
 }
 
 .lens-progress {
+  align-items: center;
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
   background: var(--color-panel-glass);
   border: 1px solid var(--color-hud-border);
   border-radius: 8px;
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
   left: 14px;
-  max-width: min(760px, calc(100% - 420px));
-  overflow-x: auto;
+  max-width: min(980px, calc(100% - 28px));
+  overflow: visible;
   padding: 5px;
   position: absolute;
   top: 56px;
@@ -488,6 +498,8 @@ strong {
 
 .lens-chip {
   align-items: center;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: var(--color-control-bg);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -590,10 +602,14 @@ span.lens-chip {
 
 .signal-panel,
 .placement-panel {
-  background: var(--color-surface-strong);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
+  backdrop-filter: blur(16px) saturate(1.12);
+  background:
+    linear-gradient(145deg, rgba(255, 246, 220, 0.055), rgba(255, 246, 220, 0)),
+    var(--color-surface-strong);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: var(--shadow-floating);
+  box-shadow: 0 18px 52px rgba(4, 14, 16, 0.24);
   color: var(--text-primary);
   display: grid;
   gap: 12px;
@@ -620,6 +636,8 @@ span.lens-chip {
 
 .signal-panel input,
 .signal-panel textarea {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: var(--color-input-bg);
   border: 1px solid var(--color-border-strong);
   border-radius: 8px;
@@ -732,8 +750,8 @@ span.lens-chip {
 
 :root[data-theme="dark"] .onboarding-backdrop {
   background:
-    linear-gradient(rgba(4, 10, 11, 0.36), rgba(4, 10, 11, 0.36)),
-    url("./assets/garden/background-dark.jpg") center / cover;
+    linear-gradient(rgba(20, 34, 35, 0.24), rgba(20, 34, 35, 0.24)),
+    url("./assets/garden/background-dusk-v3.jpg") center / cover;
 }
 
 .onboarding-panel {
@@ -1041,10 +1059,19 @@ span.lens-chip {
   }
 
   .lens-progress {
+    gap: 4px;
     left: 10px;
     max-width: calc(100% - 20px);
+    padding: 4px;
     right: 10px;
     top: 52px;
+  }
+
+  .lens-chip {
+    border-radius: 7px;
+    font-size: 0.76rem;
+    min-height: 27px;
+    padding: 0 7px;
   }
 
   .garden-stage:has(.lens-panel) .garden-status,

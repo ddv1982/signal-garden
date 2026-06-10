@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.17`](./0.1.17.md) — restores the dusk garden composition with a smaller pond and retuned dark assets
 - [`0.1.16`](./0.1.16.md) — grounds the moonlit companion and active lens focus so dark mode loses its visible selection halos
 - [`0.1.15`](./0.1.15.md) — deepens dark mode into a true moonlit night garden with a visible moon and darker foreground assets
 - [`0.1.14`](./0.1.14.md) — softens moonlit companion and lens cutouts with profiled dark assets and per-lens scene lighting

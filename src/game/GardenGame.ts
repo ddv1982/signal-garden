@@ -47,7 +47,7 @@ import sleepingDarkUrl from '../assets/companion/frames-dark/sleeping.png';
 import stretchDarkUrl from '../assets/companion/frames-dark/stretch.png';
 import wakeDarkUrl from '../assets/companion/frames-dark/wake.png';
 import gardenBackgroundUrl from '../assets/garden/background-v4.webp';
-import gardenBackgroundDarkUrl from '../assets/garden/background-dark.jpg';
+import gardenBackgroundDarkUrl from '../assets/garden/background-dusk-v3.jpg';
 import budUrl from '../assets/garden/props/bud.png';
 import dreamStoneUrl from '../assets/garden/props/dream-stone.png';
 import flowerUrl from '../assets/garden/props/flower.png';
@@ -214,13 +214,13 @@ type LensLighting = {
 };
 
 const DARK_LENS_LIGHTING: Record<LensKind, LensLighting> = {
-  word: { glowColor: 0xaac9bf, focusColor: 0xe0e9d4, moteColor: 0xc6eee1, inactiveAlpha: 0.03, activeAlpha: 0.095, glowWidth: 0.78, glowHeight: 0.32, focusWidth: 0.72, focusHeight: 0.24, focusYOffset: 0.18 },
-  body: { glowColor: 0x8fd9de, focusColor: 0xc8f3ee, moteColor: 0xbaedf0, inactiveAlpha: 0.04, activeAlpha: 0.115, glowWidth: 0.9, glowHeight: 0.34, focusWidth: 0.9, focusHeight: 0.24, focusYOffset: 0.16 },
-  emotion: { glowColor: 0xf0b565, focusColor: 0xffd08a, moteColor: 0xffd8a2, inactiveAlpha: 0.05, activeAlpha: 0.14, glowWidth: 0.68, glowHeight: 0.42, focusWidth: 0.62, focusHeight: 0.3, focusYOffset: 0.18 },
-  image: { glowColor: 0xbfd2df, focusColor: 0xe6edf2, moteColor: 0xdcebf1, inactiveAlpha: 0.03, activeAlpha: 0.085, glowWidth: 0.86, glowHeight: 0.34, focusWidth: 0.78, focusHeight: 0.26, focusYOffset: 0.17 },
-  observer: { glowColor: 0x85d8df, focusColor: 0xcaf2f0, moteColor: 0xb8eeee, inactiveAlpha: 0.035, activeAlpha: 0.1, glowWidth: 0.9, glowHeight: 0.32, focusWidth: 0.84, focusHeight: 0.24, focusYOffset: 0.16 },
-  meaning: { glowColor: 0xb7d5c4, focusColor: 0xd6edd4, moteColor: 0xc9edc8, inactiveAlpha: 0.035, activeAlpha: 0.105, glowWidth: 0.74, glowHeight: 0.42, focusWidth: 0.68, focusHeight: 0.3, focusYOffset: 0.18 },
-  action: { glowColor: 0xe6be78, focusColor: 0xf0d39a, moteColor: 0xf2d7a2, inactiveAlpha: 0.035, activeAlpha: 0.105, glowWidth: 0.78, glowHeight: 0.34, focusWidth: 0.7, focusHeight: 0.25, focusYOffset: 0.17 }
+  word: { glowColor: 0xb8d5c9, focusColor: 0xf0e6c9, moteColor: 0xe6dcc8, inactiveAlpha: 0.04, activeAlpha: 0.108, glowWidth: 0.78, glowHeight: 0.32, focusWidth: 0.72, focusHeight: 0.24, focusYOffset: 0.18 },
+  body: { glowColor: 0x9ed7df, focusColor: 0xd5f0ed, moteColor: 0xd0e9ec, inactiveAlpha: 0.048, activeAlpha: 0.124, glowWidth: 0.9, glowHeight: 0.34, focusWidth: 0.9, focusHeight: 0.24, focusYOffset: 0.16 },
+  emotion: { glowColor: 0xf0b875, focusColor: 0xffd69a, moteColor: 0xffdec0, inactiveAlpha: 0.056, activeAlpha: 0.145, glowWidth: 0.68, glowHeight: 0.42, focusWidth: 0.62, focusHeight: 0.3, focusYOffset: 0.18 },
+  image: { glowColor: 0xc8cfe0, focusColor: 0xeee5ee, moteColor: 0xe4d9e8, inactiveAlpha: 0.04, activeAlpha: 0.1, glowWidth: 0.86, glowHeight: 0.34, focusWidth: 0.78, focusHeight: 0.26, focusYOffset: 0.17 },
+  observer: { glowColor: 0x95d2dc, focusColor: 0xd4eeeb, moteColor: 0xcae8eb, inactiveAlpha: 0.044, activeAlpha: 0.112, glowWidth: 0.9, glowHeight: 0.32, focusWidth: 0.84, focusHeight: 0.24, focusYOffset: 0.16 },
+  meaning: { glowColor: 0xc3d8bd, focusColor: 0xe6e8c7, moteColor: 0xdbe5bd, inactiveAlpha: 0.044, activeAlpha: 0.116, glowWidth: 0.74, glowHeight: 0.42, focusWidth: 0.68, focusHeight: 0.3, focusYOffset: 0.18 },
+  action: { glowColor: 0xebc58b, focusColor: 0xf6d9a4, moteColor: 0xf7dfb4, inactiveAlpha: 0.044, activeAlpha: 0.116, glowWidth: 0.78, glowHeight: 0.34, focusWidth: 0.7, focusHeight: 0.25, focusYOffset: 0.17 }
 };
 
 export type GardenGameOptions = {
@@ -261,7 +261,7 @@ export function createGardenGame(options: GardenGameOptions): GardenGameHandle {
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: options.parent,
-    backgroundColor: options.theme === 'dark' ? '#10201f' : '#f7ead7',
+    backgroundColor: options.theme === 'dark' ? '#26383f' : '#f7ead7',
     scale: {
       mode: Phaser.Scale.RESIZE,
       width: options.parent.clientWidth || 720,
@@ -569,16 +569,19 @@ class BrowserGardenScene extends Phaser.Scene {
       const background = this.add.image(width / 2, height / 2, backgroundTexture).setDepth(0);
       background.setScale(frame.scale);
 
-      this.add.rectangle(width / 2, height / 2, width, height, this.theme === 'dark' ? 0x07191f : 0xfff6e8, this.theme === 'dark' ? 0.12 : 0.08).setDepth(2);
+      if (this.theme !== 'dark') {
+        this.add.rectangle(width / 2, height / 2, width, height, 0xfff6e8, 0.08).setDepth(2);
+      }
       return;
     }
 
     const dark = this.theme === 'dark';
-    this.add.rectangle(width / 2, height / 2, width, height, dark ? 0x122425 : 0xf7ead7);
-    this.add.ellipse(width * 0.5, height * 0.88, width * 1.24, height * 0.38, dark ? 0x355f56 : 0x9bbf82, 0.92);
-    this.add.ellipse(width * 0.2, height * 0.95, width * 0.52, height * 0.24, dark ? 0x24463f : 0x628f6b, 0.35);
-    this.add.ellipse(width * 0.82, height * 0.9, width * 0.64, height * 0.3, dark ? 0x6e6746 : 0xd8a86f, 0.22);
-    this.add.circle(width * 0.82, height * 0.18, Math.min(width, height) * 0.12, dark ? 0xc7dfd8 : 0xffd58b, 0.26);
+    this.add.rectangle(width / 2, height / 2, width, height, dark ? 0x26383f : 0xf7ead7);
+    this.add.ellipse(width * 0.5, height * 0.88, width * 1.24, height * 0.38, dark ? 0x5d7f6e : 0x9bbf82, 0.92);
+    this.add.ellipse(width * 0.2, height * 0.95, width * 0.52, height * 0.24, dark ? 0x446d60 : 0x628f6b, 0.35);
+    this.add.ellipse(width * 0.82, height * 0.9, width * 0.64, height * 0.3, dark ? 0x9b8062 : 0xd8a86f, 0.22);
+    this.add.ellipse(width * 0.52, height * 0.54, width * 0.9, height * 0.28, dark ? 0xc69786 : 0xffd58b, dark ? 0.12 : 0.08);
+    this.add.circle(width * 0.82, height * 0.18, Math.min(width, height) * 0.1, dark ? 0xf0ead2 : 0xffd58b, dark ? 0.2 : 0.3);
   }
 
   private drawGardenLandmarks(frame: GardenFrame) {
@@ -587,10 +590,10 @@ class BrowserGardenScene extends Phaser.Scene {
     const leftSoil = this.gardenNormalizedPoint(frame, 0.18, 0.67);
     const dark = this.theme === 'dark';
 
-    this.add.rectangle(horizon.x, horizon.y, this.gardenSize(frame, GARDEN_DESIGN_WIDTH * 0.64), Math.max(3, 5 * frame.scale), dark ? 0x9ccfbb : 0xd8a86f, dark ? 0.05 : 0.22).setDepth(20);
-    this.add.ellipse(leftSoil.x, leftSoil.y, this.gardenSize(frame, 94, { max: 132 }), this.gardenSize(frame, 28, { max: 40 }), dark ? 0x263a34 : 0x7b5941, seedCount === 0 ? (dark ? 0.34 : 0.22) : (dark ? 0.18 : 0.12)).setDepth(30);
-    this.add.circle(leftSoil.x - this.gardenSize(frame, 28), this.gardenNormalizedPoint(frame, 0.18, 0.65).y, this.gardenSize(frame, 8, { max: 12 }), dark ? 0xd9b06e : 0xf8d76e, seedCount === 0 ? 0.55 : 0.28).setDepth(31);
-    this.add.circle(leftSoil.x + this.gardenSize(frame, 4), this.gardenNormalizedPoint(frame, 0.18, 0.64).y, this.gardenSize(frame, 6, { max: 10 }), dark ? 0xe0919a : 0xdb6f7a, seedCount === 0 ? 0.46 : 0.22).setDepth(31);
+    this.add.rectangle(horizon.x, horizon.y, this.gardenSize(frame, GARDEN_DESIGN_WIDTH * 0.64), Math.max(3, 5 * frame.scale), dark ? 0xf0c59a : 0xd8a86f, dark ? 0.105 : 0.22).setDepth(20);
+    this.add.ellipse(leftSoil.x, leftSoil.y, this.gardenSize(frame, 94, { max: 132 }), this.gardenSize(frame, 28, { max: 40 }), dark ? 0x4a5b4f : 0x7b5941, seedCount === 0 ? (dark ? 0.42 : 0.22) : (dark ? 0.24 : 0.12)).setDepth(30);
+    this.add.circle(leftSoil.x - this.gardenSize(frame, 28), this.gardenNormalizedPoint(frame, 0.18, 0.65).y, this.gardenSize(frame, 8, { max: 12 }), dark ? 0xf0ca82 : 0xf8d76e, seedCount === 0 ? 0.66 : 0.28).setDepth(31);
+    this.add.circle(leftSoil.x + this.gardenSize(frame, 4), this.gardenNormalizedPoint(frame, 0.18, 0.64).y, this.gardenSize(frame, 6, { max: 10 }), dark ? 0xf1a6a9 : 0xdb6f7a, seedCount === 0 ? 0.56 : 0.22).setDepth(31);
 
     if (seedCount >= 1) {
       const point = this.gardenNormalizedPoint(frame, 0.83, 0.55);
@@ -800,7 +803,7 @@ class BrowserGardenScene extends Phaser.Scene {
       const glow = dark
         ? this.drawDarkLensGlow(placement.kind, size, glowY, active)
         : this.add.circle(0, glowY, size * 0.42, active ? 0xfff1ad : 0xffffff, active ? 0.2 : 0.06);
-      const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x071211 : 0x5c4a36, dark ? placement.shadowAlpha * 1.25 : placement.shadowAlpha);
+      const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x241a18 : 0x5c4a36, dark ? placement.shadowAlpha * 0.72 : placement.shadowAlpha);
       group.add([glow, shadow]);
       if (active && dark) {
         this.drawDarkActiveLensFocusBase(group, placement.kind, size, glowY);
@@ -944,7 +947,8 @@ class BrowserGardenScene extends Phaser.Scene {
       const sprite = this.add.image(0, 0, idleTexture).setOrigin(0.5, 1);
       const targetHeight = this.gardenSize(frame, 150, { min: 150, max: 235 });
       if (this.theme === 'dark') {
-        group.add(this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x071211, 0.28));
+        group.add(this.add.ellipse(0, -46, targetHeight * 0.72, targetHeight * 0.82, 0xf1bd79, 0.055));
+        group.add(this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x241a18, 0.18));
       }
       sprite.setScale(targetHeight / sprite.height);
       this.petBaseScaleX = sprite.scaleX;

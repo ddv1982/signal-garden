@@ -134,6 +134,20 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByRole('button', { name: 'Use dark mode' })).toHaveClass(/active/);
   });
 
+  test('keeps the dark lens chip menu free of horizontal scrollbars', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload();
+    await completeOnboarding(page);
+    await startLensJourney(page);
+    await page.keyboard.press('Escape');
+
+    const lensProgress = page.locator('.lens-progress');
+    await expect(lensProgress).toBeVisible();
+    await expect(page.getByText('Loosen the word stones')).toBeVisible();
+    await expect.poll(() => lensProgress.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+  });
+
   test('persists a manual light override while the system is dark', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.reload();
