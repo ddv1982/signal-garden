@@ -200,6 +200,27 @@ function textureKeyForTheme(textureKey: string, theme: ActiveTheme) {
   return theme === 'dark' ? `${textureKey}-dark` : textureKey;
 }
 
+type LensLighting = {
+  glowColor: number;
+  ringColor: number;
+  inactiveAlpha: number;
+  activeAlpha: number;
+  glowWidth: number;
+  glowHeight: number;
+  ringWidth: number;
+  ringHeight: number;
+};
+
+const DARK_LENS_LIGHTING: Record<LensKind, LensLighting> = {
+  word: { glowColor: 0xaac9bf, ringColor: 0xe0e9d4, inactiveAlpha: 0.035, activeAlpha: 0.11, glowWidth: 0.92, glowHeight: 0.5, ringWidth: 0.94, ringHeight: 0.62 },
+  body: { glowColor: 0x8fd9de, ringColor: 0xc8f3ee, inactiveAlpha: 0.045, activeAlpha: 0.13, glowWidth: 1, glowHeight: 0.42, ringWidth: 1.08, ringHeight: 0.54 },
+  emotion: { glowColor: 0xf0b565, ringColor: 0xffd08a, inactiveAlpha: 0.055, activeAlpha: 0.16, glowWidth: 0.74, glowHeight: 0.58, ringWidth: 0.78, ringHeight: 0.76 },
+  image: { glowColor: 0xbfd2df, ringColor: 0xe6edf2, inactiveAlpha: 0.035, activeAlpha: 0.1, glowWidth: 0.98, glowHeight: 0.52, ringWidth: 1.04, ringHeight: 0.66 },
+  observer: { glowColor: 0x85d8df, ringColor: 0xcaf2f0, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 1.02, glowHeight: 0.46, ringWidth: 1.08, ringHeight: 0.58 },
+  meaning: { glowColor: 0xb7d5c4, ringColor: 0xd6edd4, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 0.84, glowHeight: 0.62, ringWidth: 0.88, ringHeight: 0.82 },
+  action: { glowColor: 0xe6be78, ringColor: 0xf0d39a, inactiveAlpha: 0.04, activeAlpha: 0.12, glowWidth: 0.88, glowHeight: 0.48, ringWidth: 0.92, ringHeight: 0.62 }
+};
+
 export type GardenGameOptions = {
   parent: HTMLElement;
   state: GardenState;
@@ -774,20 +795,26 @@ class BrowserGardenScene extends Phaser.Scene {
           this.playAttentionAnimation();
         });
       }
-      const glow = this.add.circle(0, glowY, size * 0.42, active ? (dark ? 0xd8f4e6 : 0xfff1ad) : 0xffffff, active ? (dark ? 0.24 : 0.2) : (dark ? 0.08 : 0.06));
-      const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x071211 : 0x5c4a36, placement.shadowAlpha);
+      const glow = dark
+        ? this.drawDarkLensGlow(placement.kind, size, glowY, active)
+        : this.add.circle(0, glowY, size * 0.42, active ? 0xfff1ad : 0xffffff, active ? 0.2 : 0.06);
+      const shadow = this.add.ellipse(0, placement.shadowY, placement.shadowWidth, placement.shadowHeight, dark ? 0x071211 : 0x5c4a36, dark ? placement.shadowAlpha * 1.25 : placement.shadowAlpha);
       group.add([glow, shadow]);
       if (!this.addPropImage(group, `lens-${placement.kind}`, 0, 0, size, placement.anchor)) {
         group.add(this.add.circle(0, -size * 0.3, size * 0.3, active ? 0xf0b260 : 0xe6d1b7, 0.72));
       }
       if (active) {
-        group.add(this.add.circle(0, glowY, size * 0.5, dark ? 0xd8f4e6 : 0xfff1ad, 0).setStrokeStyle(2, dark ? 0xd8f4e6 : 0xfff1ad, dark ? 0.58 : 0.52));
+        if (dark) {
+          this.drawDarkActiveLensRim(group, placement.kind, size, glowY);
+        } else {
+          group.add(this.add.circle(0, glowY, size * 0.5, 0xfff1ad, 0).setStrokeStyle(2, 0xfff1ad, 0.52));
+        }
       }
       if (active && !this.reducedMotion) {
         this.tweens.add({
           targets: glow,
-          alpha: 0.46,
-          scale: 1.04,
+          alpha: dark ? DARK_LENS_LIGHTING[placement.kind].activeAlpha * 1.65 : 0.46,
+          scale: dark ? 1.025 : 1.04,
           duration: 3400,
           yoyo: true,
           repeat: -1,
@@ -795,6 +822,35 @@ class BrowserGardenScene extends Phaser.Scene {
         });
       }
     });
+  }
+
+  private drawDarkLensGlow(kind: LensKind, size: number, glowY: number, active: boolean) {
+    const lighting = DARK_LENS_LIGHTING[kind];
+    return this.add.ellipse(
+      0,
+      glowY + size * 0.04,
+      size * lighting.glowWidth,
+      size * lighting.glowHeight,
+      lighting.glowColor,
+      active ? lighting.activeAlpha : lighting.inactiveAlpha
+    );
+  }
+
+  private drawDarkActiveLensRim(group: Phaser.GameObjects.Container, kind: LensKind, size: number, glowY: number) {
+    const lighting = DARK_LENS_LIGHTING[kind];
+    const ring = this.add.ellipse(0, glowY + size * 0.02, size * lighting.ringWidth, size * lighting.ringHeight, lighting.ringColor, 0);
+    ring.setStrokeStyle(1.5, lighting.ringColor, 0.34);
+    const glint = this.add.arc(
+      -size * 0.18,
+      glowY - size * 0.2,
+      size * 0.28,
+      205,
+      300,
+      false,
+      lighting.ringColor,
+      0
+    ).setStrokeStyle(1.5, lighting.ringColor, 0.42);
+    group.add([ring, glint]);
   }
 
   private drawPendingSeed(width: number, height: number, frame: GardenFrame) {
@@ -843,6 +899,10 @@ class BrowserGardenScene extends Phaser.Scene {
     if (this.textures.exists(idleTexture)) {
       const sprite = this.add.image(0, 0, idleTexture).setOrigin(0.5, 1);
       const targetHeight = this.gardenSize(frame, 150, { min: 150, max: 235 });
+      if (this.theme === 'dark') {
+        group.add(this.add.ellipse(0, -4, targetHeight * 0.68, targetHeight * 0.12, 0x071211, 0.24));
+        group.add(this.add.ellipse(-targetHeight * 0.08, -targetHeight * 0.56, targetHeight * 0.78, targetHeight * 0.88, 0xb9d8d2, 0.055));
+      }
       sprite.setScale(targetHeight / sprite.height);
       this.petBaseScaleX = sprite.scaleX;
       this.petBaseScaleY = sprite.scaleY;
