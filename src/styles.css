@@ -1275,6 +1275,16 @@ fieldset.settings-section {
   }
 }
 
+@media (max-width: 480px) {
+  .topbar-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-toggle {
+    justify-self: start;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -22,6 +22,7 @@ import { OnboardingPanel } from './components/OnboardingPanel';
 import { SeedStageArt } from './components/SeedStageArt';
 import { SeedDialog } from './components/SeedDialog';
 import { TopBar, type Tab } from './components/TopBar';
+import { m } from './paraglide/messages.js';
 import companionIdleUrl from './assets/companion/frames/idle-sit.webp';
 import companionIdleDarkUrl from './assets/companion/frames-dark/idle-sit.webp';
 import gardenBackgroundUrl from './assets/garden/background-v4.webp';
@@ -33,10 +34,18 @@ const GardenCanvas = lazy(() =>
 );
 
 const themePreferenceOptions: Array<{ value: ThemePreference; label: string }> = [
-  { value: 'system', label: 'Follow system' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: m.theme_follow_system() },
+  { value: 'light', label: m.theme_light() },
+  { value: 'dark', label: m.theme_dark() },
 ];
+
+function savedSeedCountLabel(count: number) {
+  return count === 1 ? m.garden_saved_seed_one({ count }) : m.garden_saved_seed_many({ count });
+}
+
+function plantedSeedCountLabel(count: number) {
+  return count === 1 ? m.archive_count_one({ count }) : m.archive_count_many({ count });
+}
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
@@ -51,7 +60,7 @@ export function App() {
     seedId: string;
     eventId: string;
   } | null>(null);
-  const [petMessage, setPetMessage] = useState('Your pet is nearby.');
+  const [petMessage, setPetMessage] = useState<string>(m.pet_nearby());
   const [gardenCanvasWidth, setGardenCanvasWidth] = useState(720);
   const [confirmingSeedDelete, setConfirmingSeedDelete] = useState(false);
   const [confirmingProfileReset, setConfirmingProfileReset] = useState(false);
@@ -91,8 +100,10 @@ export function App() {
     if (tab === 'home') {
       setPetMessage(
         seeds.length === 0
-          ? 'Your pet is nearby.'
-          : `Your pet watches over ${seeds.length} seed${seeds.length === 1 ? '' : 's'}.`
+          ? m.pet_nearby()
+          : seeds.length === 1
+            ? m.pet_watches_one({ count: seeds.length })
+            : m.pet_watches_many({ count: seeds.length })
       );
     }
     setActiveTab(tab);
@@ -101,7 +112,7 @@ export function App() {
   function finishOnboarding(mode: InnerExperienceMode, order: LensPromptOrder) {
     setProfile(createLensProfile(mode, order));
     setSettings((current) => ({ ...current, onboardingCompleted: true }));
-    setPetMessage('Your pet pads into the garden with you.');
+    setPetMessage(m.pet_onboarding_complete());
   }
 
   function plantPendingSeed(position: { plotId: string; x: number; y: number }) {
@@ -113,7 +124,7 @@ export function App() {
     });
     setSeeds((current) => [plantedSeed, ...current]);
     setPendingSeed(null);
-    setPetMessage('Your pet gives a proud head-butt. A new seed is planted.');
+    setPetMessage(m.pet_seed_planted());
   }
 
   function handleSeedWatering(seed: ReflectionSeed, input: SeedWateringInput): string | null {
@@ -125,10 +136,10 @@ export function App() {
       if (latestWatering) {
         setLastWateringEvent({ seedId: seed.id, eventId: latestWatering.id });
       }
-      setPetMessage('You watered this seed with one kind action.');
+      setPetMessage(m.pet_seed_watered());
       return null;
     } catch (error) {
-      return error instanceof Error ? error.message : 'This watering could not be saved.';
+      return error instanceof Error ? error.message : m.app_error_watering_save();
     }
   }
 
@@ -141,10 +152,10 @@ export function App() {
         seedId: seed.id,
         eventId: `bloom-${bloomed.bloomReflection?.completedAt ?? Date.now()}`,
       });
-      setPetMessage('The seed becomes a flower.');
+      setPetMessage(m.pet_seed_bloomed());
       return null;
     } catch (error) {
-      return error instanceof Error ? error.message : 'This reflection could not be saved.';
+      return error instanceof Error ? error.message : m.app_error_bloom_save();
     }
   }
 
@@ -163,7 +174,7 @@ export function App() {
     repository.clearSeeds();
     setSelectedSeed(null);
     setConfirmingSeedDelete(false);
-    setPetMessage('Your pet settles beside the empty garden.');
+    setPetMessage(m.pet_empty_garden());
   }
 
   function resetLensProfile() {
@@ -195,19 +206,19 @@ export function App() {
       {activeTab === 'home' && (
         <section className="panel home-grid">
           <div>
-            <p className="eyebrow">Lens journey</p>
-            <h2>Move one signal through seven gentle lenses.</h2>
-            <p>
-              Your pet helps you notice inner signals without turning them into who you are. Each
-              completed journey becomes a seed in your Dream Garden.
-            </p>
+            <p className="eyebrow">{m.home_eyebrow()}</p>
+            <h2>{m.home_title()}</h2>
+            <p>{m.home_description()}</p>
             {journey.lensDraft ? (
               <button type="button" className="primary-action" onClick={journey.beginJourney}>
-                Continue Lens Journey · Step {journey.lensStepNumber} of {journey.lensOrder.length}
+                {m.home_continue_journey({
+                  step: journey.lensStepNumber,
+                  total: journey.lensOrder.length,
+                })}
               </button>
             ) : (
               <button type="button" className="primary-action" onClick={() => selectTab('garden')}>
-                Enter the Garden
+                {m.home_enter_garden()}
               </button>
             )}
           </div>
@@ -220,7 +231,7 @@ export function App() {
             <img
               className="home-companion-art"
               src={activeTheme === 'dark' ? companionIdleDarkUrl : companionIdleUrl}
-              alt="Ragdoll-style pet sitting in the garden."
+              alt={m.app_pet_alt()}
             />
             <p>{petMessage}</p>
           </div>
@@ -229,10 +240,10 @@ export function App() {
 
       {activeTab === 'garden' && (
         <section className="garden-view">
-          <h1 className="sr-only">Dream Garden</h1>
+          <h1 className="sr-only">{m.garden_title()}</h1>
           <div className="garden-stage">
             <Suspense
-              fallback={<div className="garden-canvas loading-canvas">Garden is waking up.</div>}
+              fallback={<div className="garden-canvas loading-canvas">{m.garden_loading()}</div>}
             >
               <GardenCanvas
                 state={gardenState}
@@ -242,7 +253,7 @@ export function App() {
                 currentLens={journey.currentLens}
                 lensSessionActive={Boolean(journey.lensDraft)}
                 petDebug={petDebug}
-                onPetTapped={() => setPetMessage('Your pet notices you back.')}
+                onPetTapped={() => setPetMessage(m.pet_notices_back())}
                 onSeedSelected={setSelectedSeed}
                 lastWateringEvent={lastWateringEvent}
                 onSignalRequested={journey.beginJourney}
@@ -255,15 +266,15 @@ export function App() {
               <div className="garden-status" aria-live="polite">
                 <span>
                   {pendingSeed
-                    ? 'Place the seed in an open soil spot.'
+                    ? m.garden_pending_seed_status()
                     : journey.lensDraft
                       ? lensDefinitions[journey.lensDraft.currentLens].title
-                      : `${seeds.length} saved seed${seeds.length === 1 ? '' : 's'}`}
+                      : savedSeedCountLabel(seeds.length)}
                 </span>
               </div>
             )}
             {(journey.lensDraft || pendingSeed) && !journey.lensPanelOpen && (
-              <div className="lens-progress" aria-label="Lens journey progress">
+              <div className="lens-progress" aria-label={m.garden_lens_progress_label()}>
                 {journey.lensOrder.map((kind) => {
                   const complete =
                     Boolean(journey.lensDraft?.completedLensIds.includes(kind)) ||
@@ -313,11 +324,11 @@ export function App() {
               )}
             {pendingSeed && (
               <div className="placement-panel" data-testid="placement-panel" aria-live="polite">
-                <strong>Seed ready</strong>
+                <strong>{m.garden_seed_ready()}</strong>
                 <span>
                   {accessiblePlantPlot
-                    ? 'Drag it into the soil, or plant it here with the accessible control.'
-                    : 'The designed soil spots are full for now.'}
+                    ? m.garden_seed_ready_available()
+                    : m.garden_seed_ready_full()}
                 </span>
                 <button
                   type="button"
@@ -334,7 +345,7 @@ export function App() {
                     }
                   }}
                 >
-                  Plant Here
+                  {m.garden_plant_here()}
                 </button>
               </div>
             )}
@@ -342,17 +353,14 @@ export function App() {
               {petMessage}
             </div>
             <div className="sr-only garden-keyboard-controls">
-              <p>
-                Dream Garden keyboard controls. Start the glowing signal to begin a lens journey.
-                Use Plant Here when a seed is ready.
-              </p>
+              <p>{m.garden_keyboard_controls()}</p>
               <button
                 type="button"
                 data-testid="start-lens-journey"
                 disabled={Boolean(pendingSeed)}
                 onClick={journey.beginJourney}
               >
-                Start lens journey
+                {m.garden_start_lens_journey()}
               </button>
               {seeds.map((seed) => (
                 <button
@@ -361,7 +369,7 @@ export function App() {
                   aria-label={seedCardAccessibilityLabel(seed)}
                   onClick={() => setSelectedSeed(seed)}
                 >
-                  Open seed
+                  {m.garden_open_seed()}
                 </button>
               ))}
             </div>
@@ -373,19 +381,17 @@ export function App() {
         <section className="panel archive-view">
           <div className="section-heading archive-heading">
             <div>
-              <p className="eyebrow">Archive</p>
-              <h2>Seeds you have planted.</h2>
+              <p className="eyebrow">{m.archive_eyebrow()}</p>
+              <h2>{m.archive_title()}</h2>
             </div>
-            <span className="section-count">
-              {seeds.length} planted seed{seeds.length === 1 ? '' : 's'}
-            </span>
+            <span className="section-count">{plantedSeedCountLabel(seeds.length)}</span>
           </div>
           {seeds.length === 0 ? (
             <div className="archive-empty">
               <SeedStageArt stageIndex={0} theme={activeTheme} />
-              <p>No seeds yet. Your first lens journey plants one.</p>
+              <p>{m.archive_empty()}</p>
               <button type="button" className="primary-action" onClick={() => selectTab('garden')}>
-                Visit the Garden
+                {m.archive_visit_garden()}
               </button>
             </div>
           ) : (
@@ -399,9 +405,13 @@ export function App() {
                   onClick={() => setSelectedSeed(seed)}
                 >
                   <SeedStageArt seed={seed} theme={activeTheme} />
-                  <span>{seedStatusLabel(seed.status)} seed</span>
+                  <span>
+                    {m.archive_seed_card_status({ status: seedStatusLabel(seed.status) })}
+                  </span>
                   <strong>{seed.unhookedText || seed.labelText || seed.tinyAction}</strong>
-                  <small>Planted {friendlySeedDate(seed.createdAt)}</small>
+                  <small>
+                    {m.archive_planted_date({ date: friendlySeedDate(seed.createdAt) })}
+                  </small>
                 </button>
               ))}
             </div>
@@ -412,11 +422,11 @@ export function App() {
       {activeTab === 'settings' && (
         <section className="panel settings-view">
           <div>
-            <p className="eyebrow">Settings</p>
-            <h2>Tuned for quiet reflection.</h2>
+            <p className="eyebrow">{m.settings_eyebrow()}</p>
+            <h2>{m.settings_title()}</h2>
           </div>
           <fieldset className="settings-section settings-theme">
-            <legend>Appearance</legend>
+            <legend>{m.settings_appearance()}</legend>
             <div className="segmented-grid theme-preference-grid">
               {themePreferenceOptions.map((option) => (
                 <label
@@ -438,7 +448,7 @@ export function App() {
             </div>
           </fieldset>
           <div className="settings-section">
-            <h3>Comfort</h3>
+            <h3>{m.settings_comfort()}</h3>
             <label className="toggle">
               <input
                 type="checkbox"
@@ -447,28 +457,25 @@ export function App() {
                   setSettings((current) => ({ ...current, reducedMotion: event.target.checked }))
                 }
               />
-              Reduce garden motion
+              {m.settings_reduce_motion()}
             </label>
           </div>
           <div className="settings-section">
-            <h3>Your data</h3>
-            <p>
-              Reflection text, seeds, the lens profile, drafts, and settings stay on this device, in
-              this browser. Nothing is uploaded, and no AI service ever reads your reflections.
-            </p>
+            <h3>{m.settings_your_data()}</h3>
+            <p>{m.settings_data_description()}</p>
             <div className="settings-actions">
               {confirmingProfileReset ? (
                 <div
                   className="confirm-inline"
                   role="group"
-                  aria-label="Confirm lens profile reset"
+                  aria-label={m.settings_confirm_profile_reset_label()}
                 >
-                  <span>This discards your journey in progress.</span>
+                  <span>{m.settings_profile_reset_warning()}</span>
                   <button type="button" onClick={() => setConfirmingProfileReset(false)}>
-                    Keep Journey
+                    {m.settings_keep_journey()}
                   </button>
                   <button type="button" className="danger" onClick={resetLensProfile}>
-                    Reset Anyway
+                    {m.settings_reset_anyway()}
                   </button>
                 </div>
               ) : (
@@ -482,22 +489,28 @@ export function App() {
                     }
                   }}
                 >
-                  Reset Lens Profile
+                  {m.settings_reset_lens_profile()}
                 </button>
               )}
               <button type="button" onClick={exportSeeds} disabled={seeds.length === 0}>
-                Export Seed Data
+                {m.settings_export_seed_data()}
               </button>
               {confirmingSeedDelete ? (
-                <div className="confirm-inline" role="group" aria-label="Confirm seed deletion">
+                <div
+                  className="confirm-inline"
+                  role="group"
+                  aria-label={m.settings_confirm_seed_deletion_label()}
+                >
                   <span>
-                    Delete {seeds.length} seed{seeds.length === 1 ? '' : 's'} permanently?
+                    {seeds.length === 1
+                      ? m.settings_delete_seed_one({ count: seeds.length })
+                      : m.settings_delete_seed_many({ count: seeds.length })}
                   </span>
                   <button type="button" onClick={() => setConfirmingSeedDelete(false)}>
-                    Cancel
+                    {m.settings_cancel()}
                   </button>
                   <button type="button" className="danger" onClick={deleteAllSeeds}>
-                    Delete Permanently
+                    {m.settings_delete_permanently()}
                   </button>
                 </div>
               ) : (
@@ -507,7 +520,7 @@ export function App() {
                   onClick={() => setConfirmingSeedDelete(true)}
                   disabled={seeds.length === 0}
                 >
-                  Delete Seeds
+                  {m.settings_delete_seeds()}
                 </button>
               )}
             </div>

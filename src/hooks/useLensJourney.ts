@@ -10,6 +10,7 @@ import {
   lensDefinitions,
   lensOrderForProfile,
 } from '../domain/lenses';
+import { m } from '../paraglide/messages.js';
 import type { createSignalGardenRepository } from '../persistence/repositories';
 
 type Repository = ReturnType<typeof createSignalGardenRepository>;
@@ -55,7 +56,7 @@ export function useLensJourney({
     setLensDraft(draft);
     setLensInput(draft.responses[lensDefinitions[draft.currentLens].responseKey]);
     setLensPanelOpen(true);
-    onMessage('A signal is glowing. Move through it one lens at a time.');
+    onMessage(m.pet_signal_glowing());
     onEnterGarden();
   }
 
@@ -66,7 +67,7 @@ export function useLensJourney({
     }
 
     if (kind !== lensDraft.currentLens) {
-      onMessage('Follow the glowing lens one step at a time.');
+      onMessage(m.pet_follow_glowing_lens());
       return;
     }
 
@@ -87,14 +88,14 @@ export function useLensJourney({
       setLensDraft(null);
       repository.clearLensSessionDraft();
       setLensPanelOpen(false);
-      onMessage('The lens journey becomes a seed. Plant it in the soil.');
+      onMessage(m.pet_journey_becomes_seed());
       onSeedReady(seed);
       return;
     }
 
     const nextDefinition = lensDefinitions[updatedDraft.currentLens];
     setLensInput(updatedDraft.responses[nextDefinition.responseKey]);
-    onMessage(`${nextDefinition.title}. Your pet stays close.`);
+    onMessage(m.pet_next_lens({ title: nextDefinition.title }));
   }
 
   function clearJourney() {
@@ -102,7 +103,7 @@ export function useLensJourney({
     setLensPanelOpen(false);
     setLensInput('');
     repository.clearLensSessionDraft();
-    onMessage('The signal settles back into the garden.');
+    onMessage(m.pet_signal_settles());
   }
 
   function dismissPanel() {

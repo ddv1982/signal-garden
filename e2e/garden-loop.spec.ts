@@ -1,4 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
+import { m } from '../src/paraglide/messages.js';
+
+const lensLabels = {
+  word: m.lens_word_field(),
+  body: m.lens_body_field(),
+  emotion: m.lens_emotion_field(),
+  image: m.lens_image_field(),
+  observer: m.lens_observer_field(),
+  meaning: m.lens_meaning_field(),
+  action: m.lens_action_field(),
+};
 
 test.describe('garden-first lens journey', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,15 +33,15 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByRole('button', { name: 'Head-butt' })).toHaveCount(0);
 
     await startLensJourney(page);
-    await fillLens(page, 'What word or story is attached?', 'I am behind');
-    await fillLens(page, 'Where does this show up in your body?', 'tight chest');
-    await fillLens(page, 'What emotion is nearby?', 'sad, worried');
-    await fillLens(page, 'If this had an image, what would it look like?', 'a small gray cloud');
-    await fillLens(page, 'What notices this experience?', 'awareness is here too');
-    await fillLens(page, 'What else could be true beyond the first label?', 'I may need rest');
-    await fillLens(page, 'What is one tiny kind action?', 'Take one soft pause', 'Make Seed');
+    await fillLens(page, lensLabels.word, 'I am behind');
+    await fillLens(page, lensLabels.body, 'tight chest');
+    await fillLens(page, lensLabels.emotion, 'sad, worried');
+    await fillLens(page, lensLabels.image, 'a small gray cloud');
+    await fillLens(page, lensLabels.observer, 'awareness is here too');
+    await fillLens(page, lensLabels.meaning, 'I may need rest');
+    await fillLens(page, lensLabels.action, 'Take one soft pause', m.lens_make_seed());
 
-    await expect(page.getByText('Place the seed in an open soil spot.')).toBeVisible();
+    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-plot-mode', 'planting');
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
       'data-available-plots',
@@ -38,7 +49,7 @@ test.describe('garden-first lens journey', () => {
     );
     await page.getByTestId('plant-here').click();
 
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -50,14 +61,14 @@ test.describe('garden-first lens journey', () => {
         },
       ]);
     await page.reload();
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
 
-    await page.getByRole('button', { name: 'Archive' }).click();
+    await page.getByRole('button', { name: m.tab_archive() }).click();
     await page.getByRole('button', { name: /I am behind/i }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByText('Goal: Take one soft pause', { exact: true })).toBeVisible();
-    await dialog.getByRole('tab', { name: 'History' }).click();
-    await dialog.getByText('Original lens journey').click();
+    await dialog.getByRole('tab', { name: m.seed_dialog_tab_history() }).click();
+    await dialog.getByText(m.seed_dialog_original_journey()).click();
     await expect(dialog.getByText('Action: Take one soft pause', { exact: true })).toBeVisible();
     await expect(
       dialog.getByText('Pause Wider: awareness is here too', { exact: true })
@@ -69,13 +80,13 @@ test.describe('garden-first lens journey', () => {
   test('persists an unfinished lens draft after reload', async ({ page }) => {
     await completeOnboarding(page);
     await startLensJourney(page);
-    await fillLens(page, 'What word or story is attached?', 'I am not enough');
+    await fillLens(page, lensLabels.word, 'I am not enough');
 
     await page.reload();
-    await expect(page.getByText('Notice the body weather')).toBeVisible();
-    await page.getByRole('button', { name: 'Feel Body' }).click();
+    await expect(page.getByText(m.lens_body_title())).toBeVisible();
+    await page.getByRole('button', { name: m.lens_body_action() }).click();
     await expect(page.getByTestId('lens-panel')).toBeVisible();
-    await expect(page.getByLabel('Where does this show up in your body?')).toBeVisible();
+    await expect(page.getByLabel(lensLabels.body)).toBeVisible();
   });
 
   test('starts a lens journey from the canvas signal', async ({ page }) => {
@@ -88,14 +99,14 @@ test.describe('garden-first lens journey', () => {
     await clickCanvasFraction(page, 0.72, 0.5);
 
     await expect(page.getByTestId('lens-panel')).toBeVisible();
-    await expect(page.getByLabel('What word or story is attached?')).toBeVisible();
+    await expect(page.getByLabel(lensLabels.word)).toBeVisible();
   });
 
   test('only the active canvas lens object opens the lens panel', async ({ page }) => {
     await completeOnboarding(page);
     await startLensJourney(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
-    await expect(page.getByLabel('What word or story is attached?')).toBeVisible();
+    await expect(page.getByLabel(lensLabels.word)).toBeVisible();
 
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('lens-panel')).toBeHidden();
@@ -105,7 +116,7 @@ test.describe('garden-first lens journey', () => {
 
     await clickActiveLensTarget(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
-    await expect(page.getByLabel('What word or story is attached?')).toBeVisible();
+    await expect(page.getByLabel(lensLabels.word)).toBeVisible();
   });
 
   test('plants a completed seed from the canvas soil and persists it', async ({ page }) => {
@@ -117,10 +128,10 @@ test.describe('garden-first lens journey', () => {
     await completeOnboarding(page);
     await completeLensJourney(page);
 
-    await expect(page.getByText('Place the seed in an open soil spot.')).toBeVisible();
+    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
     await clickCanvasFraction(page, 0.74, 0.87);
 
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
       'data-selected-plot',
       'front-right'
@@ -134,7 +145,7 @@ test.describe('garden-first lens journey', () => {
         },
       ]);
     await page.reload();
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
   });
 
   test('starts the pet without constant bounce', async ({ page }) => {
@@ -154,8 +165,10 @@ test.describe('garden-first lens journey', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('.app-shell')).toHaveAttribute('data-theme-preference', 'system');
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'dark');
-    await expect(page.getByRole('button', { name: 'Match system theme' })).toHaveClass(/active/);
-    await expect(page.getByRole('button', { name: 'Use dark mode' })).not.toHaveClass(/active/);
+    await expect(page.getByRole('button', { name: m.theme_match_system() })).toHaveClass(/active/);
+    await expect(page.getByRole('button', { name: m.theme_use_dark_mode() })).not.toHaveClass(
+      /active/
+    );
   });
 
   test('keeps the dark lens chip menu free of horizontal scrollbars', async ({ page }) => {
@@ -167,7 +180,7 @@ test.describe('garden-first lens journey', () => {
 
     const lensProgress = page.locator('.lens-progress');
     await expect(lensProgress).toBeVisible();
-    await expect(page.getByText('Loosen the word stones')).toBeVisible();
+    await expect(page.getByText(m.lens_word_title())).toBeVisible();
     await expect
       .poll(() =>
         lensProgress.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
@@ -187,7 +200,7 @@ test.describe('garden-first lens journey', () => {
     await page.reload();
     await completeOnboarding(page);
 
-    await page.getByRole('button', { name: 'Use light mode' }).click();
+    await page.getByRole('button', { name: m.theme_use_light_mode() }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'light');
     await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'light' });
@@ -204,13 +217,13 @@ test.describe('garden-first lens journey', () => {
     await page.reload();
     await completeOnboarding(page);
 
-    await page.getByRole('button', { name: 'Use dark mode' }).click();
+    await page.getByRole('button', { name: m.theme_use_dark_mode() }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-texture-theme', 'dark');
     await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'dark' });
 
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await page.getByLabel('Follow system').check();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await page.getByLabel(m.theme_follow_system()).check();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect.poll(() => storedSettings(page)).toMatchObject({ themePreference: 'system' });
   });
@@ -290,7 +303,7 @@ test.describe('garden-first lens journey', () => {
     await completeOnboarding(page);
     await completeLensJourney(page);
     await page.getByTestId('plant-here').click();
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
 
     await completeLensJourney(page);
 
@@ -313,21 +326,17 @@ test.describe('garden-first lens journey', () => {
     await completeOnboarding(page);
     await completeLensJourney(page);
     await page.getByTestId('plant-here').click();
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
 
-    await page.getByRole('button', { name: 'Archive' }).click();
+    await page.getByRole('button', { name: m.tab_archive() }).click();
     await page.getByRole('button', { name: /I am behind/i }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByRole('button', { name: 'Grow Seed' })).toHaveCount(0);
-    await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await dialog.getByLabel('How can this label soften today?').fill('   ');
-    await dialog
-      .getByLabel('What small action gives this seed water?')
-      .fill('Take one gentle breath.');
-    await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await expect(
-      dialog.getByText('Add both a softened label and one small action before watering.')
-    ).toBeVisible();
+    await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
+    await dialog.getByLabel(m.seed_prompt_first_label()).fill('   ');
+    await dialog.getByLabel(m.seed_prompt_first_action()).fill('Take one gentle breath.');
+    await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
+    await expect(dialog.getByText(m.seed_dialog_validation_watering())).toBeVisible();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -336,27 +345,23 @@ test.describe('garden-first lens journey', () => {
           growthPoints: 0,
         },
       ]);
-    await dialog.getByRole('button', { name: 'Let it rest' }).click();
-    await dialog.getByRole('button', { name: 'Water Seed' }).click();
-    await expect(
-      dialog.getByText('Add both a softened label and one small action before watering.')
-    ).toHaveCount(0);
-    await expect(dialog.getByLabel('How can this label soften today?')).toHaveValue('');
-    await expect(dialog.getByLabel('What small action gives this seed water?')).toHaveValue('');
+    await dialog.getByRole('button', { name: m.lens_let_it_rest() }).click();
+    await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
+    await expect(dialog.getByText(m.seed_dialog_validation_watering())).toHaveCount(0);
+    await expect(dialog.getByLabel(m.seed_prompt_first_label())).toHaveValue('');
+    await expect(dialog.getByLabel(m.seed_prompt_first_action())).toHaveValue('');
     await dialog
-      .getByLabel('How can this label soften today?')
+      .getByLabel(m.seed_prompt_first_label())
       .fill('This is one story, not the whole of me.');
-    await dialog
-      .getByLabel('What small action gives this seed water?')
-      .fill('Take one gentle breath.');
-    await dialog.getByRole('button', { name: 'Water Seed' }).click();
+    await dialog.getByLabel(m.seed_prompt_first_action()).fill('Take one gentle breath.');
+    await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
 
-    await dialog.getByRole('tab', { name: 'History' }).click();
-    await dialog.getByText('Watering history').click();
+    await dialog.getByRole('tab', { name: m.seed_dialog_tab_history() }).click();
+    await dialog.getByText(m.seed_dialog_watering_history()).click();
     await expect(dialog.getByText('This is one story, not the whole of me.')).toBeVisible();
     await expect(dialog.getByText('Take one gentle breath.')).toBeVisible();
-    await dialog.getByRole('tab', { name: 'Water' }).click();
-    await expect(page.getByText('You watered this seed with one kind action.')).toHaveCount(0);
+    await dialog.getByRole('tab', { name: m.seed_dialog_tab_water() }).click();
+    await expect(page.getByText(m.pet_seed_watered())).toHaveCount(0);
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -373,22 +378,20 @@ test.describe('garden-first lens journey', () => {
         },
       ]);
 
-    await dialog.getByRole('button', { name: 'Close' }).click();
-    await page.getByRole('button', { name: 'Garden' }).click();
+    await dialog.getByRole('button', { name: m.seed_dialog_close() }).click();
+    await page.getByRole('button', { name: m.tab_garden() }).click();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-watered-seed', /\S/);
     const firstWateringEvent = await page
       .getByTestId('garden-canvas')
       .getAttribute('data-watering-event');
     expect(firstWateringEvent).toBeTruthy();
 
-    await page.getByRole('button', { name: 'Archive' }).click();
+    await page.getByRole('button', { name: m.tab_archive() }).click();
     await page.getByRole('button', { name: /I am behind/i }).click();
-    await dialog.getByRole('tab', { name: 'Water' }).click();
-    await dialog
-      .getByLabel('What did you notice after trying this?')
-      .fill('This story is smaller today.');
-    await dialog.getByLabel('What is the next kind version?').fill('Step outside for one minute.');
-    await dialog.getByRole('button', { name: 'Water Seed' }).click();
+    await dialog.getByRole('tab', { name: m.seed_dialog_tab_water() }).click();
+    await dialog.getByLabel(m.seed_prompt_after_label()).fill('This story is smaller today.');
+    await dialog.getByLabel(m.seed_prompt_next_action()).fill('Step outside for one minute.');
+    await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -408,9 +411,9 @@ test.describe('garden-first lens journey', () => {
       ]);
     await expect(dialog.getByTestId('bloom-form')).toBeVisible();
     await dialog
-      .getByLabel('What does this seed become now?')
+      .getByLabel(m.seed_dialog_bloom_label())
       .fill('This became one small flower of trust.');
-    await dialog.getByRole('button', { name: 'Bloom Into Flower' }).click();
+    await dialog.getByRole('button', { name: m.seed_dialog_bloom_submit() }).click();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -424,8 +427,8 @@ test.describe('garden-first lens journey', () => {
           },
         },
       ]);
-    await dialog.getByRole('button', { name: 'Close' }).click();
-    await page.getByRole('button', { name: 'Garden' }).click();
+    await dialog.getByRole('button', { name: m.seed_dialog_close() }).click();
+    await page.getByRole('button', { name: m.tab_garden() }).click();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-watering-event', /\S/);
     const secondWateringEvent = await page
       .getByTestId('garden-canvas')
@@ -434,7 +437,7 @@ test.describe('garden-first lens journey', () => {
     expect(secondWateringEvent).not.toBe(firstWateringEvent);
 
     await page.reload();
-    await expect(page.getByText('1 saved seed')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -469,7 +472,7 @@ test.describe('garden-first lens journey', () => {
 
     await page.getByTestId('plant-here').click();
 
-    await expect(page.getByText('2 saved seeds')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_many({ count: 2 }))).toBeVisible();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -507,7 +510,7 @@ test.describe('garden-first lens journey', () => {
     await completeLensJourney(page);
 
     await expect(page.getByTestId('plant-here')).toBeDisabled();
-    await expect(page.getByText('The designed soil spots are full for now.')).toBeVisible();
+    await expect(page.getByText(m.garden_seed_ready_full())).toBeVisible();
     await expect.poll(() => storedSeeds(page)).toHaveLength(12);
   });
 
@@ -525,7 +528,7 @@ test.describe('garden-first lens journey', () => {
 
     await page.getByTestId('plant-here').click();
 
-    await expect(page.getByText('4 saved seeds')).toBeVisible();
+    await expect(page.getByText(m.garden_saved_seed_many({ count: 4 }))).toBeVisible();
     await expect
       .poll(() => storedSeeds(page))
       .toMatchObject([
@@ -623,8 +626,8 @@ test.describe('garden-first lens journey', () => {
 
   test('keeps reduced-motion pet behavior to frame changes', async ({ page }) => {
     await completeOnboarding(page);
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await page.getByLabel('Reduce garden motion').check();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await page.getByLabel(m.settings_reduce_motion()).check();
     await page.reload();
 
     const canvas = page.getByTestId('garden-canvas');
@@ -645,8 +648,8 @@ test.describe('garden-first lens journey', () => {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await completeOnboarding(page);
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await page.getByLabel('Reduce garden motion').check();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await page.getByLabel(m.settings_reduce_motion()).check();
     await page.reload();
 
     const canvas = page.getByTestId('garden-canvas');
@@ -664,23 +667,23 @@ test.describe('garden-first lens journey', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('lens-panel')).toBeHidden();
 
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await page.getByLabel('Reduce garden motion').check();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await page.getByLabel(m.settings_reduce_motion()).check();
     await page.reload();
-    await page.getByRole('button', { name: 'Settings' }).click();
-    await expect(page.getByLabel('Reduce garden motion')).toBeChecked();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await expect(page.getByLabel(m.settings_reduce_motion())).toBeChecked();
   });
 });
 
 async function completeOnboarding(page: Page) {
   await expect(page.getByTestId('onboarding-panel')).toBeVisible();
-  await page.getByLabel('Mixed').check();
-  await page.getByLabel('Open path').check();
-  await page.getByRole('button', { name: 'Start in the Garden' }).click();
+  await page.getByLabel(m.onboarding_mode_mixed()).check();
+  await page.getByLabel(m.onboarding_order_open()).check();
+  await page.getByRole('button', { name: m.onboarding_start() }).click();
   await expect(page.getByTestId('onboarding-panel')).toBeHidden();
 }
 
-async function fillLens(page: Page, label: string, value: string, buttonName = 'Continue') {
+async function fillLens(page: Page, label: string, value: string, buttonName = m.lens_continue()) {
   await expect(page.getByTestId('lens-panel')).toBeVisible();
   await page.getByLabel(label).fill(value);
   await page.getByTestId('lens-panel').getByRole('button', { name: buttonName }).click();
@@ -688,13 +691,13 @@ async function fillLens(page: Page, label: string, value: string, buttonName = '
 
 async function completeLensJourney(page: Page) {
   await startLensJourney(page);
-  await fillLens(page, 'What word or story is attached?', 'I am behind');
-  await fillLens(page, 'Where does this show up in your body?', 'tight chest');
-  await fillLens(page, 'What emotion is nearby?', 'sad, worried');
-  await fillLens(page, 'If this had an image, what would it look like?', 'a small gray cloud');
-  await fillLens(page, 'What notices this experience?', 'awareness is here too');
-  await fillLens(page, 'What else could be true beyond the first label?', 'I may need rest');
-  await fillLens(page, 'What is one tiny kind action?', 'Take one soft pause', 'Make Seed');
+  await fillLens(page, lensLabels.word, 'I am behind');
+  await fillLens(page, lensLabels.body, 'tight chest');
+  await fillLens(page, lensLabels.emotion, 'sad, worried');
+  await fillLens(page, lensLabels.image, 'a small gray cloud');
+  await fillLens(page, lensLabels.observer, 'awareness is here too');
+  await fillLens(page, lensLabels.meaning, 'I may need rest');
+  await fillLens(page, lensLabels.action, 'Take one soft pause', m.lens_make_seed());
 }
 
 async function startLensJourney(page: Page) {

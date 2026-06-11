@@ -1,3 +1,5 @@
+import { m } from '../paraglide/messages.js';
+
 const DAY_MS = 86_400_000;
 
 /** Friendly planting date: "today", "yesterday", "4 days ago", then "June 3" (with year once it differs). */
@@ -9,9 +11,9 @@ export function friendlySeedDate(iso: string, now: Date = new Date()): string {
     new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
   const dayDiff = Math.round((startOfDay(now) - startOfDay(date)) / DAY_MS);
 
-  if (dayDiff <= 0) return 'today';
-  if (dayDiff === 1) return 'yesterday';
-  if (dayDiff < 7) return `${dayDiff} days ago`;
+  if (dayDiff <= 0) return m.date_today();
+  if (dayDiff === 1) return m.date_yesterday();
+  if (dayDiff < 7) return m.date_days_ago({ count: dayDiff });
 
   return date.toLocaleDateString(undefined, {
     month: 'long',

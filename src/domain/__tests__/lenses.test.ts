@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { m } from '../../paraglide/messages.js';
 import {
   completeLens,
   createJourneyFromSession,
@@ -37,7 +38,7 @@ describe('lens domain', () => {
     expect(isLensSessionComplete(draft, profile)).toBe(true);
 
     const seed = createReflectionSeedFromJourney(createJourneyFromSession(draft, profile));
-    expect(seed.unhookedText).toBe('Noticing the story: “I am behind”');
+    expect(seed.unhookedText).toBe(m.lens_unhooked_text({ word: 'I am behind' }));
     expect(seed.bodySignals).toEqual(['tight chest']);
     expect(seed.emotions).toEqual(['sad', 'worried']);
     expect(seed.dreams).toEqual(['a small gray cloud']);

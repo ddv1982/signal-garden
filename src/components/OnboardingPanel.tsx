@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import type { InnerExperienceMode, LensPromptOrder } from '../../shared/models';
+import { m } from '../paraglide/messages.js';
 
 const modeOptions: Array<{ value: InnerExperienceMode; label: string }> = [
-  { value: 'words', label: 'Words' },
-  { value: 'images', label: 'Images' },
-  { value: 'body', label: 'Body' },
-  { value: 'emotions', label: 'Emotions' },
-  { value: 'knowing', label: 'Quiet knowing' },
-  { value: 'mixed', label: 'Mixed' },
+  { value: 'words', label: m.onboarding_mode_words() },
+  { value: 'images', label: m.onboarding_mode_images() },
+  { value: 'body', label: m.onboarding_mode_body() },
+  { value: 'emotions', label: m.onboarding_mode_emotions() },
+  { value: 'knowing', label: m.onboarding_mode_knowing() },
+  { value: 'mixed', label: m.onboarding_mode_mixed() },
 ];
 
 const orderOptions: Array<{ value: LensPromptOrder; label: string }> = [
-  { value: 'open', label: 'Open path' },
-  { value: 'word-first', label: 'Words first' },
-  { value: 'body-first', label: 'Body first' },
-  { value: 'image-first', label: 'Images first' },
+  { value: 'open', label: m.onboarding_order_open() },
+  { value: 'word-first', label: m.onboarding_order_word_first() },
+  { value: 'body-first', label: m.onboarding_order_body_first() },
+  { value: 'image-first', label: m.onboarding_order_image_first() },
 ];
 
 type OnboardingPanelProps = {
@@ -38,14 +39,11 @@ export function OnboardingPanel({ onComplete }: OnboardingPanelProps) {
           onComplete(mode, order);
         }}
       >
-        <p className="eyebrow">Inner lens profile</p>
-        <h2 id="onboarding-title">How does experience usually arrive for you?</h2>
-        <p>
-          This only changes the order and emphasis of garden prompts. It is stored locally and is
-          not a diagnosis.
-        </p>
+        <p className="eyebrow">{m.onboarding_eyebrow()}</p>
+        <h2 id="onboarding-title">{m.onboarding_title()}</h2>
+        <p>{m.onboarding_description()}</p>
         <fieldset>
-          <legend>Most familiar signal</legend>
+          <legend>{m.onboarding_most_familiar_signal()}</legend>
           <div className="segmented-grid">
             {modeOptions.map((option) => (
               <label
@@ -65,7 +63,7 @@ export function OnboardingPanel({ onComplete }: OnboardingPanelProps) {
           </div>
         </fieldset>
         <fieldset>
-          <legend>Gentle path</legend>
+          <legend>{m.onboarding_gentle_path()}</legend>
           <div className="segmented-grid">
             {orderOptions.map((option) => (
               <label
@@ -85,7 +83,7 @@ export function OnboardingPanel({ onComplete }: OnboardingPanelProps) {
           </div>
         </fieldset>
         <button type="submit" className="primary-action">
-          Start in the Garden
+          {m.onboarding_start()}
         </button>
       </form>
     </section>

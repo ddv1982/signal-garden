@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { GardenPlot, GardenState, LensKind, ReflectionSeed } from '../../../shared/models';
 import type { ActiveTheme } from '../../domain/theme';
 import { growthStageForSeed } from '../../domain/seedGrowth';
+import { m } from '../../paraglide/messages.js';
 import {
   GARDEN_DESIGN_HEIGHT,
   GARDEN_DESIGN_WIDTH,
@@ -318,7 +319,7 @@ export class GardenScene extends Phaser.Scene {
     const point = gardenNormalizedPoint(frame, 0.5, 0.51);
     const dark = this.theme === 'dark';
     const label = this.add
-      .text(point.x - 78, point.y, 'choose a plot', {
+      .text(point.x - 78, point.y, m.garden_canvas_choose_plot(), {
         backgroundColor: dark ? 'rgba(18, 32, 34, 0.78)' : 'rgba(255, 250, 241, 0.72)',
         color: dark ? '#f1e9cf' : '#49382e',
         fontFamily: 'Georgia, serif',

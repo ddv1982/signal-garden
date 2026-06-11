@@ -1,12 +1,18 @@
 import type { ReflectionSeed, SeedBloomOutcome } from '../../shared/models';
+import { m } from '../paraglide/messages.js';
 import { growthStageForSeed, type SeedGrowthStage } from './seedGrowth';
 
-export const growthStepLabels = ['Seed', 'Sprout', 'Bud', 'Flower'] as const;
+export const growthStepLabels = [
+  m.seed_growth_step_seed(),
+  m.seed_growth_step_sprout(),
+  m.seed_growth_step_bud(),
+  m.seed_growth_step_flower(),
+] as const;
 
 export const bloomOutcomeOptions: Array<{ value: SeedBloomOutcome; label: string }> = [
-  { value: 'done', label: 'It happened' },
-  { value: 'adapted', label: 'It changed' },
-  { value: 'more-care', label: 'It needs more care' },
+  { value: 'done', label: m.seed_bloom_outcome_done() },
+  { value: 'adapted', label: m.seed_bloom_outcome_adapted() },
+  { value: 'more-care', label: m.seed_bloom_outcome_more_care() },
 ];
 
 const growthStageIndex: Record<SeedGrowthStage, number> = {
@@ -31,53 +37,57 @@ export function seedStageCopy(seed: ReflectionSeed) {
   const index = growthIndexForSeed(seed);
   if (index === 3) {
     return {
-      eyebrow: 'Flower',
-      title: 'This seed has bloomed.',
-      description: 'The action has become a flower in the garden.',
+      eyebrow: m.seed_stage_flower_eyebrow(),
+      title: m.seed_stage_flower_title(),
+      description: m.seed_stage_flower_description(),
     };
   }
   if (index === 2) {
     return {
-      eyebrow: 'Growing plant',
-      title: 'A bud is forming.',
-      description: 'One final reflection can decide whether this becomes a flower.',
+      eyebrow: m.seed_stage_growing_eyebrow(),
+      title: m.seed_stage_growing_title(),
+      description: m.seed_stage_growing_description(),
     };
   }
   if (index === 1) {
     return {
-      eyebrow: 'Sprout',
-      title: 'The seed has sprouted.',
-      description:
-        'Water it once more by noticing what changed and choosing the next kind version.',
+      eyebrow: m.seed_stage_sprout_eyebrow(),
+      title: m.seed_stage_sprout_title(),
+      description: m.seed_stage_sprout_description(),
     };
   }
   return {
-    eyebrow: 'Seed',
-    title: 'This seed is planted.',
-    description: 'Water it with one softened label and one small action.',
+    eyebrow: m.seed_stage_seed_eyebrow(),
+    title: m.seed_stage_seed_title(),
+    description: m.seed_stage_seed_description(),
   };
 }
 
 export function wateringPromptForSeed(seed: ReflectionSeed) {
   if (wateringCountForSeed(seed) >= 1) {
     return {
-      label: 'What did you notice after trying this?',
-      labelPlaceholder: 'Name what shifted, even if it was small.',
-      actionLabel: 'What is the next kind version?',
+      label: m.seed_prompt_after_label(),
+      labelPlaceholder: m.seed_prompt_after_placeholder(),
+      actionLabel: m.seed_prompt_next_action(),
       actionPlaceholder: seed.tinyAction,
     };
   }
 
   return {
-    label: 'How can this label soften today?',
-    labelPlaceholder: `The story "${seed.labelText || seed.tinyAction}" can soften into one passing thought.`,
-    actionLabel: 'What small action gives this seed water?',
+    label: m.seed_prompt_first_label(),
+    labelPlaceholder: m.seed_prompt_first_placeholder({
+      text: seed.labelText || seed.tinyAction,
+    }),
+    actionLabel: m.seed_prompt_first_action(),
     actionPlaceholder: seed.tinyAction,
   };
 }
 
 export function bloomOutcomeLabel(outcome: SeedBloomOutcome) {
-  return bloomOutcomeOptions.find((option) => option.value === outcome)?.label ?? 'It changed';
+  return (
+    bloomOutcomeOptions.find((option) => option.value === outcome)?.label ??
+    m.seed_bloom_outcome_adapted()
+  );
 }
 
 export function isReadyToBloom(seed: ReflectionSeed) {

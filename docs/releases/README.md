@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.22`](./0.1.22.md) — moves app copy into a typed Paraglide catalog and hardens generated i18n output for clean builds
 - [`0.1.21`](./0.1.21.md) — settles the planting spots into tidy garden beds that track the painted ground across window sizes
 - [`0.1.20`](./0.1.20.md) — removes the faint garden horizon line and retires the unreachable procedural drawing era behind a texture-coverage test
 - [`0.1.19`](./0.1.19.md) — polishes the home, archive, settings, and seed surfaces while cutting runtime image weight with WebP assets

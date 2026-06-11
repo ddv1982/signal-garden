@@ -33,6 +33,11 @@ corepack pnpm run dev
 
 Open `http://localhost:5173/`.
 
+## Copy
+
+User-facing app copy lives in `messages/en.json`. Edit that file, commit the change, and the
+Paraglide Vite plugin regenerates typed message functions during dev and build.
+
 ## Verify
 
 ```sh

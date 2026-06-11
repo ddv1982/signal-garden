@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReflectionSeed } from '../../../shared/models';
+import { m } from '../../paraglide/messages.js';
 import {
   advanceGardenGrowth,
   assignPlotToSeed,
@@ -171,14 +172,14 @@ describe('seed growth domain', () => {
         { outcome: 'done', reflection: 'It became a flower.' },
         '2026-06-07T10:06:00.000Z'
       )
-    ).toThrow('Seed bloom requires two waterings before final reflection.');
+    ).toThrow(m.seed_error_bloom_requires_two_waterings());
     expect(() =>
       bloomSeed(
         sprouted,
         { outcome: 'done', reflection: 'It became a flower.' },
         '2026-06-07T10:06:00.000Z'
       )
-    ).toThrow('Seed bloom requires two waterings before final reflection.');
+    ).toThrow(m.seed_error_bloom_requires_two_waterings());
   });
 
   it('keeps dream-heavy seeds botanical instead of becoming lanterns', () => {
@@ -248,14 +249,14 @@ describe('seed growth domain', () => {
         { transformedLabel: '   ', kindAction: 'Breathe.' },
         '2026-06-07T10:03:00.000Z'
       )
-    ).toThrow('Seed watering requires a softened label and kind action.');
+    ).toThrow(m.seed_error_watering_requires_fields());
     expect(() =>
       waterSeed(
         planted,
         { transformedLabel: 'A passing story.', kindAction: '   ' },
         '2026-06-07T10:03:00.000Z'
       )
-    ).toThrow('Seed watering requires a softened label and kind action.');
+    ).toThrow(m.seed_error_watering_requires_fields());
     expect(planted.status).toBe('planted');
     expect(planted.waterings).toBeUndefined();
   });

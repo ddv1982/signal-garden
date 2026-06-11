@@ -1,10 +1,18 @@
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 const buildSourceMap = process.env.BUILD_SOURCE_MAPS === 'true' ? 'hidden' : false;
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    paraglideVitePlugin({
+      project: './project.inlang',
+      outdir: './src/paraglide',
+      emitTsDeclarations: true,
+    }),
+    react(),
+  ],
   server: {
     port: 5173,
   },

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReflectionSeed } from '../../../shared/models';
+import { m } from '../../paraglide/messages.js';
 import {
   bloomOutcomeLabel,
   growthIndexForSeed,
@@ -67,26 +68,30 @@ describe('growthIndexForSeed', () => {
 
 describe('seedStageCopy', () => {
   it('describes each growth stage', () => {
-    expect(seedStageCopy(makeSeed()).eyebrow).toBe('Seed');
-    expect(seedStageCopy(makeSeed({ status: 'sprouted', growthPoints: 1 })).eyebrow).toBe('Sprout');
-    expect(seedStageCopy(makeSeed({ status: 'growing', growthPoints: 2 })).eyebrow).toBe(
-      'Growing plant'
+    expect(seedStageCopy(makeSeed()).eyebrow).toBe(m.seed_stage_seed_eyebrow());
+    expect(seedStageCopy(makeSeed({ status: 'sprouted', growthPoints: 1 })).eyebrow).toBe(
+      m.seed_stage_sprout_eyebrow()
     );
-    expect(seedStageCopy(makeSeed({ status: 'blooming', growthPoints: 3 })).eyebrow).toBe('Flower');
+    expect(seedStageCopy(makeSeed({ status: 'growing', growthPoints: 2 })).eyebrow).toBe(
+      m.seed_stage_growing_eyebrow()
+    );
+    expect(seedStageCopy(makeSeed({ status: 'blooming', growthPoints: 3 })).eyebrow).toBe(
+      m.seed_stage_flower_eyebrow()
+    );
   });
 });
 
 describe('wateringPromptForSeed', () => {
   it('prompts for a softened label before the first watering', () => {
     const prompt = wateringPromptForSeed(makeSeed());
-    expect(prompt.label).toBe('How can this label soften today?');
+    expect(prompt.label).toBe(m.seed_prompt_first_label());
     expect(prompt.labelPlaceholder).toContain('I always mess things up');
     expect(prompt.actionPlaceholder).toBe('Send one kind message');
   });
 
   it('prompts for what changed after a watering', () => {
     const prompt = wateringPromptForSeed(makeSeed({ waterings: [makeWatering('w1')] }));
-    expect(prompt.label).toBe('What did you notice after trying this?');
+    expect(prompt.label).toBe(m.seed_prompt_after_label());
   });
 });
 
@@ -121,8 +126,8 @@ describe('wateringCountForSeed', () => {
 
 describe('bloomOutcomeLabel', () => {
   it('maps outcomes to display labels', () => {
-    expect(bloomOutcomeLabel('done')).toBe('It happened');
-    expect(bloomOutcomeLabel('adapted')).toBe('It changed');
-    expect(bloomOutcomeLabel('more-care')).toBe('It needs more care');
+    expect(bloomOutcomeLabel('done')).toBe(m.seed_bloom_outcome_done());
+    expect(bloomOutcomeLabel('adapted')).toBe(m.seed_bloom_outcome_adapted());
+    expect(bloomOutcomeLabel('more-care')).toBe(m.seed_bloom_outcome_more_care());
   });
 });

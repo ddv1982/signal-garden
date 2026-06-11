@@ -4,6 +4,7 @@ import type {
   SeedStatus,
   SeedVisualType,
 } from '../../shared/models';
+import { m } from '../paraglide/messages.js';
 
 const GROWTH_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
@@ -29,7 +30,7 @@ export function waterSeed(
   const kindAction = input.kindAction.trim();
   const note = input.note?.trim();
   if (!transformedLabel || !kindAction) {
-    throw new Error('Seed watering requires a softened label and kind action.');
+    throw new Error(m.seed_error_watering_requires_fields());
   }
 
   const watered = advanceSeedWateringStage(seed, now);
@@ -59,10 +60,10 @@ export function bloomSeed(
 ): ReflectionSeed {
   const reflection = input.reflection.trim();
   if (!reflection) {
-    throw new Error('Seed bloom requires a reflection.');
+    throw new Error(m.seed_error_bloom_requires_reflection());
   }
   if ((seed.waterings?.length ?? 0) < 2) {
-    throw new Error('Seed bloom requires two waterings before final reflection.');
+    throw new Error(m.seed_error_bloom_requires_two_waterings());
   }
 
   return {

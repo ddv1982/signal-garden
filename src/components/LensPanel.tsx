@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { LensKind, LensSessionDraft } from '../../shared/models';
 import type { LensDefinition } from '../domain/lenses';
+import { m } from '../paraglide/messages.js';
 
 type LensPanelProps = {
   draft: LensSessionDraft;
@@ -40,7 +41,7 @@ export function LensPanel({
       role="dialog"
       aria-modal="false"
       aria-labelledby="lens-panel-title"
-      aria-label="Move this signal through the current lens"
+      aria-label={m.lens_panel_label()}
       onKeyDown={(event) => {
         if (event.key === 'Escape') onDismiss();
       }}
@@ -51,7 +52,7 @@ export function LensPanel({
     >
       <div>
         <p className="eyebrow">
-          Current lens · Step {stepNumber} of {lensOrder.length}
+          {m.lens_panel_eyebrow({ step: stepNumber, total: lensOrder.length })}
         </p>
         <h3 id="lens-panel-title">{definition.title}</h3>
         <div className="lens-step-meter" aria-hidden="true">
@@ -80,10 +81,10 @@ export function LensPanel({
       </label>
       <div className="form-actions">
         <button type="button" onClick={onRest}>
-          Let it rest
+          {m.lens_let_it_rest()}
         </button>
         <button type="submit" className="primary-action">
-          {isLastLens ? 'Make Seed' : 'Continue'}
+          {isLastLens ? m.lens_make_seed() : m.lens_continue()}
         </button>
       </div>
     </form>

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { m } from '../../paraglide/messages.js';
 import {
   initialWateringFormState,
   wateringFormReducer,
@@ -33,13 +34,13 @@ describe('wateringFormReducer', () => {
   it('records validation failures per form', () => {
     const wateringFailed = wateringFormReducer(initialWateringFormState, {
       type: 'watering-failed',
-      message: 'Add both a softened label and one small action before watering.',
+      message: m.seed_dialog_validation_watering(),
     });
     expect(wateringFailed.wateringError).toContain('softened label');
 
     const bloomFailed = wateringFormReducer(initialWateringFormState, {
       type: 'bloom-failed',
-      message: 'Add one reflection before the seed becomes a flower.',
+      message: m.seed_dialog_validation_bloom(),
     });
     expect(bloomFailed.bloomError).toContain('reflection');
   });

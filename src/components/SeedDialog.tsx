@@ -13,6 +13,7 @@ import {
 } from '../domain/seedDisplay';
 import type { SeedBloomInput, SeedWateringInput } from '../domain/seedGrowth';
 import { useWateringForm } from '../hooks/useWateringForm';
+import { m } from '../paraglide/messages.js';
 
 type SeedDialogTab = 'overview' | 'water' | 'history';
 
@@ -46,7 +47,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     if (!transformedLabel || !kindAction) {
       dispatch({
         type: 'watering-failed',
-        message: 'Add both a softened label and one small action before watering.',
+        message: m.seed_dialog_validation_watering(),
       });
       return;
     }
@@ -65,7 +66,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     if (!reflection) {
       dispatch({
         type: 'bloom-failed',
-        message: 'Add one reflection before the seed becomes a flower.',
+        message: m.seed_dialog_validation_bloom(),
       });
       return;
     }
@@ -87,18 +88,20 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       onClose={onClose}
     >
       <div className="dialog-heading">
-        <p className="eyebrow">{seedStatusLabel(seed.status)} seed</p>
+        <p className="eyebrow">{m.seed_dialog_eyebrow({ status: seedStatusLabel(seed.status) })}</p>
         <button
           ref={closeButtonRef}
           type="button"
-          aria-label="Close seed details"
+          aria-label={m.seed_dialog_close_details()}
           onClick={onClose}
         >
-          Close
+          {m.seed_dialog_close()}
         </button>
       </div>
-      <h2 id="seed-dialog-title">{seed.unhookedText || seed.labelText || 'A tiny kind action'}</h2>
-      <div className="seed-dialog-tabs" role="tablist" aria-label="Seed details">
+      <h2 id="seed-dialog-title">
+        {seed.unhookedText || seed.labelText || m.seed_dialog_fallback_title()}
+      </h2>
+      <div className="seed-dialog-tabs" role="tablist" aria-label={m.seed_dialog_details_label()}>
         {(['overview', 'water', 'history'] as SeedDialogTab[]).map((tab) => (
           <button
             key={tab}
@@ -108,7 +111,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
             className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
             onClick={() => setActiveTab(tab)}
           >
-            {tab[0].toUpperCase() + tab.slice(1)}
+            {seedDialogTabLabel(tab)}
           </button>
         ))}
       </div>
@@ -120,7 +123,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
             <strong>{seedStageCopy(seed).title}</strong>
             <span>{seedStageCopy(seed).description}</span>
           </div>
-          <div className="seed-progress" aria-label="Seed growth progress">
+          <div className="seed-progress" aria-label={m.seed_dialog_growth_progress()}>
             {growthStepLabels.map((step, index) => (
               <span key={step} className={index <= growthIndexForSeed(seed) ? 'complete' : ''}>
                 {step}
@@ -128,19 +131,20 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
             ))}
           </div>
           <p>
-            <strong>Goal:</strong> {seed.tinyAction}
+            <strong>{m.seed_dialog_goal_label()}</strong> {seed.tinyAction}
           </p>
           {seed.bloomReflection && (
             <p>
-              <strong>Bloom reflection:</strong> {seed.bloomReflection.reflection}
+              <strong>{m.seed_dialog_bloom_reflection_label()}</strong>{' '}
+              {seed.bloomReflection.reflection}
             </p>
           )}
           <button type="button" className="primary-action" onClick={() => setActiveTab('water')}>
             {seed.bloomReflection
-              ? 'Review Growth'
+              ? m.seed_dialog_review_growth()
               : isReadyToBloom(seed)
-                ? 'Reflect to Flower'
-                : 'Water Seed'}
+                ? m.seed_dialog_reflect_to_flower()
+                : m.seed_dialog_water_seed()}
           </button>
         </section>
       )}
@@ -149,14 +153,14 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
         <section className="seed-dialog-panel" role="tabpanel">
           {seed.bloomReflection ? (
             <div className="seed-stage-card">
-              <p className="eyebrow">Flower</p>
-              <strong>This seed has bloomed.</strong>
+              <p className="eyebrow">{m.seed_stage_flower_eyebrow()}</p>
+              <strong>{m.seed_stage_flower_title()}</strong>
               <span>{seed.bloomReflection.reflection}</span>
             </div>
           ) : isReadyToBloom(seed) ? (
             <form className="watering-form" data-testid="bloom-form" onSubmit={submitBloom}>
               <fieldset>
-                <legend>Did this goal/action happen, change, or need more care?</legend>
+                <legend>{m.seed_dialog_bloom_legend()}</legend>
                 <div className="segmented-grid">
                   {bloomOutcomeOptions.map((option) => (
                     <label
@@ -180,13 +184,13 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                 </div>
               </fieldset>
               <label>
-                What does this seed become now?
+                {m.seed_dialog_bloom_label()}
                 <textarea
                   value={form.bloomReflection}
                   onChange={(event) =>
                     dispatch({ type: 'set-bloom-reflection', value: event.target.value })
                   }
-                  placeholder="Name what grew from this small action."
+                  placeholder={m.seed_dialog_bloom_placeholder()}
                   required
                 />
               </label>
@@ -197,10 +201,10 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
               )}
               <div className="form-actions">
                 <button type="button" onClick={() => dispatch({ type: 'reset' })}>
-                  Let it rest
+                  {m.lens_let_it_rest()}
                 </button>
                 <button type="submit" className="primary-action">
-                  Bloom Into Flower
+                  {m.seed_dialog_bloom_submit()}
                 </button>
               </div>
             </form>
@@ -235,10 +239,10 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
               )}
               <div className="form-actions">
                 <button type="button" onClick={() => dispatch({ type: 'reset' })}>
-                  Let it rest
+                  {m.lens_let_it_rest()}
                 </button>
                 <button type="submit" className="primary-action">
-                  Water Seed
+                  {m.seed_dialog_water_seed()}
                 </button>
               </div>
             </form>
@@ -249,29 +253,29 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       {activeTab === 'history' && (
         <section className="seed-dialog-panel" role="tabpanel">
           <details>
-            <summary>Original lens journey</summary>
+            <summary>{m.seed_dialog_original_journey()}</summary>
             <div className="journey-detail">
               <p>
-                <strong>Action:</strong> {seed.tinyAction}
+                <strong>{m.seed_dialog_history_action()}</strong> {seed.tinyAction}
               </p>
               {seed.emotions.length > 0 && (
                 <p>
-                  <strong>Emotions:</strong> {seed.emotions.join(', ')}
+                  <strong>{m.seed_dialog_history_emotions()}</strong> {seed.emotions.join(', ')}
                 </p>
               )}
               {seed.bodySignals.length > 0 && (
                 <p>
-                  <strong>Body:</strong> {seed.bodySignals.join(', ')}
+                  <strong>{m.seed_dialog_history_body()}</strong> {seed.bodySignals.join(', ')}
                 </p>
               )}
               {seed.values.length > 0 && (
                 <p>
-                  <strong>Meaning:</strong> {seed.values.join(', ')}
+                  <strong>{m.seed_dialog_history_meaning()}</strong> {seed.values.join(', ')}
                 </p>
               )}
               {seed.dreams.length > 0 && (
                 <p>
-                  <strong>Image:</strong> {seed.dreams.join(', ')}
+                  <strong>{m.seed_dialog_history_image()}</strong> {seed.dreams.join(', ')}
                 </p>
               )}
               {seed.lensJourney?.lensOrder.map((kind) => {
@@ -287,7 +291,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
             </div>
           </details>
           <details>
-            <summary>Watering history</summary>
+            <summary>{m.seed_dialog_watering_history()}</summary>
             <div className="watering-history">
               {seed.waterings && seed.waterings.length > 0 ? (
                 seed.waterings.map((watering, index) => (
@@ -299,11 +303,15 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                   </p>
                 ))
               ) : (
-                <p>No waterings yet.</p>
+                <p>{m.seed_dialog_no_waterings()}</p>
               )}
               {seed.bloomReflection && (
                 <p>
-                  <strong>Flower: {bloomOutcomeLabel(seed.bloomReflection.outcome)}</strong>
+                  <strong>
+                    {m.seed_dialog_flower_outcome({
+                      outcome: bloomOutcomeLabel(seed.bloomReflection.outcome),
+                    })}
+                  </strong>
                   <span>{seed.bloomReflection.reflection}</span>
                 </p>
               )}
@@ -313,4 +321,15 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       )}
     </dialog>
   );
+}
+
+function seedDialogTabLabel(tab: SeedDialogTab) {
+  switch (tab) {
+    case 'overview':
+      return m.seed_dialog_tab_overview();
+    case 'water':
+      return m.seed_dialog_tab_water();
+    case 'history':
+      return m.seed_dialog_tab_history();
+  }
 }

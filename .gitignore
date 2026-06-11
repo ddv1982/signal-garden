@@ -6,6 +6,11 @@ test-results/
 tmp/
 web-build/
 app/generated/
+src/paraglide/
+project.inlang/.gitignore
+project.inlang/.meta.json
+project.inlang/README.md
+project.inlang/cache/
 .vercel/
 .vite/
 coverage/

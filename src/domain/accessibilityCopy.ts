@@ -1,45 +1,62 @@
 import type { ReflectionSeed, SeedStatus } from '../../shared/models';
+import { m } from '../paraglide/messages.js';
 import { friendlySeedDate } from './dates';
 
 export function seedStatusLabel(status: SeedStatus): string {
   switch (status) {
     case 'planted':
-      return 'Planted';
+      return m.seed_status_planted();
     case 'sprouted':
-      return 'Sprouted';
+      return m.seed_status_sprouted();
     case 'growing':
-      return 'Growing';
+      return m.seed_status_growing();
     case 'blooming':
-      return 'Blooming';
+      return m.seed_status_blooming();
     case 'resting':
-      return 'Resting';
+      return m.seed_status_resting();
+  }
+}
+
+function seedStatusLowerLabel(status: SeedStatus): string {
+  switch (status) {
+    case 'planted':
+      return m.seed_status_planted_lower();
+    case 'sprouted':
+      return m.seed_status_sprouted_lower();
+    case 'growing':
+      return m.seed_status_growing_lower();
+    case 'blooming':
+      return m.seed_status_blooming_lower();
+    case 'resting':
+      return m.seed_status_resting_lower();
   }
 }
 
 export function seedCardAccessibilityLabel(seed: ReflectionSeed): string {
   const date = friendlySeedDate(seed.createdAt);
-  const status = seedStatusLabel(seed.status);
+  const status = seedStatusLowerLabel(seed.status);
   const primaryText = seed.unhookedText || seed.labelText || seed.tinyAction;
   const wateringCount = seed.waterings?.length ?? 0;
   const wateringText =
     wateringCount === 0
-      ? 'Not watered yet.'
-      : `Watered ${wateringCount} ${wateringCount === 1 ? 'time' : 'times'}.`;
+      ? m.seed_watered_not_yet()
+      : wateringCount === 1
+        ? m.seed_watered_once({ count: wateringCount })
+        : m.seed_watered_many({ count: wateringCount });
 
-  return `Open ${status.toLowerCase()} seed planted ${date}. ${wateringText} ${primaryText}`;
+  return m.seed_card_accessibility({ status, date, wateringText, primaryText });
 }
 
 export function gardenAccessibilityLabel(seedCount: number): string {
-  if (seedCount === 0)
-    return 'Dream Garden. No seeds planted yet. Your pet is resting in the garden.';
+  if (seedCount === 0) return m.garden_accessibility_empty();
 
   const visibleCount = Math.min(seedCount, 50);
   const hiddenCount = Math.max(seedCount - visibleCount, 0);
-  const seedWord = visibleCount === 1 ? 'seed' : 'seeds';
-
   if (hiddenCount === 0) {
-    return `Dream Garden. ${visibleCount} ${seedWord} visible. Tap your pet for a gentle head-butt or tap a seed to open it.`;
+    return visibleCount === 1
+      ? m.garden_accessibility_visible_one({ visibleCount })
+      : m.garden_accessibility_visible_many({ visibleCount });
   }
 
-  return `Dream Garden. ${visibleCount} seeds visible and ${hiddenCount} older saved. Tap your pet for a gentle head-butt or tap a seed to open it.`;
+  return m.garden_accessibility_hidden({ visibleCount, hiddenCount });
 }

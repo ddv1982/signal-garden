@@ -1,8 +1,22 @@
 import type { ActiveTheme, ThemePreference } from '../domain/theme';
+import { m } from '../paraglide/messages.js';
 
 export type Tab = 'home' | 'garden' | 'archive' | 'settings';
 
 const tabs: Tab[] = ['home', 'garden', 'archive', 'settings'];
+
+function tabLabel(tab: Tab) {
+  switch (tab) {
+    case 'home':
+      return m.tab_home();
+    case 'garden':
+      return m.tab_garden();
+    case 'archive':
+      return m.tab_archive();
+    case 'settings':
+      return m.tab_settings();
+  }
+}
 
 type TopBarProps = {
   activeTab: Tab;
@@ -26,12 +40,12 @@ export function TopBar({
           SG
         </span>
         <div>
-          <p className="eyebrow">Signal Garden</p>
-          <span>A living garden for shifting perspective.</span>
+          <p className="eyebrow">{m.app_brand_name()}</p>
+          <span>{m.app_brand_tagline()}</span>
         </div>
       </div>
       <div className="topbar-actions">
-        <nav className="tabs" aria-label="Signal Garden sections">
+        <nav className="tabs" aria-label={m.app_nav_sections_label()}>
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -40,7 +54,7 @@ export function TopBar({
               aria-current={activeTab === tab ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
             >
-              {tab[0].toUpperCase() + tab.slice(1)}
+              {tabLabel(tab)}
             </button>
           ))}
         </nav>
@@ -48,14 +62,14 @@ export function TopBar({
           className="theme-toggle"
           data-testid="theme-toggle"
           role="group"
-          aria-label={`Theme controls. Current theme is ${activeTheme}.`}
+          aria-label={m.theme_controls_label({ theme: activeTheme })}
         >
           <button
             type="button"
             className={themePreference === 'light' ? 'theme-button active' : 'theme-button'}
-            aria-label="Use light mode"
+            aria-label={m.theme_use_light_mode()}
             aria-pressed={themePreference === 'light'}
-            title="Use light mode"
+            title={m.theme_use_light_mode()}
             onClick={() => onSelectTheme('light')}
           >
             <SunIcon />
@@ -63,9 +77,9 @@ export function TopBar({
           <button
             type="button"
             className={themePreference === 'dark' ? 'theme-button active' : 'theme-button'}
-            aria-label="Use dark mode"
+            aria-label={m.theme_use_dark_mode()}
             aria-pressed={themePreference === 'dark'}
-            title="Use dark mode"
+            title={m.theme_use_dark_mode()}
             onClick={() => onSelectTheme('dark')}
           >
             <MoonIcon />
@@ -73,9 +87,9 @@ export function TopBar({
           <button
             type="button"
             className={themePreference === 'system' ? 'theme-button active' : 'theme-button'}
-            aria-label="Match system theme"
+            aria-label={m.theme_match_system()}
             aria-pressed={themePreference === 'system'}
-            title="Match system theme"
+            title={m.theme_match_system()}
             onClick={() => onSelectTheme('system')}
           >
             <AutoIcon />

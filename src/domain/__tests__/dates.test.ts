@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import { m } from '../../paraglide/messages.js';
 import { friendlySeedDate } from '../dates';
 
 describe('friendlySeedDate', () => {
   const now = new Date('2026-06-11T14:00:00');
 
   it('labels same-day plantings as today', () => {
-    expect(friendlySeedDate('2026-06-11T01:10:00', now)).toBe('today');
+    expect(friendlySeedDate('2026-06-11T01:10:00', now)).toBe(m.date_today());
   });
 
   it('labels the previous day as yesterday', () => {
-    expect(friendlySeedDate('2026-06-10T23:59:00', now)).toBe('yesterday');
+    expect(friendlySeedDate('2026-06-10T23:59:00', now)).toBe(m.date_yesterday());
   });
 
   it('counts recent days', () => {
-    expect(friendlySeedDate('2026-06-07T10:00:00', now)).toBe('4 days ago');
+    expect(friendlySeedDate('2026-06-07T10:00:00', now)).toBe(m.date_days_ago({ count: 4 }));
   });
 
   it('falls back to a month and day within the same year', () => {
