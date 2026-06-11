@@ -44,7 +44,7 @@ test.describe('garden-first lens journey', () => {
       .toMatchObject([
         {
           gardenPlotId: 'front-right',
-          gardenPosition: { x: 0.72, y: 0.75 },
+          gardenPosition: { x: 0.7, y: 0.87 },
           growthPoints: 0,
           status: 'planted',
         },
@@ -118,7 +118,7 @@ test.describe('garden-first lens journey', () => {
     await completeLensJourney(page);
 
     await expect(page.getByText('Place the seed in an open soil spot.')).toBeVisible();
-    await clickCanvasFraction(page, 0.72, 0.75);
+    await clickCanvasFraction(page, 0.74, 0.87);
 
     await expect(page.getByText('1 saved seed')).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute(

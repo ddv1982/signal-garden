@@ -192,19 +192,96 @@ const LENS_RING: Array<{
   },
 ];
 
-const DESKTOP_PLOTS: GardenPlot[] = [
-  { id: 'front-left', x: 0.17, y: 0.72, band: 'front', scale: 1, depth: 330 },
-  { id: 'front-center', x: 0.28, y: 0.76, band: 'front', scale: 1.02, depth: 342 },
-  { id: 'front-right', x: 0.72, y: 0.75, band: 'front', scale: 1, depth: 340 },
-  { id: 'front-far-right', x: 0.84, y: 0.72, band: 'front', scale: 0.96, depth: 350 },
-  { id: 'middle-left', x: 0.2, y: 0.64, band: 'middle', scale: 0.78, depth: 230 },
-  { id: 'middle-center-left', x: 0.32, y: 0.58, band: 'middle', scale: 0.76, depth: 235 },
-  { id: 'middle-center', x: 0.44, y: 0.54, band: 'middle', scale: 0.72, depth: 238 },
-  { id: 'middle-center-right', x: 0.6, y: 0.56, band: 'middle', scale: 0.72, depth: 240 },
-  { id: 'middle-right', x: 0.75, y: 0.64, band: 'middle', scale: 0.78, depth: 250 },
-  { id: 'back-left', x: 0.3, y: 0.52, band: 'back', scale: 0.6, depth: 130 },
-  { id: 'back-center', x: 0.5, y: 0.52, band: 'back', scale: 0.58, depth: 134 },
-  { id: 'back-right', x: 0.68, y: 0.52, band: 'back', scale: 0.6, depth: 140 },
+type GardenPlotAnchor = {
+  id: string;
+  band: 'front' | 'middle' | 'back';
+  narrow: { x: number; y: number; scale: number; depth: number };
+  wide: { x: number; y: number; scale: number; depth: number };
+};
+
+// The garden background is cover-cropped, so viewport-normalized coordinates
+// land on different artwork depending on the frame's visible crop ratio
+// (visibleWidth / GARDEN_DESIGN_WIDTH). Each desktop plot is therefore tuned
+// against the artwork twice — at a narrow crop (~0.45) and a wide crop
+// (~0.68) — and createGardenPlots() interpolates between the anchors so plots
+// keep tracking the same garden beds (and stay off the pool, paths, mosaic,
+// pet, and lens props) while the artwork shifts underneath.
+const NARROW_VISIBLE_RATIO = 0.45;
+const WIDE_VISIBLE_RATIO = 0.68;
+
+const DESKTOP_PLOT_ANCHORS: GardenPlotAnchor[] = [
+  {
+    id: 'front-left',
+    band: 'front',
+    narrow: { x: 0.07, y: 0.87, scale: 1, depth: 344 },
+    wide: { x: 0.1, y: 0.86, scale: 1, depth: 344 },
+  },
+  {
+    id: 'front-center',
+    band: 'front',
+    narrow: { x: 0.215, y: 0.865, scale: 1, depth: 350 },
+    wide: { x: 0.225, y: 0.875, scale: 1.02, depth: 350 },
+  },
+  {
+    id: 'front-right',
+    band: 'front',
+    narrow: { x: 0.915, y: 0.875, scale: 1, depth: 348 },
+    wide: { x: 0.7, y: 0.87, scale: 1.02, depth: 348 },
+  },
+  {
+    id: 'front-far-right',
+    band: 'front',
+    narrow: { x: 0.92, y: 0.7, scale: 0.8, depth: 300 },
+    wide: { x: 0.815, y: 0.93, scale: 1.06, depth: 358 },
+  },
+  {
+    id: 'middle-left',
+    band: 'middle',
+    narrow: { x: 0.155, y: 0.78, scale: 0.82, depth: 252 },
+    wide: { x: 0.15, y: 0.78, scale: 0.82, depth: 252 },
+  },
+  {
+    id: 'middle-center-left',
+    band: 'middle',
+    narrow: { x: 0.27, y: 0.75, scale: 0.78, depth: 246 },
+    wide: { x: 0.26, y: 0.77, scale: 0.8, depth: 250 },
+  },
+  {
+    id: 'middle-center',
+    band: 'middle',
+    narrow: { x: 0.615, y: 0.815, scale: 0.88, depth: 256 },
+    wide: { x: 0.615, y: 0.815, scale: 0.84, depth: 256 },
+  },
+  {
+    id: 'middle-center-right',
+    band: 'middle',
+    narrow: { x: 0.73, y: 0.745, scale: 0.84, depth: 244 },
+    wide: { x: 0.74, y: 0.715, scale: 0.78, depth: 240 },
+  },
+  {
+    id: 'middle-right',
+    band: 'middle',
+    narrow: { x: 0.92, y: 0.575, scale: 0.72, depth: 210 },
+    wide: { x: 0.8, y: 0.62, scale: 0.7, depth: 210 },
+  },
+  {
+    id: 'back-left',
+    band: 'back',
+    narrow: { x: 0.055, y: 0.51, scale: 0.6, depth: 130 },
+    wide: { x: 0.05, y: 0.46, scale: 0.6, depth: 130 },
+  },
+  {
+    id: 'back-center',
+    band: 'back',
+    narrow: { x: 0.115, y: 0.435, scale: 0.58, depth: 126 },
+    wide: { x: 0.125, y: 0.435, scale: 0.58, depth: 126 },
+  },
+  {
+    id: 'back-right',
+    band: 'back',
+    narrow: { x: 0.92, y: 0.46, scale: 0.6, depth: 134 },
+    wide: { x: 0.795, y: 0.47, scale: 0.6, depth: 134 },
+  },
 ];
 
 const MOBILE_PLOTS: GardenPlot[] = [
@@ -218,21 +295,42 @@ const MOBILE_PLOTS: GardenPlot[] = [
   { id: 'back-center', x: 0.78, y: 0.47, band: 'back', scale: 0.54, depth: 180 },
 ];
 
-export function createGardenPlots(width: number, _height: number): GardenPlot[] {
-  const plots = width < 540 ? MOBILE_PLOTS : DESKTOP_PLOTS;
-  return plots.map((plot) => ({ ...plot }));
+export function createGardenPlots(width: number, height: number): GardenPlot[] {
+  if (width < 540) return MOBILE_PLOTS.map((plot) => ({ ...plot }));
+
+  const frame = createGardenFrame(width, height);
+  const ratio = frame.visibleWidth / GARDEN_DESIGN_WIDTH;
+  const t = clamp(
+    (ratio - NARROW_VISIBLE_RATIO) / (WIDE_VISIBLE_RATIO - NARROW_VISIBLE_RATIO),
+    0,
+    1
+  );
+
+  return DESKTOP_PLOT_ANCHORS.map(({ id, band, narrow, wide }) => ({
+    id,
+    band,
+    x: lerp(narrow.x, wide.x, t),
+    y: lerp(narrow.y, wide.y, t),
+    scale: lerp(narrow.scale, wide.scale, t),
+    depth: Math.round(lerp(narrow.depth, wide.depth, t)),
+  }));
 }
 
-export function availableGardenPlots(seeds: ReflectionSeed[], width: number): GardenPlot[] {
+export function availableGardenPlots(
+  seeds: ReflectionSeed[],
+  width: number,
+  height = 0
+): GardenPlot[] {
   const occupied = new Set(seeds.map((seed) => seed.gardenPlotId).filter(Boolean));
-  return createGardenPlots(width, 0).filter((plot) => !occupied.has(plot.id));
+  return createGardenPlots(width, height).filter((plot) => !occupied.has(plot.id));
 }
 
 export function firstAvailableGardenPlot(
   seeds: ReflectionSeed[],
-  width: number
+  width: number,
+  height = 0
 ): GardenPlot | null {
-  const available = availableGardenPlots(seeds, width);
+  const available = availableGardenPlots(seeds, width, height);
   return (
     PREFERRED_PLOT_IDS.map((id) => available.find((plot) => plot.id === id)).find(Boolean) ??
     available[0] ??
@@ -522,6 +620,10 @@ function columnsFor(width: number, preferred: number) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function lerp(from: number, to: number, t: number) {
+  return from + (to - from) * t;
 }
 
 function scaledRatio(width: number, height: number) {

@@ -96,6 +96,18 @@ describe('createGardenPlots', () => {
     expect(projectedPlots.every((point) => point.y >= 0 && point.y <= frame.height)).toBe(true);
   });
 
+  // Plot coordinates interpolate with the frame's visible crop ratio, so the
+  // landmark-avoidance rules must hold across the whole desktop size range,
+  // not just at a single canvas size.
+  const PLOT_CANVAS_SIZES: Array<[number, number]> = [
+    [390, 680],
+    [560, 760],
+    [960, 640],
+    [1012, 714],
+    [1402, 674],
+    [2048, 900],
+  ];
+
   it('keeps designed planting plots out of the main pool water', () => {
     const poolWater = { x: 0.5, y: 0.66, radiusX: 0.22, radiusY: 0.11 };
     const isInsidePool = (plot: { x: number; y: number }) => {
@@ -105,16 +117,39 @@ describe('createGardenPlots', () => {
       return dx * dx + dy * dy < 1;
     };
 
-    expect(createGardenPlots(960, 640).filter(isInsidePool)).toEqual([]);
-    expect(createGardenPlots(390, 680).filter(isInsidePool)).toEqual([]);
+    for (const [width, height] of PLOT_CANVAS_SIZES) {
+      expect(createGardenPlots(width, height).filter(isInsidePool)).toEqual([]);
+    }
   });
 
   it('keeps designed planting plots off the central walking path', () => {
     const isOnCentralPath = (plot: { x: number; y: number }) =>
       plot.y > 0.83 && plot.x > 0.34 && plot.x < 0.66;
 
-    expect(createGardenPlots(960, 640).filter(isOnCentralPath)).toEqual([]);
-    expect(createGardenPlots(390, 680).filter(isOnCentralPath)).toEqual([]);
+    for (const [width, height] of PLOT_CANVAS_SIZES) {
+      expect(createGardenPlots(width, height).filter(isOnCentralPath)).toEqual([]);
+    }
+  });
+
+  it('keeps planting plots clear of the resting pet and the signal orb', () => {
+    const petZone = { x: 0.24, y: 0.55, radiusX: 0.085, radiusY: 0.17 };
+    const signalZone = { x: 0.72, y: 0.5, radiusX: 0.055, radiusY: 0.1 };
+    const intersects = (
+      plot: { x: number; y: number },
+      zone: { x: number; y: number; radiusX: number; radiusY: number }
+    ) => {
+      const dx = (plot.x - zone.x) / zone.radiusX;
+      const dy = (plot.y - zone.y) / zone.radiusY;
+
+      return dx * dx + dy * dy < 1;
+    };
+
+    for (const [width, height] of PLOT_CANVAS_SIZES.filter(([width]) => width >= 540)) {
+      const plots = createGardenPlots(width, height);
+
+      expect(plots.filter((plot) => intersects(plot, petZone))).toEqual([]);
+      expect(plots.filter((plot) => intersects(plot, signalZone))).toEqual([]);
+    }
   });
 });
 

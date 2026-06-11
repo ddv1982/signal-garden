@@ -902,7 +902,11 @@ export class GardenScene extends Phaser.Scene {
   }
 
   private emptyPlots() {
-    return availableGardenPlots(this.state.seeds, this.scale.width || 720);
+    return availableGardenPlots(
+      this.state.seeds,
+      this.scale.width || 720,
+      this.scale.height || 520
+    );
   }
 
   private nearestEmptyPlot(x: number, y: number) {
