@@ -74,7 +74,7 @@ export class PetController {
 
   attach(
     group: Phaser.GameObjects.Container,
-    sprite: Phaser.GameObjects.Image | undefined,
+    sprite: Phaser.GameObjects.Image,
     baseScaleX: number,
     baseScaleY: number
   ) {
@@ -322,7 +322,7 @@ export class PetController {
 
   private setFrame(frame: PetFrameId) {
     const textureKey = textureKeyForTheme(PET_FRAME_TEXTURES[frame], this.ctx.theme());
-    if (this.sprite && this.scene.textures.exists(textureKey)) {
+    if (this.sprite) {
       this.sprite.setTexture(textureKey);
       this.applyFrameOffset(frame);
       this.host.dataset.petFrame = frame;

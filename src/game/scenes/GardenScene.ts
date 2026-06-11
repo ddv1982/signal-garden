@@ -217,75 +217,21 @@ export class GardenScene extends Phaser.Scene {
 
   private drawBackground(width: number, height: number, frame: GardenFrame) {
     const backgroundTexture = textureKeyForTheme('garden-background-v4', this.theme);
-    if (this.textures.exists(backgroundTexture)) {
-      const background = this.add.image(width / 2, height / 2, backgroundTexture).setDepth(0);
-      background.setScale(frame.scale);
+    this.add
+      .image(width / 2, height / 2, backgroundTexture)
+      .setDepth(0)
+      .setScale(frame.scale);
 
-      if (this.theme !== 'dark') {
-        this.add.rectangle(width / 2, height / 2, width, height, 0xfff6e8, 0.08).setDepth(2);
-      }
-      return;
+    if (this.theme !== 'dark') {
+      this.add.rectangle(width / 2, height / 2, width, height, 0xfff6e8, 0.08).setDepth(2);
     }
-
-    const dark = this.theme === 'dark';
-    this.add.rectangle(width / 2, height / 2, width, height, dark ? 0x26383f : 0xf7ead7);
-    this.add.ellipse(
-      width * 0.5,
-      height * 0.88,
-      width * 1.24,
-      height * 0.38,
-      dark ? 0x5d7f6e : 0x9bbf82,
-      0.92
-    );
-    this.add.ellipse(
-      width * 0.2,
-      height * 0.95,
-      width * 0.52,
-      height * 0.24,
-      dark ? 0x446d60 : 0x628f6b,
-      0.35
-    );
-    this.add.ellipse(
-      width * 0.82,
-      height * 0.9,
-      width * 0.64,
-      height * 0.3,
-      dark ? 0x9b8062 : 0xd8a86f,
-      0.22
-    );
-    this.add.ellipse(
-      width * 0.52,
-      height * 0.54,
-      width * 0.9,
-      height * 0.28,
-      dark ? 0xc69786 : 0xffd58b,
-      dark ? 0.12 : 0.08
-    );
-    this.add.circle(
-      width * 0.82,
-      height * 0.18,
-      Math.min(width, height) * 0.1,
-      dark ? 0xf0ead2 : 0xffd58b,
-      dark ? 0.2 : 0.3
-    );
   }
 
   private drawGardenLandmarks(frame: GardenFrame) {
     const seedCount = this.state.seeds.length;
-    const horizon = gardenNormalizedPoint(frame, 0.5, 0.55);
     const leftSoil = gardenNormalizedPoint(frame, 0.18, 0.67);
     const dark = this.theme === 'dark';
 
-    this.add
-      .rectangle(
-        horizon.x,
-        horizon.y,
-        this.gardenSize(frame, GARDEN_DESIGN_WIDTH * 0.64),
-        Math.max(3, 5 * frame.scale),
-        dark ? 0xf0c59a : 0xd8a86f,
-        dark ? 0.105 : 0.22
-      )
-      .setDepth(20);
     this.add
       .ellipse(
         leftSoil.x,
@@ -318,20 +264,14 @@ export class GardenScene extends Phaser.Scene {
     if (seedCount >= 1) {
       const point = gardenNormalizedPoint(frame, 0.83, 0.55);
       const lantern = this.add.container(point.x, point.y).setDepth(70);
-      if (
-        !this.addPropImage(
-          lantern,
-          'prop-lantern',
-          0,
-          0,
-          this.gardenSize(frame, 92, { max: 130 }),
-          'bottom'
-        )
-      ) {
-        lantern.add(this.add.rectangle(0, -34, 5, 70, 0x6c5a4c, 0.68));
-        lantern.add(this.add.circle(0, -78, 19, 0xffc96d, 0.82));
-        lantern.add(this.add.circle(0, -78, 10, 0xfff1ad, 0.72));
-      }
+      this.addPropImage(
+        lantern,
+        'prop-lantern',
+        0,
+        0,
+        this.gardenSize(frame, 92, { max: 130 }),
+        'bottom'
+      );
       if (!this.reducedMotion) {
         this.tweens.add({
           targets: lantern,
@@ -347,46 +287,27 @@ export class GardenScene extends Phaser.Scene {
     if (seedCount >= 3) {
       const point = gardenNormalizedPoint(frame, 0.5, 0.6);
       const vine = this.add.container(point.x, point.y).setDepth(60);
-      if (
-        !this.addPropImage(
-          vine,
-          'prop-vine',
-          0,
-          0,
-          this.gardenSize(frame, 124, { max: 172 }),
-          'bottom'
-        )
-      ) {
-        vine.add(
-          this.add.arc(-48, 0, 36, 220, 40, false, 0x3f7f53, 0.8).setStrokeStyle(6, 0x3f7f53, 0.8)
-        );
-        vine.add(
-          this.add
-            .arc(12, -10, 42, 200, 20, false, 0x4f7d55, 0.74)
-            .setStrokeStyle(6, 0x4f7d55, 0.74)
-        );
-        vine.add(this.add.ellipse(-14, -32, 22, 11, 0x78a65d, 0.88).setRotation(0.35));
-        vine.add(this.add.ellipse(48, -24, 24, 12, 0x78a65d, 0.78).setRotation(-0.45));
-      }
+      this.addPropImage(
+        vine,
+        'prop-vine',
+        0,
+        0,
+        this.gardenSize(frame, 124, { max: 172 }),
+        'bottom'
+      );
     }
 
     if (seedCount >= 7) {
       const point = gardenNormalizedPoint(frame, 0.66, 0.66);
       const dreamStone = this.add.container(point.x, point.y).setDepth(65);
-      if (
-        !this.addPropImage(
-          dreamStone,
-          'prop-dream-stone',
-          0,
-          0,
-          this.gardenSize(frame, 96, { max: 136 }),
-          'bottom'
-        )
-      ) {
-        dreamStone.add(this.add.ellipse(0, 0, 86, 34, 0x8d6a4b, 0.42));
-        dreamStone.add(this.add.circle(-18, -12, 7, 0xfff1ad, 0.5));
-        dreamStone.add(this.add.circle(16, -9, 5, 0xf8d76e, 0.42));
-      }
+      this.addPropImage(
+        dreamStone,
+        'prop-dream-stone',
+        0,
+        0,
+        this.gardenSize(frame, 96, { max: 136 }),
+        'bottom'
+      );
     }
   }
 
@@ -501,43 +422,8 @@ export class GardenScene extends Phaser.Scene {
   }
 
   private drawSeed(group: Phaser.GameObjects.Container, seed: ReflectionSeed) {
-    const propKey = this.seedPropKey(seed);
-    if (propKey && this.addPropImage(group, propKey, 0, 0, 82, 'bottom')) {
-      group.add(this.add.ellipse(0, 20, 58, 18, 0x7b5941, 0.18));
-      return;
-    }
-
-    const stem = this.add.rectangle(0, -12, 5, 32, 0x4f7d55).setOrigin(0.5, 1);
-    const earth = this.add.ellipse(0, 10, 54, 20, 0x7b5941, 0.35);
-    group.add([earth, stem]);
-
-    if (seed.status === 'planted') {
-      group.add(this.add.ellipse(0, 0, 22, 14, 0x8d6a4b));
-      return;
-    }
-
-    if (seed.visualType === 'lantern') {
-      group.add(this.add.circle(0, -34, 17, 0xffc96d));
-      group.add(this.add.circle(0, -34, 10, 0xfff1ad, 0.7));
-      return;
-    }
-
-    if (seed.visualType === 'vine') {
-      group.add(this.add.arc(-7, -25, 18, 260, 80, false, 0x3f7f53, 1).setStrokeStyle(5, 0x3f7f53));
-      group.add(this.add.ellipse(10, -36, 18, 10, 0x78a65d).setRotation(0.4));
-      return;
-    }
-
-    const petalColor = seed.status === 'blooming' ? 0xdb6f7a : 0xf0b260;
-    group.add(this.add.circle(0, -35, 11, 0xf8d76e));
-    for (let index = 0; index < 6; index += 1) {
-      const angle = (Math.PI * 2 * index) / 6;
-      group.add(
-        this.add
-          .ellipse(Math.cos(angle) * 14, -35 + Math.sin(angle) * 12, 16, 10, petalColor)
-          .setRotation(angle)
-      );
-    }
+    this.addPropImage(group, this.seedPropKey(seed), 0, 0, 82, 'bottom');
+    group.add(this.add.ellipse(0, 20, 58, 18, 0x7b5941, 0.18));
   }
 
   private drawSignal(frame: GardenFrame) {
@@ -636,9 +522,7 @@ export class GardenScene extends Phaser.Scene {
         this.drawDarkActiveLensInnerFill(group, placement.kind, size, glowY);
         this.drawDarkActiveLensFocusBase(group, placement.kind, size, glowY);
       }
-      if (!this.addPropImage(group, `lens-${placement.kind}`, 0, 0, size, placement.anchor)) {
-        group.add(this.add.circle(0, -size * 0.3, size * 0.3, active ? 0xf0b260 : 0xe6d1b7, 0.72));
-      }
+      this.addPropImage(group, `lens-${placement.kind}`, 0, 0, size, placement.anchor);
       if (active) {
         if (dark) {
           this.drawDarkActiveLensOrbit(group, placement.kind, size, glowY);
@@ -693,9 +577,7 @@ export class GardenScene extends Phaser.Scene {
       dark ? placement.shadowAlpha * 0.72 : placement.shadowAlpha
     );
     group.add(shadow);
-    if (!this.addPropImage(group, `lens-${kind}`, 0, 0, placement.size, placement.anchor)) {
-      group.add(this.add.circle(0, -placement.size * 0.3, placement.size * 0.3, 0xe6d1b7, 0.72));
-    }
+    this.addPropImage(group, `lens-${kind}`, 0, 0, placement.size, placement.anchor);
     this.tweens.add({
       targets: group,
       alpha: 0,
@@ -947,52 +829,24 @@ export class GardenScene extends Phaser.Scene {
       this.pet.playFriendly();
     });
 
-    let sprite: Phaser.GameObjects.Image | undefined;
-    let baseScaleX = 1;
-    let baseScaleY = 1;
     const idleTexture = textureKeyForTheme('companion-idle', this.theme);
-    if (this.textures.exists(idleTexture)) {
-      sprite = this.add.image(0, 0, idleTexture).setOrigin(0.5, 1);
-      const targetHeight = this.gardenSize(frame, 150, { min: 150, max: 235 });
-      if (this.theme === 'dark') {
-        group.add(
-          this.add.ellipse(0, -46, targetHeight * 0.72, targetHeight * 0.82, 0xf1bd79, 0.055)
-        );
-        group.add(
-          this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x241a18, 0.18)
-        );
-      }
-      sprite.setScale(targetHeight / sprite.height);
-      baseScaleX = sprite.scaleX;
-      baseScaleY = sprite.scaleY;
-      group.add(sprite);
-    } else {
-      this.drawPrimitivePet(group);
+    const sprite = this.add.image(0, 0, idleTexture).setOrigin(0.5, 1);
+    const targetHeight = this.gardenSize(frame, 150, { min: 150, max: 235 });
+    if (this.theme === 'dark') {
+      group.add(
+        this.add.ellipse(0, -46, targetHeight * 0.72, targetHeight * 0.82, 0xf1bd79, 0.055)
+      );
+      group.add(this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x241a18, 0.18));
     }
+    sprite.setScale(targetHeight / sprite.height);
+    group.add(sprite);
 
-    this.pet.attach(group, sprite, baseScaleX, baseScaleY);
+    this.pet.attach(group, sprite, sprite.scaleX, sprite.scaleY);
     this.pet.restoreAfterDraw();
     this.pet.startIdleBreathing();
     if (!this.petDebug) {
       this.pet.startLivingLoop();
     }
-  }
-
-  private drawPrimitivePet(group: Phaser.GameObjects.Container) {
-    group.add(this.add.ellipse(0, 18, 96, 132, 0xe6d1b7));
-    group.add(this.add.ellipse(-28, 12, 34, 104, 0x6a5146));
-    group.add(this.add.ellipse(28, 12, 34, 104, 0x6a5146));
-    group.add(this.add.ellipse(0, -66, 92, 76, 0xd9bea0));
-    group.add(this.add.triangle(-34, -100, -56, -66, -20, -72, 0x6a5146));
-    group.add(this.add.triangle(34, -100, 56, -66, 20, -72, 0x6a5146));
-    group.add(this.add.ellipse(0, -61, 50, 42, 0x3d302e, 0.86));
-    group.add(this.add.circle(-19, -70, 9, 0x1f2530));
-    group.add(this.add.circle(19, -70, 9, 0x1f2530));
-    group.add(this.add.circle(-22, -73, 3, 0xffffff, 0.8));
-    group.add(this.add.circle(16, -73, 3, 0xffffff, 0.8));
-    group.add(this.add.ellipse(0, -52, 14, 9, 0x211b1b));
-    group.add(this.add.arc(-54, 24, 28, 110, 290, false, 0x5b463f, 1).setStrokeStyle(16, 0x5b463f));
-    group.add(this.add.rectangle(0, -4, 38, 8, 0x2c3036));
   }
 
   private tryPlantPendingSeed() {
@@ -1167,7 +1021,7 @@ export class GardenScene extends Phaser.Scene {
     }
   }
 
-  private seedPropKey(seed: ReflectionSeed): string | null {
+  private seedPropKey(seed: ReflectionSeed): string {
     const growthStage = growthStageForSeed(seed);
     if (growthStage === 'seed') return 'prop-seed';
     if (growthStage === 'sprout') return 'prop-sprout';
@@ -1182,10 +1036,8 @@ export class GardenScene extends Phaser.Scene {
     y: number,
     maxSize: number,
     anchor: LensPropAnchor = 'center'
-  ): Phaser.GameObjects.Image | null {
+  ): Phaser.GameObjects.Image {
     const themedTextureKey = textureKeyForTheme(textureKey, this.theme);
-    if (!this.textures.exists(themedTextureKey)) return null;
-
     const image = this.add
       .image(x, y, themedTextureKey)
       .setOrigin(0.5, anchor === 'center' ? 0.5 : 1);

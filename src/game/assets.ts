@@ -31,7 +31,6 @@ import dreamStoneUrl from '../assets/garden/props/dream-stone.webp';
 import flowerUrl from '../assets/garden/props/flower.webp';
 import lanternUrl from '../assets/garden/props/lantern.webp';
 import seedUrl from '../assets/garden/props/seed.webp';
-import soilPatchUrl from '../assets/garden/props/soil-patch.webp';
 import sproutUrl from '../assets/garden/props/sprout.webp';
 import vineUrl from '../assets/garden/props/vine.webp';
 import budDarkUrl from '../assets/garden/props-dark/bud.webp';
@@ -39,7 +38,6 @@ import dreamStoneDarkUrl from '../assets/garden/props-dark/dream-stone.webp';
 import flowerDarkUrl from '../assets/garden/props-dark/flower.webp';
 import lanternDarkUrl from '../assets/garden/props-dark/lantern.webp';
 import seedDarkUrl from '../assets/garden/props-dark/seed.webp';
-import soilPatchDarkUrl from '../assets/garden/props-dark/soil-patch.webp';
 import sproutDarkUrl from '../assets/garden/props-dark/sprout.webp';
 import vineDarkUrl from '../assets/garden/props-dark/vine.webp';
 import actionBasketUrl from '../assets/lenses/props/action-basket.webp';
@@ -61,7 +59,7 @@ import wordStonesDarkUrl from '../assets/lenses/props-dark/word-stones.webp';
  * Every garden texture by key. Dark-theme variants use the `-dark` suffix
  * convention consumed by textureKeyForTheme().
  */
-const GARDEN_TEXTURE_URLS: Record<string, string> = {
+export const GARDEN_TEXTURE_URLS: Record<string, string> = {
   'garden-background-v4': gardenBackgroundUrl,
   'garden-background-v4-dark': gardenBackgroundDarkUrl,
   'prop-bud': budUrl,
@@ -69,7 +67,6 @@ const GARDEN_TEXTURE_URLS: Record<string, string> = {
   'prop-flower': flowerUrl,
   'prop-lantern': lanternUrl,
   'prop-seed': seedUrl,
-  'prop-soil-patch': soilPatchUrl,
   'prop-sprout': sproutUrl,
   'prop-vine': vineUrl,
   'prop-bud-dark': budDarkUrl,
@@ -77,7 +74,6 @@ const GARDEN_TEXTURE_URLS: Record<string, string> = {
   'prop-flower-dark': flowerDarkUrl,
   'prop-lantern-dark': lanternDarkUrl,
   'prop-seed-dark': seedDarkUrl,
-  'prop-soil-patch-dark': soilPatchDarkUrl,
   'prop-sprout-dark': sproutDarkUrl,
   'prop-vine-dark': vineDarkUrl,
   'companion-idle': idleSitUrl,
