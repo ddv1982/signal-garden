@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          version="${TAG_NAME#v}"
+          notes_file="docs/releases/${version}.md"
+
+          if [ ! -f "$notes_file" ]; then
+            echo "Release notes file not found: $notes_file" >&2
+            exit 1
+          fi
+
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "Release tag ${TAG_NAME} must point at a commit on main." >&2
+            exit 1
+          fi
+
+      - name: Wait for production CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          deadline=$((SECONDS + 1800))
+
+          while true; do
+            run_id="$(
+              gh run list \
+                --workflow CI \
+                --branch main \
+                --event push \
+                --commit "$GITHUB_SHA" \
+                --limit 1 \
+                --json databaseId \
+                --jq '.[0].databaseId // ""'
+            )"
+
+            if [ -n "$run_id" ]; then
+              status="$(gh run view "$run_id" --json status --jq '.status')"
+              conclusion="$(gh run view "$run_id" --json conclusion --jq '.conclusion // ""')"
+
+              if [ "$status" = "completed" ]; then
+                if [ "$conclusion" != "success" ]; then
+                  echo "CI run ${run_id} completed with conclusion: ${conclusion}" >&2
+                  exit 1
+                fi
+
+                successful_required_jobs="$(
+                  gh run view "$run_id" \
+                    --json jobs \
+                    --jq '[.jobs[] | select((.name == "verify" or .name == "deploy-production") and .conclusion == "success")] | length'
+                )"
+
+                if [ "$successful_required_jobs" != "2" ]; then
+                  echo "CI run ${run_id} did not complete both required jobs successfully." >&2
+                  gh run view "$run_id" \
+                    --json jobs \
+                    --jq '.jobs[] | select(.name == "verify" or .name == "deploy-production") | "\(.name): \(.conclusion)"' >&2
+                  exit 1
+                fi
+
+                echo "CI run ${run_id} completed successfully for ${GITHUB_SHA}."
+                break
+              fi
+
+              echo "CI run ${run_id} is ${status}; waiting before publishing the release."
+            else
+              echo "No matching CI run found for ${GITHUB_SHA} on main yet."
+            fi
+
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "Timed out waiting for successful production CI for ${GITHUB_SHA}." >&2
+              exit 1
+            fi
+
+            sleep 30
+          done
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          version="${TAG_NAME#v}"
+          notes_file="docs/releases/${version}.md"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" \
+              --title "Release ${version}" \
+              --notes-file "$notes_file"
+          else
+            gh release create "$TAG_NAME" \
+              --title "Release ${version}" \
+              --notes-file "$notes_file"
+          fi
