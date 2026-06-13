@@ -24,6 +24,14 @@ import {
   type LensPropAnchor,
 } from '../gardenLayout';
 import { preloadGardenTextures, textureKeyForTheme } from '../assets';
+import {
+  createGardenAmbientLayout,
+  createLensAmbientMotes,
+  createPetAmbientLayout,
+  isCompactGardenFrame,
+  type AmbientCircle,
+  type AmbientEllipse,
+} from '../gardenEffects';
 import { DARK_LENS_LIGHTING } from '../lensLighting';
 import { PetController } from '../PetController';
 import type { PetFrameId, PetSequenceId } from '../petAnimation';
@@ -186,7 +194,7 @@ export class GardenScene extends Phaser.Scene {
     this.drawSeeds(width, height, frame);
     this.drawPlantingPlots(width, height, frame);
     this.drawSignal(frame);
-    this.drawAmbientMotes(frame);
+    this.drawAmbientGardenEffects(frame);
     this.drawLensObjects(frame);
     this.drawPendingSeed(width, height, frame);
     this.drawPet(frame);
@@ -195,6 +203,8 @@ export class GardenScene extends Phaser.Scene {
   private clearScene() {
     delete this.hostElement.dataset.activeLensX;
     delete this.hostElement.dataset.activeLensY;
+    delete this.hostElement.dataset.ambientMotion;
+    delete this.hostElement.dataset.ambientZones;
     this.pet.detach();
     this.children.removeAll(true);
     this.seedGroups = [];
@@ -532,6 +542,7 @@ export class GardenScene extends Phaser.Scene {
           group.add(
             this.add.circle(0, glowY, size * 0.5, 0xfff1ad, 0).setStrokeStyle(2, 0xfff1ad, 0.52)
           );
+          this.drawLightActiveLensMotes(group, size, glowY, isCompactGardenFrame(frame));
         }
       }
       if (active && !this.reducedMotion) {
@@ -590,29 +601,72 @@ export class GardenScene extends Phaser.Scene {
     });
   }
 
-  private drawAmbientMotes(frame: GardenFrame) {
-    if (this.reducedMotion) return;
+  private drawAmbientGardenEffects(frame: GardenFrame) {
+    const layout = createGardenAmbientLayout(frame, this.reducedMotion);
+    this.hostElement.dataset.ambientMotion = layout.motion;
+    this.hostElement.dataset.ambientZones = layout.zones;
+    this.drawPondShimmer(layout.pondShimmers);
+    this.drawPondMotes(layout.pondMotes);
+  }
 
+  private drawPondShimmer(shimmers: AmbientEllipse[]) {
     const dark = this.theme === 'dark';
-    const color = dark ? 0xffe9b0 : 0xfff7df;
-    const count = 9;
-    for (let index = 0; index < count; index += 1) {
-      const x = frame.width * (0.08 + Math.random() * 0.84);
-      const y = frame.height * (0.18 + Math.random() * 0.5);
-      const radius = dark ? 2 + Math.random() * 1.6 : 2.4 + Math.random() * 2;
-      const baseAlpha = dark ? 0.14 + Math.random() * 0.14 : 0.1 + Math.random() * 0.1;
-      const mote = this.add.circle(x, y, radius, color, baseAlpha).setDepth(350);
-      this.tweens.add({
-        targets: mote,
-        y: y - (12 + Math.random() * 16),
-        alpha: { from: baseAlpha * 0.55, to: baseAlpha * 1.45 },
-        duration: 4200 + Math.random() * 2600,
-        delay: Math.random() * 1800,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-    }
+    const color = dark ? 0x8fb5b1 : 0xaecfc7;
+
+    shimmers.forEach((shimmer) => {
+      const ripple = this.add
+        .ellipse(
+          shimmer.x,
+          shimmer.y,
+          shimmer.width,
+          shimmer.height,
+          color,
+          dark ? shimmer.alpha * 0.96 : shimmer.alpha * 0.82
+        )
+        .setDepth(88);
+
+      if (!this.reducedMotion) {
+        this.tweens.add({
+          targets: ripple,
+          alpha: { from: shimmer.alpha * 0.42, to: shimmer.alpha * 0.98 },
+          scaleX: 1.035,
+          scaleY: 1.08,
+          duration: shimmer.durationMs,
+          delay: shimmer.delayMs,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      }
+    });
+  }
+
+  private drawPondMotes(motes: AmbientCircle[]) {
+    const dark = this.theme === 'dark';
+
+    motes.forEach((mote, index) => {
+      const color = dark
+        ? index % 2 === 0
+          ? 0xd6bd83
+          : 0x9fbfbd
+        : index % 2 === 0
+          ? 0xf1ddba
+          : 0xb8d8cf;
+      const circle = this.add.circle(mote.x, mote.y, mote.radius, color, mote.alpha).setDepth(255);
+
+      if (!this.reducedMotion) {
+        this.tweens.add({
+          targets: circle,
+          y: mote.y + mote.driftY,
+          alpha: { from: mote.alpha * 0.42, to: mote.alpha * 1.08 },
+          duration: mote.durationMs,
+          delay: mote.delayMs,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      }
+    });
   }
 
   private drawLensFocusVignette(frame: GardenFrame) {
@@ -750,21 +804,21 @@ export class GardenScene extends Phaser.Scene {
         glowY - size * 0.18,
         Math.max(1.4, size * 0.018),
         lighting.moteColor,
-        0.42
+        0.3
       ),
       this.add.circle(
         size * 0.28,
         glowY - size * 0.12,
         Math.max(1.2, size * 0.014),
         lighting.focusColor,
-        0.34
+        0.24
       ),
       this.add.circle(
         size * 0.1,
         glowY - size * 0.28,
         Math.max(1.1, size * 0.012),
         lighting.moteColor,
-        0.3
+        0.21
       ),
     ];
     group.add(motes);
@@ -773,8 +827,42 @@ export class GardenScene extends Phaser.Scene {
         this.tweens.add({
           targets: mote,
           y: mote.y - size * (0.035 + index * 0.01),
-          alpha: index === 0 ? 0.22 : 0.18,
+          alpha: index === 0 ? 0.16 : 0.13,
           duration: 2200 + index * 360,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      });
+    }
+  }
+
+  private drawLightActiveLensMotes(
+    group: Phaser.GameObjects.Container,
+    size: number,
+    glowY: number,
+    compact: boolean
+  ) {
+    const motes = createLensAmbientMotes(size, glowY, compact).map((mote, index) =>
+      this.add.circle(
+        mote.x,
+        mote.y,
+        mote.radius,
+        index % 2 === 0 ? 0xf1ddba : 0xb8d8cf,
+        mote.alpha
+      )
+    );
+    group.add(motes);
+
+    if (!this.reducedMotion) {
+      motes.forEach((mote, index) => {
+        const config = createLensAmbientMotes(size, glowY, compact)[index];
+        this.tweens.add({
+          targets: mote,
+          y: mote.y + config.driftY,
+          alpha: config.alpha * 0.48,
+          duration: config.durationMs,
+          delay: config.delayMs,
           yoyo: true,
           repeat: -1,
           ease: 'Sine.easeInOut',
@@ -839,6 +927,7 @@ export class GardenScene extends Phaser.Scene {
       );
       group.add(this.add.ellipse(0, -4, targetHeight * 0.66, targetHeight * 0.11, 0x241a18, 0.18));
     }
+    this.drawPetAmbient(group, targetHeight, isCompactGardenFrame(frame));
     sprite.setScale(targetHeight / sprite.height);
     group.add(sprite);
 
@@ -848,6 +937,61 @@ export class GardenScene extends Phaser.Scene {
     if (!this.petDebug) {
       this.pet.startLivingLoop();
     }
+  }
+
+  private drawPetAmbient(
+    group: Phaser.GameObjects.Container,
+    targetHeight: number,
+    compact: boolean
+  ) {
+    const dark = this.theme === 'dark';
+    const layout = createPetAmbientLayout(targetHeight, compact);
+    const ground = this.add.ellipse(
+      layout.ground.x,
+      layout.ground.y,
+      layout.ground.width,
+      layout.ground.height,
+      dark ? 0xd6bd83 : 0xf1ddba,
+      dark ? layout.ground.alpha * 0.86 : layout.ground.alpha * 0.74
+    );
+    group.add(ground);
+
+    if (!this.reducedMotion) {
+      this.tweens.add({
+        targets: ground,
+        alpha: layout.ground.alpha * 0.36,
+        scaleX: 1.045,
+        duration: layout.ground.durationMs,
+        delay: layout.ground.delayMs,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+
+    layout.motes.forEach((mote, index) => {
+      const circle = this.add.circle(
+        mote.x,
+        mote.y,
+        mote.radius,
+        dark ? 0xd6bd83 : index % 2 === 0 ? 0xf1ddba : 0xb8d8cf,
+        mote.alpha
+      );
+      group.add(circle);
+
+      if (!this.reducedMotion) {
+        this.tweens.add({
+          targets: circle,
+          y: mote.y + mote.driftY,
+          alpha: mote.alpha * 0.42,
+          duration: mote.durationMs,
+          delay: mote.delayMs,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      }
+    });
   }
 
   private tryPlantPendingSeed() {

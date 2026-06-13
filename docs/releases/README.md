@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.24`](./0.1.24.md) — anchors garden ambience to the pond, pet, and active lens while softening desktop particles across themes
 - [`0.1.23`](./0.1.23.md) — splits tag publishing from production CI while keeping releases behind the deployed main gate
 - [`0.1.22`](./0.1.22.md) — moves app copy into a typed Paraglide catalog and hardens generated i18n output for clean builds
 - [`0.1.21`](./0.1.21.md) — settles the planting spots into tidy garden beds that track the painted ground across window sizes

@@ -29,6 +29,14 @@ test.describe('garden-first lens journey', () => {
     await completeOnboarding(page);
     await expect(page.getByTestId('garden-canvas')).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-signal-motion', 'glow');
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
+      'data-ambient-motion',
+      'anchored'
+    );
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
+      'data-ambient-zones',
+      'pond,pet'
+    );
     await expect(page.getByTestId('notice-signal')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Head-butt' })).toHaveCount(0);
 
@@ -155,6 +163,22 @@ test.describe('garden-first lens journey', () => {
     await expect(canvas).toHaveAttribute('data-pet-state', 'idle');
     await expect(canvas).toHaveAttribute('data-pet-motion', 'breathing');
     await expect(canvas).not.toHaveAttribute('data-pet-motion', 'bouncing');
+  });
+
+  test('renders anchored garden ambience on desktop and mobile', async ({ page }) => {
+    await completeOnboarding(page);
+    const canvas = page.getByTestId('garden-canvas');
+
+    await expect(canvas).toBeVisible();
+    await expect(canvas).toHaveAttribute('data-ambient-motion', 'anchored');
+    await expect(canvas).toHaveAttribute('data-ambient-zones', 'pond,pet');
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+        )
+      )
+      .toBe(true);
   });
 
   test('follows the system dark theme by default', async ({ page }) => {
@@ -633,6 +657,8 @@ test.describe('garden-first lens journey', () => {
     const canvas = page.getByTestId('garden-canvas');
     await expect(canvas).toBeVisible();
     await expect(canvas).toHaveAttribute('data-pet-motion', 'still');
+    await expect(canvas).toHaveAttribute('data-ambient-motion', 'still');
+    await expect(canvas).toHaveAttribute('data-ambient-zones', 'pond,pet');
 
     await page.waitForTimeout(2_000);
     await expect(canvas).toHaveAttribute('data-pet-motion', /^(frame-change|still)$/);
