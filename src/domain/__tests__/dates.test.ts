@@ -18,11 +18,22 @@ describe('friendlySeedDate', () => {
   });
 
   it('falls back to a month and day within the same year', () => {
-    expect(friendlySeedDate('2026-06-01T10:00:00', now)).toMatch(/June 1/);
+    expect(friendlySeedDate('2026-06-01T10:00:00', now)).toBe(
+      new Date('2026-06-01T10:00:00').toLocaleDateString(undefined, {
+        month: 'long',
+        day: 'numeric',
+      })
+    );
   });
 
   it('includes the year for older seeds', () => {
-    expect(friendlySeedDate('2025-12-20T10:00:00', now)).toMatch(/December 20, 2025/);
+    expect(friendlySeedDate('2025-12-20T10:00:00', now)).toBe(
+      new Date('2025-12-20T10:00:00').toLocaleDateString(undefined, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    );
   });
 
   it('returns an empty string for invalid dates', () => {

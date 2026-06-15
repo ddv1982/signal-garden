@@ -23,10 +23,15 @@ export default defineConfig({
     sourcemap: buildSourceMap,
     // Phaser is intentionally isolated as a lazy game-runtime chunk; keep warnings focused on unexpected growth.
     chunkSizeWarningLimit: 1300,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          phaser: ['phaser'],
+        codeSplitting: {
+          groups: [
+            {
+              name: 'phaser',
+              test: /node_modules[\\/]phaser[\\/]/,
+            },
+          ],
         },
       },
     },
