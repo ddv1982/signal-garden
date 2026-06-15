@@ -1,6 +1,6 @@
 {
   "name": "signal-garden",
-  "version": "0.1.24",
+  "version": "0.1.25",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -10,6 +10,7 @@
     "start": "vite",
     "build": "pnpm i18n:compile && tsc --noEmit && vite build",
     "e2e": "pnpm i18n:compile && playwright test",
+    "e2e:mobile-smoke": "pnpm i18n:compile && playwright test --project=mobile-chrome --grep @mobile-smoke",
     "preview": "vite preview",
     "typecheck": "pnpm i18n:compile && tsc --noEmit",
     "test": "pnpm i18n:compile && vitest run",

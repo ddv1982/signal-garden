@@ -55,7 +55,9 @@ export function App() {
   const [settings, setSettings] = useState(() => repository.loadSettings());
   const [profile, setProfile] = useState(() => repository.loadLensProfile());
   const [selectedSeed, setSelectedSeed] = useState<ReflectionSeed | null>(null);
-  const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(null);
+  const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(() =>
+    repository.loadPendingSeed()
+  );
   const [lastWateringEvent, setLastWateringEvent] = useState<{
     seedId: string;
     eventId: string;
@@ -72,6 +74,7 @@ export function App() {
     onProfileEnsured: setProfile,
     onSeedReady: (seed) => {
       setSeeds((current) => advanceGardenGrowth(current, new Date().toISOString(), 'journey'));
+      repository.savePendingSeed(seed);
       setPendingSeed(seed);
     },
     onMessage: setPetMessage,
@@ -123,6 +126,7 @@ export function App() {
       y: position.y,
     });
     setSeeds((current) => [plantedSeed, ...current]);
+    repository.clearPendingSeed();
     setPendingSeed(null);
     setPetMessage(m.pet_seed_planted());
   }
@@ -172,7 +176,9 @@ export function App() {
   function deleteAllSeeds() {
     setSeeds([]);
     repository.clearSeeds();
+    repository.clearPendingSeed();
     setSelectedSeed(null);
+    setPendingSeed(null);
     setConfirmingSeedDelete(false);
     setPetMessage(m.pet_empty_garden());
   }
@@ -238,7 +244,7 @@ export function App() {
         </section>
       )}
 
-      {activeTab === 'garden' && (
+      {activeTab === 'garden' && !needsOnboarding && (
         <section className="garden-view">
           <h1 className="sr-only">{m.garden_title()}</h1>
           <div className="garden-stage">

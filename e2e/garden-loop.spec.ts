@@ -26,6 +26,8 @@ test.describe('garden-first lens journey', () => {
       'Full seven-lens journey is covered on desktop; mobile covers onboarding and persistence smoke paths.'
     );
     test.setTimeout(60_000);
+    await expect(page.getByTestId('onboarding-panel')).toBeVisible();
+    await expect(page.getByTestId('garden-canvas')).toHaveCount(0);
     await completeOnboarding(page);
     await expect(page.getByTestId('garden-canvas')).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute('data-signal-motion', 'glow');
@@ -95,6 +97,43 @@ test.describe('garden-first lens journey', () => {
     await page.getByRole('button', { name: m.lens_body_action() }).click();
     await expect(page.getByTestId('lens-panel')).toBeVisible();
     await expect(page.getByLabel(lensLabels.body)).toBeVisible();
+  });
+
+  test('recovers a pending seed after reload before planting', async ({ page }) => {
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Full seven-lens journey is covered on desktop; mobile covers shorter smoke paths.'
+    );
+    test.setTimeout(60_000);
+    await completeOnboarding(page);
+    await completeLensJourney(page);
+
+    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
+    await expect
+      .poll(() => storedPendingSeed(page))
+      .toMatchObject({
+        tinyAction: 'Take one soft pause',
+        lensJourney: {
+          responses: {
+            wordLabel: 'I am behind',
+          },
+        },
+      });
+
+    await page.reload();
+
+    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
+    await page.getByTestId('plant-here').click();
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
+    await expect.poll(() => storedPendingSeed(page)).toBeNull();
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          tinyAction: 'Take one soft pause',
+          gardenPlotId: 'front-right',
+        },
+      ]);
   });
 
   test('starts a lens journey from the canvas signal', async ({ page }) => {
@@ -355,8 +394,18 @@ test.describe('garden-first lens journey', () => {
     await page.getByRole('button', { name: m.tab_archive() }).click();
     await page.getByRole('button', { name: /I am behind/i }).click();
     const dialog = page.getByRole('dialog');
+    const waterTab = dialog.getByRole('tab', { name: m.seed_dialog_tab_water() });
+    await expect(waterTab).toHaveAttribute('aria-controls', 'seed-dialog-panel-water');
+    await expect(dialog.locator('#seed-dialog-panel-overview')).toHaveAttribute(
+      'aria-labelledby',
+      'seed-dialog-tab-overview'
+    );
     await expect(dialog.getByRole('button', { name: 'Grow Seed' })).toHaveCount(0);
     await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
+    await expect(dialog.locator('#seed-dialog-panel-water')).toHaveAttribute(
+      'aria-labelledby',
+      'seed-dialog-tab-water'
+    );
     await dialog.getByLabel(m.seed_prompt_first_label()).fill('   ');
     await dialog.getByLabel(m.seed_prompt_first_action()).fill('Take one gentle breath.');
     await dialog.getByRole('button', { name: m.seed_dialog_water_seed() }).click();
@@ -688,16 +737,60 @@ test.describe('garden-first lens journey', () => {
   test('supports keyboard panel dismissal and persists reduced motion', async ({ page }) => {
     await completeOnboarding(page);
     await startLensJourney(page);
-    await expect(page.getByTestId('lens-panel')).toBeVisible();
+    const lensPanel = page.getByTestId('lens-panel');
+    await expect(lensPanel).toBeVisible();
+
+    await page.getByRole('button', { name: m.lens_panel_close() }).click();
+    await expect(lensPanel).toBeHidden();
+
+    await page.getByRole('button', { name: m.lens_word_action() }).click();
+    await expect(lensPanel).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('lens-panel')).toBeHidden();
+    await expect(lensPanel).toBeHidden();
 
     await page.getByRole('button', { name: m.tab_settings() }).click();
     await page.getByLabel(m.settings_reduce_motion()).check();
     await page.reload();
     await page.getByRole('button', { name: m.tab_settings() }).click();
     await expect(page.getByLabel(m.settings_reduce_motion())).toBeChecked();
+  });
+
+  test('mobile smoke covers onboarding, lens start, storage, and planting @mobile-smoke', async ({
+    page,
+  }) => {
+    test.skip(test.info().project.name !== 'mobile-chrome', 'Mobile smoke runs on mobile-chrome.');
+    test.setTimeout(60_000);
+
+    await completeOnboarding(page);
+    await startLensJourney(page);
+    const lensPanel = page.getByTestId('lens-panel');
+    await expect(lensPanel).toBeVisible();
+    await page.getByRole('button', { name: m.lens_panel_close() }).click();
+    await expect(lensPanel).toBeHidden();
+
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await page.getByLabel(m.settings_reduce_motion()).check();
+    await page.reload();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+    await expect(page.getByLabel(m.settings_reduce_motion())).toBeChecked();
+
+    await storePendingSeed(page);
+    await page.reload();
+    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
+    await page.getByTestId('plant-here').click();
+
+    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
+    await expect.poll(() => storedPendingSeed(page)).toBeNull();
+    await expect
+      .poll(() => storedSeeds(page))
+      .toMatchObject([
+        {
+          id: 'mobile-pending-seed',
+          tinyAction: 'Take one mobile pause',
+          gardenPlotId: 'front-right',
+        },
+      ]);
   });
 });
 
@@ -710,9 +803,12 @@ async function completeOnboarding(page: Page) {
 }
 
 async function fillLens(page: Page, label: string, value: string, buttonName = m.lens_continue()) {
-  await expect(page.getByTestId('lens-panel')).toBeVisible();
-  await page.getByLabel(label).fill(value);
-  await page.getByTestId('lens-panel').getByRole('button', { name: buttonName }).click();
+  const panel = page.getByTestId('lens-panel');
+  await expect(panel).toBeVisible();
+  const field = panel.getByLabel(label);
+  await field.fill(value);
+  await expect(field).toHaveValue(value);
+  await panel.getByRole('button', { name: buttonName }).click();
 }
 
 async function completeLensJourney(page: Page) {
@@ -742,6 +838,12 @@ async function startLensJourney(page: Page) {
 async function storedSeeds(page: Page) {
   return page.evaluate(() =>
     JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]')
+  );
+}
+
+async function storedPendingSeed(page: Page) {
+  return page.evaluate(() =>
+    JSON.parse(localStorage.getItem('signal-garden/pending-seed/vite/v1') ?? 'null')
   );
 }
 
@@ -809,6 +911,41 @@ async function seedStoredGarden(page: Page, plotIds: string[]) {
     }));
     localStorage.setItem('signal-garden/reflection-seeds/vite/v1', JSON.stringify(seeds));
   }, plotIds);
+}
+
+async function storePendingSeed(page: Page) {
+  await page.evaluate(() => {
+    localStorage.removeItem('signal-garden/lens-session-draft/vite/v1');
+    localStorage.setItem(
+      'signal-garden/pending-seed/vite/v1',
+      JSON.stringify({
+        id: 'mobile-pending-seed',
+        createdAt: '2026-06-07T13:00:00.000Z',
+        labelText: 'mobile signal',
+        unhookedText: 'Noticing the story: mobile signal',
+        emotions: ['curious'],
+        bodySignals: ['warm hands'],
+        values: ['steadiness'],
+        dreams: ['small lantern'],
+        tinyAction: 'Take one mobile pause',
+        status: 'planted',
+        visualType: 'seed',
+        lensJourney: {
+          completedAt: '2026-06-07T13:05:00.000Z',
+          lensOrder: ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'],
+          responses: {
+            wordLabel: 'mobile signal',
+            bodySignal: 'warm hands',
+            emotion: 'curious',
+            innerImage: 'small lantern',
+            observerNote: 'awareness is here',
+            alternateMeaning: 'steadiness can be small',
+            tinyAction: 'Take one mobile pause',
+          },
+        },
+      })
+    );
+  });
 }
 
 async function clickCanvasFraction(page: Page, xFraction: number, yFraction: number) {

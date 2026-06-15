@@ -719,6 +719,16 @@ span.lens-chip {
   margin: 0;
 }
 
+.lens-panel-dismiss {
+  font-size: 0.82rem;
+  min-height: 32px;
+  padding: 0 10px;
+  position: absolute;
+  right: 34px;
+  top: 34px;
+  z-index: 4;
+}
+
 .lens-step-meter {
   display: flex;
   gap: 4px;

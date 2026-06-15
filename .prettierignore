@@ -2,6 +2,7 @@ dist
 node_modules
 test-results
 playwright-report
+.flow
 pnpm-lock.yaml
 src/assets
 public

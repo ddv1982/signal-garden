@@ -75,10 +75,10 @@ export function useLensJourney({
     setLensPanelOpen(true);
   }
 
-  function submitCurrentLens() {
+  function submitCurrentLens(submittedInput = lensInput) {
     if (!lensDraft || !currentLensDefinition) return;
 
-    const updatedDraft = completeLens(lensDraft, profile, lensInput);
+    const updatedDraft = completeLens(lensDraft, profile, submittedInput);
     setLensDraft(updatedDraft);
     setLensInput('');
 

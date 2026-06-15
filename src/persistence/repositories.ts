@@ -17,6 +17,7 @@ const settingsKey = 'signal-garden/settings/vite/v1';
 const themePreferenceKey = 'signal-garden/theme-preference/vite/v1';
 const lensProfileKey = 'signal-garden/inner-lens-profile/vite/v1';
 const lensSessionKey = 'signal-garden/lens-session-draft/vite/v1';
+const pendingSeedKey = 'signal-garden/pending-seed/vite/v1';
 
 export type AppSettings = {
   reducedMotion: boolean;
@@ -60,6 +61,15 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
     clearLensSessionDraft(): void {
       storage?.removeItem(lensSessionKey);
     },
+    loadPendingSeed(): ReflectionSeed | null {
+      return readJson(storage, pendingSeedKey, null, isNullableReflectionSeed);
+    },
+    savePendingSeed(seed: ReflectionSeed): void {
+      writeJson(storage, pendingSeedKey, seed);
+    },
+    clearPendingSeed(): void {
+      storage?.removeItem(pendingSeedKey);
+    },
     loadSettings(): AppSettings {
       const settings = sanitizeAppSettings(
         readJson(storage, settingsKey, defaultSettings, isAppSettingsObject)
@@ -97,6 +107,10 @@ function isNullableInnerLensProfile(value: unknown): value is InnerLensProfile |
 
 function isNullableLensSessionDraft(value: unknown): value is LensSessionDraft | null {
   return value === null || isLensSessionDraft(value);
+}
+
+function isNullableReflectionSeed(value: unknown): value is ReflectionSeed | null {
+  return value === null || isReflectionSeed(value);
 }
 
 function isAppSettingsObject(value: unknown): value is Partial<AppSettings> {

@@ -15,11 +15,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"],
-      "@shared/*": ["shared/*"],
-      "@game/*": ["src/game/*"]
+      "@src/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
+      "@game/*": ["./src/game/*"]
     }
   },
   "include": ["src", "shared", "vite.config.ts"]

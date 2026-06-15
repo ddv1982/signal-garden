@@ -66,6 +66,37 @@ describe('createSignalGardenRepository', () => {
     expect(repository.loadLensSessionDraft()).toBeNull();
   });
 
+  it('saves, loads, and clears a completed pending seed', () => {
+    const storage = createMemoryStorage();
+    const repository = createSignalGardenRepository(storage);
+    const seed: ReflectionSeed = {
+      id: 'pending-seed-1',
+      createdAt: '2026-06-06T12:05:00.000Z',
+      labelText: 'I am behind',
+      unhookedText: 'I am noticing the story that I am behind',
+      emotions: ['sad'],
+      bodySignals: ['tight chest'],
+      values: ['I may need rest'],
+      dreams: ['gray cloud'],
+      tinyAction: 'Take one soft pause',
+      status: 'planted',
+      visualType: 'stone',
+    };
+
+    repository.savePendingSeed(seed);
+    expect(repository.loadPendingSeed()).toEqual(seed);
+
+    repository.clearPendingSeed();
+    expect(repository.loadPendingSeed()).toBeNull();
+  });
+
+  it('falls back when stored pending seed data is invalid', () => {
+    const storage = createMemoryStorage();
+    storage.setItem('signal-garden/pending-seed/vite/v1', JSON.stringify({ id: 'missing-fields' }));
+
+    expect(createSignalGardenRepository(storage).loadPendingSeed()).toBeNull();
+  });
+
   it('loads older settings without onboarding state', () => {
     const storage = createMemoryStorage();
     storage.setItem('signal-garden/settings/vite/v1', JSON.stringify({ reducedMotion: true }));

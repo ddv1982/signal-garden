@@ -6,14 +6,7 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      'node_modules',
-      'test-results',
-      'playwright-report',
-      'scripts',
-      'src/paraglide',
-    ],
+    ignores: ['dist', 'node_modules', 'test-results', 'playwright-report', 'src/paraglide'],
   },
   eslint.configs.recommended,
   tseslint.configs.recommended,
@@ -37,6 +30,17 @@ export default tseslint.config(
     files: ['e2e/**/*.ts', 'playwright.config.ts', 'vite.config.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        URL: 'readonly',
+      },
     },
   }
 );

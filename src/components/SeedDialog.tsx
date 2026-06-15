@@ -17,6 +17,8 @@ import { m } from '../paraglide/messages.js';
 
 type SeedDialogTab = 'overview' | 'water' | 'history';
 
+const seedDialogTabs: SeedDialogTab[] = ['overview', 'water', 'history'];
+
 type SeedDialogProps = {
   seed: ReflectionSeed;
   onClose: () => void;
@@ -102,12 +104,15 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
         {seed.unhookedText || seed.labelText || m.seed_dialog_fallback_title()}
       </h2>
       <div className="seed-dialog-tabs" role="tablist" aria-label={m.seed_dialog_details_label()}>
-        {(['overview', 'water', 'history'] as SeedDialogTab[]).map((tab) => (
+        {seedDialogTabs.map((tab) => (
           <button
             key={tab}
+            id={seedDialogTabId(tab)}
             type="button"
             role="tab"
             aria-selected={activeTab === tab}
+            aria-controls={seedDialogPanelId(tab)}
+            tabIndex={activeTab === tab ? 0 : -1}
             className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
             onClick={() => setActiveTab(tab)}
           >
@@ -117,7 +122,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       </div>
 
       {activeTab === 'overview' && (
-        <section className="seed-dialog-panel" role="tabpanel">
+        <section
+          id={seedDialogPanelId('overview')}
+          className="seed-dialog-panel"
+          role="tabpanel"
+          aria-labelledby={seedDialogTabId('overview')}
+        >
           <div className="seed-stage-card">
             <p className="eyebrow">{seedStageCopy(seed).eyebrow}</p>
             <strong>{seedStageCopy(seed).title}</strong>
@@ -150,7 +160,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       )}
 
       {activeTab === 'water' && (
-        <section className="seed-dialog-panel" role="tabpanel">
+        <section
+          id={seedDialogPanelId('water')}
+          className="seed-dialog-panel"
+          role="tabpanel"
+          aria-labelledby={seedDialogTabId('water')}
+        >
           {seed.bloomReflection ? (
             <div className="seed-stage-card">
               <p className="eyebrow">{m.seed_stage_flower_eyebrow()}</p>
@@ -251,7 +266,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       )}
 
       {activeTab === 'history' && (
-        <section className="seed-dialog-panel" role="tabpanel">
+        <section
+          id={seedDialogPanelId('history')}
+          className="seed-dialog-panel"
+          role="tabpanel"
+          aria-labelledby={seedDialogTabId('history')}
+        >
           <details>
             <summary>{m.seed_dialog_original_journey()}</summary>
             <div className="journey-detail">
@@ -332,4 +352,12 @@ function seedDialogTabLabel(tab: SeedDialogTab) {
     case 'history':
       return m.seed_dialog_tab_history();
   }
+}
+
+function seedDialogTabId(tab: SeedDialogTab) {
+  return `seed-dialog-tab-${tab}`;
+}
+
+function seedDialogPanelId(tab: SeedDialogTab) {
+  return `seed-dialog-panel-${tab}`;
 }

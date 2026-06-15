@@ -123,6 +123,7 @@
   "lens_unhooked_text": "Noticing the story: “{word}”",
   "lens_panel_label": "Move this signal through the current lens",
   "lens_panel_eyebrow": "Current lens · Step {step} of {total}",
+  "lens_panel_close": "Close Panel",
   "lens_let_it_rest": "Let it rest",
   "lens_make_seed": "Make Seed",
   "lens_continue": "Continue",

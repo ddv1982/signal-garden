@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.25`](./0.1.25.md) — splits the garden scene into focused caretakers while hardening pending seeds, mobile smoke, and TypeScript path config
 - [`0.1.24`](./0.1.24.md) — anchors garden ambience to the pond, pet, and active lens while softening desktop particles across themes
 - [`0.1.23`](./0.1.23.md) — splits tag publishing from production CI while keeping releases behind the deployed main gate
 - [`0.1.22`](./0.1.22.md) — moves app copy into a typed Paraglide catalog and hardens generated i18n output for clean builds
