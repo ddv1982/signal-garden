@@ -5,6 +5,7 @@ import {
   createPetAmbientLayout,
 } from '../gardenEffects';
 import { createGardenFrame, visibleGardenPoint } from '../gardenLayout';
+import { clearGardenHostDataset } from '../scenes/sceneDataset';
 
 describe('createGardenAmbientLayout', () => {
   it('keeps anchored pond effects inside desktop and mobile frames', () => {
@@ -90,5 +91,24 @@ describe('createLensAmbientMotes', () => {
     expect(desktop.map((mote) => mote.x)).toEqual(
       createLensAmbientMotes(108, -38, false).map((mote) => mote.x)
     );
+  });
+});
+
+describe('clearGardenHostDataset', () => {
+  it('removes per-draw dataset markers that should not survive a redraw', () => {
+    const host = document.createElement('div');
+    host.dataset.activeLensX = '0.25';
+    host.dataset.activeLensY = '0.5';
+    host.dataset.ambientMotion = 'drift';
+    host.dataset.ambientZones = 'pond,pet';
+    host.dataset.signalMotion = 'glow';
+
+    clearGardenHostDataset(host);
+
+    expect(host.dataset.activeLensX).toBeUndefined();
+    expect(host.dataset.activeLensY).toBeUndefined();
+    expect(host.dataset.ambientMotion).toBeUndefined();
+    expect(host.dataset.ambientZones).toBeUndefined();
+    expect(host.dataset.signalMotion).toBeUndefined();
   });
 });

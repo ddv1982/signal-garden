@@ -126,15 +126,15 @@ export function GardenCanvas({
   }, []);
 
   useEffect(() => {
-    gameRef.current?.update(
+    gameRef.current?.update({
       state,
       reducedMotion,
       theme,
       pendingSeed,
       currentLens,
       lensSessionActive,
-      lastWateringEvent
-    );
+      lastWateringEvent,
+    });
   }, [state, reducedMotion, theme, pendingSeed, currentLens, lensSessionActive, lastWateringEvent]);
 
   return (

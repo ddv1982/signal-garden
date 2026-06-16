@@ -40,6 +40,7 @@ import {
 } from './lensObjectRenderer';
 import { drawAmbientGardenEffects, type AmbienceRendererContext } from './ambienceRenderer';
 import { drawGardenLandmarks, type LandmarkRendererContext } from './landmarkRenderer';
+import { clearGardenHostDataset } from './sceneDataset';
 
 export type { PlantingPosition } from './plantingRenderer';
 export type WateringEvent = { seedId: string; eventId: string };
@@ -60,6 +61,17 @@ export type GardenSceneOptions = {
   onLensObjectSelected: (kind: LensKind) => void;
   onPendingSeedPlanted: (position: PlantingPosition) => void;
 };
+
+export type GardenSceneUpdate = Pick<
+  GardenSceneOptions,
+  | 'state'
+  | 'reducedMotion'
+  | 'theme'
+  | 'pendingSeed'
+  | 'currentLens'
+  | 'lensSessionActive'
+  | 'lastWateringEvent'
+>;
 
 export class GardenScene extends Phaser.Scene {
   private state: GardenState;
@@ -86,6 +98,7 @@ export class GardenScene extends Phaser.Scene {
   private previousSeedCount = 0;
   private seedGroups: Phaser.GameObjects.Container[] = [];
   private signalGroup?: Phaser.GameObjects.Container;
+  private readonly handleResize = () => this.draw();
 
   constructor(options: GardenSceneOptions) {
     super('GardenScene');
@@ -139,33 +152,27 @@ export class GardenScene extends Phaser.Scene {
     this.input.on('pointerup', () =>
       endPendingSeedDrag(this.plantingRendererContext(), this.plantingState)
     );
-    this.scale.on('resize', () => this.draw());
+    this.scale.on('resize', this.handleResize);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.shutdownScene, this);
+    this.events.once(Phaser.Scenes.Events.DESTROY, this.shutdownScene, this);
     this.draw();
   }
 
-  setGardenState(
-    state: GardenState,
-    reducedMotion: boolean,
-    theme: ActiveTheme,
-    pendingSeed: ReflectionSeed | null,
-    currentLens: LensKind | null,
-    lensSessionActive: boolean,
-    lastWateringEvent: WateringEvent | null
-  ) {
+  setGardenState(update: GardenSceneUpdate) {
     const previousSeedCount = this.previousSeedCount;
     const previousTheme = this.theme;
-    this.state = state;
-    this.reducedMotion = reducedMotion;
-    this.theme = theme;
-    this.pendingSeed = pendingSeed;
-    this.currentLens = currentLens;
-    this.lensSessionActive = lensSessionActive;
-    this.lastWateringEvent = lastWateringEvent;
-    this.previousSeedCount = state.seeds.length;
+    this.state = update.state;
+    this.reducedMotion = update.reducedMotion;
+    this.theme = update.theme;
+    this.pendingSeed = update.pendingSeed;
+    this.currentLens = update.currentLens;
+    this.lensSessionActive = update.lensSessionActive;
+    this.lastWateringEvent = update.lastWateringEvent;
+    this.previousSeedCount = update.state.seeds.length;
     if (this.sys.isActive()) {
       this.draw();
-      if (previousTheme === theme) {
-        if (state.seeds.length > previousSeedCount) {
+      if (previousTheme === update.theme) {
+        if (update.state.seeds.length > previousSeedCount) {
           animateNewestSeed(this.seedRendererContext(), this.seedGroups, this.pet);
         }
         const animatedWateringEventId = animateWateredSeed(
@@ -211,15 +218,18 @@ export class GardenScene extends Phaser.Scene {
   }
 
   private clearScene() {
-    delete this.hostElement.dataset.activeLensX;
-    delete this.hostElement.dataset.activeLensY;
-    delete this.hostElement.dataset.ambientMotion;
-    delete this.hostElement.dataset.ambientZones;
+    clearGardenHostDataset(this.hostElement);
     this.pet.detach();
     this.children.removeAll(true);
     this.seedGroups = [];
     clearPlantingRendererState(this.plantingState);
     this.signalGroup = undefined;
+  }
+
+  private shutdownScene() {
+    this.scale.off('resize', this.handleResize);
+    clearGardenHostDataset(this.hostElement);
+    this.pet.detach();
   }
 
   private gardenSize(

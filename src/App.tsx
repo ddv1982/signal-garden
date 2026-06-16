@@ -1,8 +1,8 @@
-import { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import type { InnerExperienceMode, LensPromptOrder, ReflectionSeed } from '../shared/models';
 import { seedCardAccessibilityLabel, seedStatusLabel } from './domain/accessibilityCopy';
 import { seedExportFilename, serializeSeedExport } from './domain/exportSeeds';
-import { resolveActiveTheme, type ThemePreference } from './domain/theme';
+import type { ThemePreference } from './domain/theme';
 import { createLensProfile, lensDefinitions } from './domain/lenses';
 import {
   advanceGardenGrowth,
@@ -16,6 +16,8 @@ import { createSignalGardenRepository } from './persistence/repositories';
 import { firstAvailableGardenPlot } from './game/gardenLayout';
 import { useLensJourney } from './hooks/useLensJourney';
 import { useSystemTheme } from './hooks/useSystemTheme';
+import { useGardenData } from './hooks/useGardenData';
+import { useAppSettings } from './hooks/useAppSettings';
 import { friendlySeedDate } from './domain/dates';
 import { LensPanel } from './components/LensPanel';
 import { OnboardingPanel } from './components/OnboardingPanel';
@@ -49,15 +51,26 @@ function plantedSeedCountLabel(count: number) {
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
-  const [seeds, setSeeds] = useState<ReflectionSeed[]>(() =>
-    advanceGardenGrowth(repository.loadSeeds())
-  );
-  const [settings, setSettings] = useState(() => repository.loadSettings());
+  const {
+    seeds,
+    setSeeds,
+    pendingSeed,
+    gardenState,
+    savePendingSeed,
+    clearPendingSeed,
+    clearGarden,
+  } = useGardenData(repository);
+  const systemTheme = useSystemTheme();
+  const {
+    settings,
+    activeTheme,
+    setThemePreference,
+    setReducedMotion,
+    completeOnboarding,
+    resetOnboarding,
+  } = useAppSettings(repository, systemTheme);
   const [profile, setProfile] = useState(() => repository.loadLensProfile());
   const [selectedSeed, setSelectedSeed] = useState<ReflectionSeed | null>(null);
-  const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(() =>
-    repository.loadPendingSeed()
-  );
   const [lastWateringEvent, setLastWateringEvent] = useState<{
     seedId: string;
     eventId: string;
@@ -67,33 +80,23 @@ export function App() {
   const [confirmingSeedDelete, setConfirmingSeedDelete] = useState(false);
   const [confirmingProfileReset, setConfirmingProfileReset] = useState(false);
 
-  const systemTheme = useSystemTheme();
   const journey = useLensJourney({
     repository,
     profile,
     onProfileEnsured: setProfile,
     onSeedReady: (seed) => {
       setSeeds((current) => advanceGardenGrowth(current, new Date().toISOString(), 'journey'));
-      repository.savePendingSeed(seed);
-      setPendingSeed(seed);
+      savePendingSeed(seed);
     },
     onMessage: setPetMessage,
     onEnterGarden: () => setActiveTab('garden'),
   });
 
-  const gardenState = useMemo(() => repository.gardenState(seeds), [seeds]);
   const needsOnboarding = !profile || !settings.onboardingCompleted;
   const petDebug =
     import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
   const accessiblePlantPlot = firstAvailableGardenPlot(seeds, gardenCanvasWidth);
-  const activeTheme = resolveActiveTheme(settings.themePreference, systemTheme);
 
-  useEffect(() => repository.saveSeeds(seeds), [seeds]);
-  useEffect(() => repository.saveSettings(settings), [settings]);
-  useLayoutEffect(() => {
-    document.documentElement.dataset.theme = activeTheme;
-    document.documentElement.style.colorScheme = activeTheme;
-  }, [activeTheme]);
   useEffect(() => {
     if (profile) repository.saveLensProfile(profile);
   }, [profile]);
@@ -114,7 +117,7 @@ export function App() {
 
   function finishOnboarding(mode: InnerExperienceMode, order: LensPromptOrder) {
     setProfile(createLensProfile(mode, order));
-    setSettings((current) => ({ ...current, onboardingCompleted: true }));
+    completeOnboarding();
     setPetMessage(m.pet_onboarding_complete());
   }
 
@@ -126,8 +129,7 @@ export function App() {
       y: position.y,
     });
     setSeeds((current) => [plantedSeed, ...current]);
-    repository.clearPendingSeed();
-    setPendingSeed(null);
+    clearPendingSeed();
     setPetMessage(m.pet_seed_planted());
   }
 
@@ -174,25 +176,18 @@ export function App() {
   }
 
   function deleteAllSeeds() {
-    setSeeds([]);
-    repository.clearSeeds();
-    repository.clearPendingSeed();
+    clearGarden();
     setSelectedSeed(null);
-    setPendingSeed(null);
     setConfirmingSeedDelete(false);
     setPetMessage(m.pet_empty_garden());
   }
 
   function resetLensProfile() {
-    setSettings((current) => ({ ...current, onboardingCompleted: false }));
+    resetOnboarding();
     setProfile(null);
     journey.resetSession();
     repository.clearLensProfile();
     setConfirmingProfileReset(false);
-  }
-
-  function setThemePreference(themePreference: ThemePreference) {
-    setSettings((current) => ({ ...current, themePreference }));
   }
 
   return (
@@ -459,9 +454,7 @@ export function App() {
               <input
                 type="checkbox"
                 checked={settings.reducedMotion}
-                onChange={(event) =>
-                  setSettings((current) => ({ ...current, reducedMotion: event.target.checked }))
-                }
+                onChange={(event) => setReducedMotion(event.target.checked)}
               />
               {m.settings_reduce_motion()}
             </label>

@@ -82,6 +82,39 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     setActiveTab('overview');
   }
 
+  function selectTab(tab: SeedDialogTab) {
+    setActiveTab(tab);
+    document.getElementById(seedDialogTabId(tab))?.focus();
+  }
+
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, tab: SeedDialogTab) {
+    const currentIndex = seedDialogTabs.indexOf(tab);
+    let nextTab: SeedDialogTab | null = null;
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextTab = seedDialogTabs[(currentIndex + 1) % seedDialogTabs.length];
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextTab =
+          seedDialogTabs[(currentIndex - 1 + seedDialogTabs.length) % seedDialogTabs.length];
+        break;
+      case 'Home':
+        nextTab = seedDialogTabs[0];
+        break;
+      case 'End':
+        nextTab = seedDialogTabs[seedDialogTabs.length - 1];
+        break;
+    }
+
+    if (nextTab) {
+      event.preventDefault();
+      selectTab(nextTab);
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -115,6 +148,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
             tabIndex={activeTab === tab ? 0 : -1}
             className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
             onClick={() => setActiveTab(tab)}
+            onKeyDown={(event) => handleTabKeyDown(event, tab)}
           >
             {seedDialogTabLabel(tab)}
           </button>

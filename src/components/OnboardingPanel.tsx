@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { InnerExperienceMode, LensPromptOrder } from '../../shared/models';
 import { m } from '../paraglide/messages.js';
 
@@ -25,15 +25,85 @@ type OnboardingPanelProps = {
 export function OnboardingPanel({ onComplete }: OnboardingPanelProps) {
   const [mode, setMode] = useState<InnerExperienceMode>('mixed');
   const [order, setOrder] = useState<LensPromptOrder>('open');
+  const backdropRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLFormElement | null>(null);
+
+  useEffect(() => {
+    panelRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const backdrop = backdropRef.current;
+    const parent = backdrop?.parentElement;
+    if (!backdrop || !parent) return;
+
+    const restoredSiblings: Array<{
+      element: HTMLElement;
+      ariaHidden: string | null;
+      inert: boolean;
+    }> = [];
+
+    for (const sibling of Array.from(parent.children)) {
+      if (sibling === backdrop || !(sibling instanceof HTMLElement)) continue;
+      restoredSiblings.push({
+        element: sibling,
+        ariaHidden: sibling.getAttribute('aria-hidden'),
+        inert: Boolean(sibling.inert),
+      });
+      sibling.setAttribute('aria-hidden', 'true');
+      sibling.inert = true;
+    }
+
+    return () => {
+      for (const { element, ariaHidden, inert } of restoredSiblings) {
+        if (ariaHidden === null) {
+          element.removeAttribute('aria-hidden');
+        } else {
+          element.setAttribute('aria-hidden', ariaHidden);
+        }
+        element.inert = inert;
+      }
+    };
+  }, []);
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
+    if (event.key !== 'Tab') return;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const focusableElements = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]'
+      )
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    if (!firstElement || !lastElement) return;
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  }
 
   return (
     <section
+      ref={backdropRef}
       className="onboarding-backdrop"
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="onboarding-title"
       data-testid="onboarding-panel"
     >
       <form
+        ref={panelRef}
         className="onboarding-panel"
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
         onSubmit={(event) => {
           event.preventDefault();
           onComplete(mode, order);

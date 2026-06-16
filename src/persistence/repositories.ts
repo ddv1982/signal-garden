@@ -97,6 +97,8 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
   };
 }
 
+export type SignalGardenRepository = ReturnType<typeof createSignalGardenRepository>;
+
 function isSeedArray(value: unknown): value is ReflectionSeed[] {
   return Array.isArray(value) && value.every(isReflectionSeed);
 }

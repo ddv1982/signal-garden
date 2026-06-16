@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
-import type { GardenState, LensKind, ReflectionSeed } from '../../shared/models';
-import type { ActiveTheme } from '../domain/theme';
 import {
   GardenScene,
   type GardenSceneOptions,
+  type GardenSceneUpdate,
   type PlantingPosition,
   type WateringEvent,
 } from './scenes/GardenScene';
@@ -11,18 +10,11 @@ import type { PetFrameId, PetSequenceId } from './petAnimation';
 
 export type { PetFrameId, PetSequenceId } from './petAnimation';
 export type GardenGameOptions = GardenSceneOptions;
+export type GardenGameUpdate = GardenSceneUpdate;
 export type { PlantingPosition, WateringEvent };
 
 export type GardenGameHandle = {
-  update(
-    state: GardenState,
-    reducedMotion: boolean,
-    theme: ActiveTheme,
-    pendingSeed: ReflectionSeed | null,
-    currentLens: LensKind | null,
-    lensSessionActive: boolean,
-    lastWateringEvent: WateringEvent | null
-  ): void;
+  update(update: GardenGameUpdate): void;
   playHeadButt(): void;
   previewPetFrame(frame: PetFrameId): void;
   previewPetSequence(sequence: PetSequenceId): void;
@@ -44,24 +36,8 @@ export function createGardenGame(options: GardenGameOptions): GardenGameHandle {
   });
 
   return {
-    update(
-      state,
-      reducedMotion,
-      theme,
-      pendingSeed,
-      currentLens,
-      lensSessionActive,
-      lastWateringEvent
-    ) {
-      scene.setGardenState(
-        state,
-        reducedMotion,
-        theme,
-        pendingSeed,
-        currentLens,
-        lensSessionActive,
-        lastWateringEvent
-      );
+    update(update) {
+      scene.setGardenState(update);
     },
     playHeadButt() {
       scene.playHeadButt();

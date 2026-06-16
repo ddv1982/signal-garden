@@ -351,7 +351,7 @@ test.describe('garden-first lens journey', () => {
       settings: '{not-json',
       expectedTheme: 'dark',
     },
-  ]) {
+  ] as const) {
     test(`sets first-paint theme from ${scenario.name} before React loads`, async ({ page }) => {
       await assertBootstrapTheme(page, scenario);
     });

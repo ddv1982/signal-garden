@@ -6,10 +6,11 @@ export default defineConfig({
   expect: {
     timeout: 8_000,
   },
+  outputDir: 'test-results',
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? [['github'], ['list']] : 'list',
+  reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://127.0.0.1:6173',
     trace: 'retain-on-failure',
