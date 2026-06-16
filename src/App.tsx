@@ -274,37 +274,6 @@ export function App() {
                 </span>
               </div>
             )}
-            {(journey.lensDraft || pendingSeed) && !journey.lensPanelOpen && (
-              <div className="lens-progress" aria-label={m.garden_lens_progress_label()}>
-                {journey.lensOrder.map((kind) => {
-                  const complete =
-                    Boolean(journey.lensDraft?.completedLensIds.includes(kind)) ||
-                    Boolean(pendingSeed);
-                  const active = journey.currentLens === kind && !pendingSeed;
-                  const className = active
-                    ? 'lens-chip active'
-                    : complete
-                      ? 'lens-chip complete'
-                      : 'lens-chip';
-
-                  return active && journey.lensDraft ? (
-                    <button
-                      key={kind}
-                      type="button"
-                      className={className}
-                      onClick={() => journey.openLens(kind)}
-                      aria-current="step"
-                    >
-                      {lensDefinitions[kind].actionLabel}
-                    </button>
-                  ) : (
-                    <span key={kind} className={className} aria-disabled="true">
-                      {lensDefinitions[kind].actionLabel}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
             {journey.lensPanelOpen &&
               journey.lensDraft &&
               journey.currentLensDefinition &&

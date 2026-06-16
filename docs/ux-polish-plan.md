@@ -19,7 +19,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ## Phase 2 — Journey focus: one progress indicator, honest copy
 
-- [x] **Dedupe journey signage.** `.garden-status` and `.lens-progress` are hidden while `lensPanelOpen`; the chip rail returns when the panel is dismissed mid-journey (re-entry affordance). Verified in preview: panel open → no duplicate chrome.
+- [x] **Dedupe journey signage.** `.garden-status` is hidden while `lensPanelOpen`; the old lens chip rail was removed so dismissed journeys keep only the compact current-lens status plus the active canvas lens object as the re-entry affordance. Verified in preview: panel open → no duplicate chrome.
 - [x] **Align home copy with the real journey.** Headline is now "Move one signal through seven gentle lenses."
 - [x] **Settings privacy copy.** Now: data "stays on this device, in this browser. Nothing is uploaded, and no AI service ever reads your reflections." `privacy-policy-draft.md` never quoted the old wording (no change needed); README's OpenAI note is developer-facing asset provenance and stays.
 

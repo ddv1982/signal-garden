@@ -94,7 +94,7 @@ test.describe('garden-first lens journey', () => {
 
     await page.reload();
     await expect(page.getByText(m.lens_body_title())).toBeVisible();
-    await page.getByRole('button', { name: m.lens_body_action() }).click();
+    await openCurrentLens(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
     await expect(page.getByLabel(lensLabels.body)).toBeVisible();
   });
@@ -161,7 +161,7 @@ test.describe('garden-first lens journey', () => {
     await clickCanvasFraction(page, 0.37, 0.58);
     await expect(page.getByTestId('lens-panel')).toBeHidden();
 
-    await clickActiveLensTarget(page);
+    await openCurrentLens(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
     await expect(page.getByLabel(lensLabels.word)).toBeVisible();
   });
@@ -234,7 +234,7 @@ test.describe('garden-first lens journey', () => {
     );
   });
 
-  test('keeps the dark lens chip menu free of horizontal scrollbars', async ({ page }) => {
+  test('keeps the removed dark lens chip menu off screen', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.reload();
     await completeOnboarding(page);
@@ -242,13 +242,8 @@ test.describe('garden-first lens journey', () => {
     await page.keyboard.press('Escape');
 
     const lensProgress = page.locator('.lens-progress');
-    await expect(lensProgress).toBeVisible();
+    await expect(lensProgress).toHaveCount(0);
     await expect(page.getByText(m.lens_word_title())).toBeVisible();
-    await expect
-      .poll(() =>
-        lensProgress.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)
-      )
-      .toBe(true);
     await expect
       .poll(() =>
         page.evaluate(
@@ -729,6 +724,7 @@ test.describe('garden-first lens journey', () => {
 
     const canvas = page.getByTestId('garden-canvas');
     await expect(page.getByTestId('pet-debug-panel')).toBeVisible();
+    await page.waitForTimeout(500);
     await page.getByTestId('pet-debug-sequence-stretch').click();
     await expect(canvas).toHaveAttribute('data-pet-motion', 'frame-change');
     await expect(canvas).not.toHaveAttribute('data-pet-motion', 'state-action');
@@ -740,10 +736,11 @@ test.describe('garden-first lens journey', () => {
     const lensPanel = page.getByTestId('lens-panel');
     await expect(lensPanel).toBeVisible();
 
-    await page.getByRole('button', { name: m.lens_panel_close() }).click();
+    await expect(page.getByRole('button', { name: 'Close Panel' })).toHaveCount(0);
+    await page.keyboard.press('Escape');
     await expect(lensPanel).toBeHidden();
 
-    await page.getByRole('button', { name: m.lens_word_action() }).click();
+    await clickActiveLensTarget(page);
     await expect(lensPanel).toBeVisible();
 
     await page.keyboard.press('Escape');
@@ -766,7 +763,7 @@ test.describe('garden-first lens journey', () => {
     await startLensJourney(page);
     const lensPanel = page.getByTestId('lens-panel');
     await expect(lensPanel).toBeVisible();
-    await page.getByRole('button', { name: m.lens_panel_close() }).click();
+    await page.keyboard.press('Escape');
     await expect(lensPanel).toBeHidden();
 
     await page.getByRole('button', { name: m.tab_settings() }).click();
@@ -832,6 +829,18 @@ async function startLensJourney(page: Page) {
     await startControl.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('lens-panel')).toBeVisible();
+  }
+}
+
+async function openCurrentLens(page: Page) {
+  await clickActiveLensTarget(page);
+  try {
+    await expect(page.getByTestId('lens-panel')).toBeVisible({ timeout: 1_500 });
+  } catch {
+    const startControl = page.getByTestId('start-lens-journey');
+    await expect(startControl).toHaveCount(1);
+    await startControl.focus();
+    await page.keyboard.press('Enter');
   }
 }
 

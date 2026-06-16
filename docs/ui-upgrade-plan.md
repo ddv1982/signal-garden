@@ -25,7 +25,7 @@ The token system in `src/styles.css` is solid; the upgrade is refinement, not re
 - [x] Lens panel: stronger glassmorphism (24px blur), larger radius, tighter type hierarchy, entrance animation, step meter.
 - [x] Buttons: hover lift + pressed states, primary shadow/weight, consistent radii via tokens.
 - [x] Top bar: pill nav + pill theme toggle, refined brand mark. (Kept the two sun/moon buttons — e2e tests target their aria-labels.)
-- [x] Lens action chips: pill progress rail — completed get a ✓ prefix, current highlighted, upcoming muted.
+- [x] Lens progress chrome: removed the old action-chip rail; the panel now carries progress through the step eyebrow and segmented meter.
 - [x] Typography pass: eyebrow letter-spacing 0.08em, panel title -0.01em tracking.
 - [x] Radius audit: tokens `--radius-sm/md/lg/pill` applied across all components.
 - [x] Focus/keyboard states: existing `--focus-ring` outlines preserved everywhere.
@@ -47,7 +47,7 @@ Existing pipeline: generated chroma-key sheets in `*/source/`, runtime props in 
 - [x] Lens-to-lens transition choreography: outgoing fade-down → beat → incoming fade-up; panel re-animates per step (`key={currentLens}`).
 - [x] Soft "focus vignette": subtle scene dim (depth 540) while a lens is active; active prop renders above it.
 - [x] Ambient life: 9 drifting motes (fireflies at dusk, pollen by day) at low alpha; disabled under `reducedMotion`.
-- [x] Micro-interactions: button hover/press, panel enter animation, chip/meter transitions (CSS-only).
+- [x] Micro-interactions: button hover/press, panel enter animation, and meter transitions (CSS-only).
 - [ ] Journey completion moment: deferred — existing planting burst covers the handoff; revisit if wanted.
 - [x] Reduced-motion audit: Phaser tweens gated on `reducedMotion`; global `prefers-reduced-motion` CSS block added.
 
@@ -66,4 +66,4 @@ Existing pipeline: generated chroma-key sheets in `*/source/`, runtime props in 
 
 ## Key files
 
-`src/game/GardenGame.ts` (drawLensObjects, transitions) · `src/game/gardenLayout.ts` (LENS_RING, placements) · `src/domain/lenses.ts` (order/progress) · `src/App.tsx` (panel, chips, stepper) · `src/styles.css` (tokens, chrome) · `scripts/*` (asset pipeline).
+`src/game/GardenGame.ts` (drawLensObjects, transitions) · `src/game/gardenLayout.ts` (LENS_RING, placements) · `src/domain/lenses.ts` (order/progress) · `src/App.tsx` (panel, status, stepper) · `src/styles.css` (tokens, chrome) · `scripts/*` (asset pipeline).

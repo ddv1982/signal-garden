@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.28`](./0.1.28.md) — clears duplicate lens journey chrome so the current lens and garden prop carry the path
 - [`0.1.27`](./0.1.27.md) — tends the garden paths with accessibility, state, lifecycle, and validation cleanup
 - [`0.1.26`](./0.1.26.md) — moves the garden onto Vite 8's Rolldown path while refreshing the public stack markers
 - [`0.1.25`](./0.1.25.md) — splits the garden scene into focused caretakers while hardening pending seeds, mobile smoke, and TypeScript path config

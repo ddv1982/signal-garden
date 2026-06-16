@@ -537,71 +537,6 @@ strong {
   z-index: 3;
 }
 
-.lens-progress {
-  align-items: center;
-  -webkit-backdrop-filter: blur(18px) saturate(1.16);
-  backdrop-filter: blur(18px) saturate(1.16);
-  background: var(--color-panel-glass);
-  border: 1px solid var(--color-hud-border);
-  border-radius: var(--radius-pill);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  left: 14px;
-  max-width: min(980px, calc(100% - 28px));
-  overflow: visible;
-  padding: 5px;
-  position: absolute;
-  top: 56px;
-  z-index: 3;
-}
-
-.lens-chip {
-  align-items: center;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  background: var(--color-control-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  box-shadow: none;
-  color: var(--text-primary);
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-weight: var(--weight-control);
-  justify-content: center;
-  font-size: 0.82rem;
-  min-height: 30px;
-  padding: 0 11px;
-  transition: var(--transition-control);
-  white-space: nowrap;
-}
-
-span.lens-chip {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.lens-chip.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 10px rgba(29, 29, 31, 0.16);
-  color: var(--text-inverse);
-  font-weight: var(--weight-strong);
-}
-
-.lens-chip.complete {
-  background: var(--color-complete);
-  border-color: var(--color-complete-border);
-  opacity: 0.9;
-}
-
-.lens-chip.complete::before {
-  content: '✓';
-  font-size: 0.72rem;
-  margin-right: 5px;
-  opacity: 0.7;
-}
-
 .garden-keyboard-controls {
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
@@ -717,16 +652,6 @@ span.lens-chip {
   letter-spacing: -0.01em;
   line-height: 1.2;
   margin: 0;
-}
-
-.lens-panel-dismiss {
-  font-size: 0.82rem;
-  min-height: 32px;
-  padding: 0 10px;
-  position: absolute;
-  right: 34px;
-  top: 34px;
-  z-index: 4;
 }
 
 .lens-step-meter {
@@ -1248,26 +1173,8 @@ fieldset.settings-section {
     top: 10px;
   }
 
-  .lens-progress {
-    gap: 4px;
-    left: 10px;
-    max-width: calc(100% - 20px);
-    padding: 4px;
-    right: 10px;
-    top: 52px;
-  }
-
-  .lens-chip {
-    border-radius: var(--radius-pill);
-    font-size: 0.76rem;
-    min-height: 27px;
-    padding: 0 7px;
-  }
-
   .garden-stage:has(.lens-panel) .garden-status,
-  .garden-stage:has(.lens-panel) .lens-progress,
-  .garden-stage:has(.placement-panel) .garden-status,
-  .garden-stage:has(.placement-panel) .lens-progress {
+  .garden-stage:has(.placement-panel) .garden-status {
     opacity: 0;
     pointer-events: none;
   }

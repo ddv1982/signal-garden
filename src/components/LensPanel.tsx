@@ -35,63 +35,58 @@ export function LensPanel({
   }, []);
 
   return (
-    <>
-      <form
-        className="signal-panel lens-panel"
-        data-testid="lens-panel"
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby="lens-panel-title"
-        aria-label={m.lens_panel_label()}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') onDismiss();
-        }}
-        onSubmit={(event) => {
-          event.preventDefault();
-          onSubmit(inputRef.current?.value ?? input);
-        }}
-      >
-        <div>
-          <p className="eyebrow">
-            {m.lens_panel_eyebrow({ step: stepNumber, total: lensOrder.length })}
-          </p>
-          <h3 id="lens-panel-title">{definition.title}</h3>
-          <div className="lens-step-meter" aria-hidden="true">
-            {lensOrder.map((kind) => (
-              <span
-                key={kind}
-                className={
-                  kind === draft.currentLens
-                    ? 'meter-step active'
-                    : draft.completedLensIds.includes(kind)
-                      ? 'meter-step complete'
-                      : 'meter-step'
-                }
-              />
-            ))}
-          </div>
+    <form
+      className="signal-panel lens-panel"
+      data-testid="lens-panel"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="lens-panel-title"
+      aria-label={m.lens_panel_label()}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onDismiss();
+      }}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(inputRef.current?.value ?? input);
+      }}
+    >
+      <div>
+        <p className="eyebrow">
+          {m.lens_panel_eyebrow({ step: stepNumber, total: lensOrder.length })}
+        </p>
+        <h3 id="lens-panel-title">{definition.title}</h3>
+        <div className="lens-step-meter" aria-hidden="true">
+          {lensOrder.map((kind) => (
+            <span
+              key={kind}
+              className={
+                kind === draft.currentLens
+                  ? 'meter-step active'
+                  : draft.completedLensIds.includes(kind)
+                    ? 'meter-step complete'
+                    : 'meter-step'
+              }
+            />
+          ))}
         </div>
-        <label>
-          {definition.fieldLabel}
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(event) => onInputChange(event.target.value)}
-            placeholder={definition.helper}
-          />
-        </label>
-        <div className="form-actions">
-          <button type="button" onClick={onRest}>
-            {m.lens_let_it_rest()}
-          </button>
-          <button type="submit" className="primary-action">
-            {isLastLens ? m.lens_make_seed() : m.lens_continue()}
-          </button>
-        </div>
-      </form>
-      <button type="button" className="lens-panel-dismiss" onClick={onDismiss}>
-        {m.lens_panel_close()}
-      </button>
-    </>
+      </div>
+      <label>
+        {definition.fieldLabel}
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={(event) => onInputChange(event.target.value)}
+          placeholder={definition.helper}
+        />
+      </label>
+      <div className="form-actions">
+        <button type="button" onClick={onRest}>
+          {m.lens_let_it_rest()}
+        </button>
+        <button type="submit" className="primary-action">
+          {isLastLens ? m.lens_make_seed() : m.lens_continue()}
+        </button>
+      </div>
+    </form>
   );
 }
