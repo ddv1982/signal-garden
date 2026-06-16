@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.29`](./0.1.29.md) — measures the garden paths with coverage reporting and focused journey/data-control tests
 - [`0.1.28`](./0.1.28.md) — clears duplicate lens journey chrome so the current lens and garden prop carry the path
 - [`0.1.27`](./0.1.27.md) — tends the garden paths with accessibility, state, lifecycle, and validation cleanup
 - [`0.1.26`](./0.1.26.md) — moves the garden onto Vite 8's Rolldown path while refreshing the public stack markers

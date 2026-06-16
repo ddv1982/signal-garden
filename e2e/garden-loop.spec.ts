@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { m } from '../src/paraglide/messages.js';
 
@@ -753,6 +754,73 @@ test.describe('garden-first lens journey', () => {
     await expect(page.getByLabel(m.settings_reduce_motion())).toBeChecked();
   });
 
+  test('settings exports seed data and confirms seed deletion', async ({ page }) => {
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Settings data controls are covered on desktop; mobile keeps smoke coverage.'
+    );
+    await completeOnboarding(page);
+    await seedStoredGarden(page, ['front-right', 'front-center']);
+    await page.reload();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: m.settings_export_seed_data() }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/^signal-garden-seeds-\d{4}-\d{2}-\d{2}\.json$/);
+    const downloadPath = await download.path();
+    expect(downloadPath).toBeTruthy();
+    const exported = JSON.parse(await readFile(downloadPath!, 'utf8'));
+    expect(exported).toMatchObject({ app: 'Signal Garden', version: 1, seedCount: 2 });
+    expect(exported.seeds.map((seed: { gardenPlotId: string }) => seed.gardenPlotId)).toEqual([
+      'front-right',
+      'front-center',
+    ]);
+
+    await page.getByRole('button', { name: m.settings_delete_seeds() }).click();
+    await expect(
+      page.getByRole('group', { name: m.settings_confirm_seed_deletion_label() })
+    ).toBeVisible();
+    await page.getByRole('button', { name: m.settings_cancel() }).click();
+    await expect.poll(() => storedSeeds(page)).toHaveLength(2);
+
+    await page.getByRole('button', { name: m.settings_delete_seeds() }).click();
+    await page.getByRole('button', { name: m.settings_delete_permanently() }).click();
+
+    await expect(page.getByRole('button', { name: m.settings_export_seed_data() })).toBeDisabled();
+    await expect(page.getByRole('button', { name: m.settings_delete_seeds() })).toBeDisabled();
+    await expect.poll(() => storedSeeds(page)).toEqual([]);
+  });
+
+  test('settings confirms resetting an active lens profile', async ({ page }) => {
+    test.skip(
+      test.info().project.name === 'mobile-chrome',
+      'Settings profile reset confirmation is covered on desktop; mobile keeps smoke coverage.'
+    );
+    await completeOnboarding(page);
+    await startLensJourney(page);
+    await expect(page.getByTestId('lens-panel')).toBeVisible();
+    await page.getByRole('button', { name: m.tab_settings() }).click();
+
+    await page.getByRole('button', { name: m.settings_reset_lens_profile() }).click();
+    await expect(
+      page.getByRole('group', { name: m.settings_confirm_profile_reset_label() })
+    ).toBeVisible();
+    await page.getByRole('button', { name: m.settings_keep_journey() }).click();
+    await expect(
+      page.getByRole('group', { name: m.settings_confirm_profile_reset_label() })
+    ).toHaveCount(0);
+    await expect.poll(() => storedLensSessionDraft(page)).not.toBeNull();
+    await expect.poll(() => storedLensProfile(page)).not.toBeNull();
+
+    await page.getByRole('button', { name: m.settings_reset_lens_profile() }).click();
+    await page.getByRole('button', { name: m.settings_reset_anyway() }).click();
+
+    await expect(page.getByTestId('onboarding-panel')).toBeVisible();
+    await expect.poll(() => storedLensSessionDraft(page)).toBeNull();
+    await expect.poll(() => storedLensProfile(page)).toBeNull();
+  });
+
   test('mobile smoke covers onboarding, lens start, storage, and planting @mobile-smoke', async ({
     page,
   }) => {
@@ -853,6 +921,18 @@ async function storedSeeds(page: Page) {
 async function storedPendingSeed(page: Page) {
   return page.evaluate(() =>
     JSON.parse(localStorage.getItem('signal-garden/pending-seed/vite/v1') ?? 'null')
+  );
+}
+
+async function storedLensProfile(page: Page) {
+  return page.evaluate(() =>
+    JSON.parse(localStorage.getItem('signal-garden/inner-lens-profile/vite/v1') ?? 'null')
+  );
+}
+
+async function storedLensSessionDraft(page: Page) {
+  return page.evaluate(() =>
+    JSON.parse(localStorage.getItem('signal-garden/lens-session-draft/vite/v1') ?? 'null')
   );
 }
 
