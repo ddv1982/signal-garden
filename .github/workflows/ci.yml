@@ -49,8 +49,8 @@ jobs:
       - name: End-to-end smoke
         run: pnpm run e2e:compiled --project=chromium
 
-      - name: Mobile end-to-end smoke
-        run: pnpm run e2e:mobile-smoke:compiled
+      - name: Mobile end-to-end
+        run: pnpm run e2e:mobile:compiled
 
       - name: Upload Playwright artifacts
         if: failure()

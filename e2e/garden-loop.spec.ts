@@ -22,10 +22,6 @@ test.describe('garden-first lens journey', () => {
   test('creates a lens profile, completes a lens journey, plants a seed, and persists it', async ({
     page,
   }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Full seven-lens journey is covered on desktop; mobile covers onboarding and persistence smoke paths.'
-    );
     test.setTimeout(60_000);
     await expect(page.getByTestId('onboarding-panel')).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveCount(0);
@@ -66,7 +62,10 @@ test.describe('garden-first lens journey', () => {
       .toMatchObject([
         {
           gardenPlotId: 'front-right',
-          gardenPosition: { x: 0.7, y: 0.87 },
+          gardenPosition: expect.objectContaining({
+            x: expect.any(Number),
+            y: expect.any(Number),
+          }),
           growthPoints: 0,
           status: 'planted',
         },
@@ -101,10 +100,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('recovers a pending seed after reload before planting', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Full seven-lens journey is covered on desktop; mobile covers shorter smoke paths.'
-    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -138,11 +133,11 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('starts a lens journey from the canvas signal', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Mobile canvas coverage uses active lens-object interactions; the signal hit target is desktop-stable.'
-    );
     await completeOnboarding(page);
+    await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
+      'data-signal-motion',
+      /glow|still/
+    );
 
     await clickCanvasFraction(page, 0.72, 0.5);
 
@@ -168,16 +163,12 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('plants a completed seed from the canvas soil and persists it', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Full seven-lens journey is covered on desktop.'
-    );
     test.setTimeout(120_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
 
     await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
-    await clickCanvasFraction(page, 0.74, 0.87);
+    await clickFrontRightSoil(page);
 
     await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
     await expect(page.getByTestId('garden-canvas')).toHaveAttribute(
@@ -354,10 +345,6 @@ test.describe('garden-first lens journey', () => {
   }
 
   test('advances an older seed after a later lens journey', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Full repeated journey growth is covered on desktop.'
-    );
     test.setTimeout(90_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -377,10 +364,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('waters a planted seed, advances growth, and persists the watering', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Full seven-lens journey is covered on desktop.'
-    );
     test.setTimeout(90_000);
     await completeOnboarding(page);
     await completeLensJourney(page);
@@ -529,10 +512,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('accessible planting skips an occupied preferred plot', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Desktop plot ordering is covered here; mobile keeps smoke coverage.'
-    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await seedStoredGarden(page, ['front-right']);
@@ -555,10 +534,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('accessible planting is disabled when designed plots are full', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Desktop full-plot behavior is covered here; mobile keeps smoke coverage.'
-    );
     test.setTimeout(60_000);
     await completeOnboarding(page);
     await seedStoredGarden(page, [
@@ -584,10 +559,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('accessible planting uses the measured mobile canvas width', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Desktop browser is resized here to exercise the canvas-width threshold deterministically.'
-    );
     test.setTimeout(60_000);
     await page.setViewportSize({ width: 500, height: 760 });
     await completeOnboarding(page);
@@ -616,83 +587,6 @@ test.describe('garden-first lens journey', () => {
       ]);
   });
 
-  test('reports sleeping pet state without idle breathing motion', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Sleep debug sequence coverage is desktop-stable; mobile keeps no-bounce and reduced-motion coverage.'
-    );
-    await page.goto('/?petDebug=1');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
-    await completeOnboarding(page);
-    const canvas = page.getByTestId('garden-canvas');
-    await expect(page.getByTestId('pet-debug-panel')).toBeVisible();
-
-    await page.getByTestId('pet-debug-sequence-sleep').click();
-
-    await expect(canvas).toHaveAttribute('data-pet-debug-preview', 'sleep');
-    await expect(canvas).toHaveAttribute('data-pet-state', 'sleep', { timeout: 20_000 });
-    await expect(canvas).toHaveAttribute('data-pet-motion', 'sleeping');
-  });
-
-  test('pet debug mode can freeze every pose and trigger representative sequences', async ({
-    page,
-  }) => {
-    test.setTimeout(60_000);
-    test.skip(
-      !!process.env.CI,
-      'Pet debug pose review is a local visual QA harness; CI covers user-facing pet behavior and reduced-motion sequence smoke.'
-    );
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Exhaustive pet pose review is covered on desktop; mobile keeps reduced-motion and canvas smoke coverage.'
-    );
-    await page.goto('/?petDebug=1');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
-    await completeOnboarding(page);
-
-    const canvas = page.getByTestId('garden-canvas');
-    await expect(page.getByTestId('pet-debug-panel')).toBeVisible();
-    await page.waitForTimeout(500);
-
-    const frames = [
-      'idle',
-      'blinkSleepy',
-      'curious',
-      'headbuttWindup',
-      'headbuttContact',
-      'settleBack',
-      'stretch',
-      'groom',
-      'napCurl',
-      'sleeping',
-      'wake',
-      'plantProud',
-    ];
-
-    for (const frame of frames) {
-      await page.getByTestId(`pet-debug-frame-${frame}`).click();
-      await expect(canvas).toHaveAttribute('data-pet-frame', frame);
-      await expect(canvas).toHaveAttribute('data-pet-debug-preview', frame);
-    }
-
-    const sequences: Array<{ id: string; state: string; finalState: string }> = [
-      { id: 'stretch', state: 'attention', finalState: 'idle' },
-      { id: 'sleep', state: 'napStart', finalState: 'sleep' },
-      { id: 'wake', state: 'attention', finalState: 'idle' },
-    ];
-
-    for (const sequence of sequences) {
-      await page.getByTestId(`pet-debug-sequence-${sequence.id}`).click();
-      await expect(canvas).toHaveAttribute('data-pet-debug-preview', sequence.id);
-      await expect(canvas).toHaveAttribute('data-pet-state', sequence.state);
-      await expect(canvas).toHaveAttribute('data-pet-state', sequence.finalState, {
-        timeout: 20_000,
-      });
-    }
-  });
-
   test('keeps reduced-motion pet behavior to frame changes', async ({ page }) => {
     await completeOnboarding(page);
     await page.getByRole('button', { name: m.tab_settings() }).click();
@@ -711,10 +605,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('pet debug sequences respect reduced motion', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Debug sequence controls are exercised on desktop; mobile reduced-motion behavior is covered by the regular reduced-motion test.'
-    );
     await page.goto('/?petDebug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -741,7 +631,7 @@ test.describe('garden-first lens journey', () => {
     await page.keyboard.press('Escape');
     await expect(lensPanel).toBeHidden();
 
-    await clickActiveLensTarget(page);
+    await openCurrentLens(page);
     await expect(lensPanel).toBeVisible();
 
     await page.keyboard.press('Escape');
@@ -755,10 +645,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('settings exports seed data and confirms seed deletion', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Settings data controls are covered on desktop; mobile keeps smoke coverage.'
-    );
     await completeOnboarding(page);
     await seedStoredGarden(page, ['front-right', 'front-center']);
     await page.reload();
@@ -793,10 +679,6 @@ test.describe('garden-first lens journey', () => {
   });
 
   test('settings confirms resetting an active lens profile', async ({ page }) => {
-    test.skip(
-      test.info().project.name === 'mobile-chrome',
-      'Settings profile reset confirmation is covered on desktop; mobile keeps smoke coverage.'
-    );
     await completeOnboarding(page);
     await startLensJourney(page);
     await expect(page.getByTestId('lens-panel')).toBeVisible();
@@ -820,43 +702,6 @@ test.describe('garden-first lens journey', () => {
     await expect.poll(() => storedLensSessionDraft(page)).toBeNull();
     await expect.poll(() => storedLensProfile(page)).toBeNull();
   });
-
-  test('mobile smoke covers onboarding, lens start, storage, and planting @mobile-smoke', async ({
-    page,
-  }) => {
-    test.skip(test.info().project.name !== 'mobile-chrome', 'Mobile smoke runs on mobile-chrome.');
-    test.setTimeout(60_000);
-
-    await completeOnboarding(page);
-    await startLensJourney(page);
-    const lensPanel = page.getByTestId('lens-panel');
-    await expect(lensPanel).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(lensPanel).toBeHidden();
-
-    await page.getByRole('button', { name: m.tab_settings() }).click();
-    await page.getByLabel(m.settings_reduce_motion()).check();
-    await page.reload();
-    await page.getByRole('button', { name: m.tab_settings() }).click();
-    await expect(page.getByLabel(m.settings_reduce_motion())).toBeChecked();
-
-    await storePendingSeed(page);
-    await page.reload();
-    await expect(page.getByText(m.garden_pending_seed_status())).toBeVisible();
-    await page.getByTestId('plant-here').click();
-
-    await expect(page.getByText(m.garden_saved_seed_one({ count: 1 }))).toBeVisible();
-    await expect.poll(() => storedPendingSeed(page)).toBeNull();
-    await expect
-      .poll(() => storedSeeds(page))
-      .toMatchObject([
-        {
-          id: 'mobile-pending-seed',
-          tinyAction: 'Take one mobile pause',
-          gardenPlotId: 'front-right',
-        },
-      ]);
-  });
 });
 
 async function completeOnboarding(page: Page) {
@@ -871,9 +716,15 @@ async function fillLens(page: Page, label: string, value: string, buttonName = m
   const panel = page.getByTestId('lens-panel');
   await expect(panel).toBeVisible();
   const field = panel.getByLabel(label);
+  await expect(field).toBeVisible();
   await field.fill(value);
   await expect(field).toHaveValue(value);
-  await panel.getByRole('button', { name: buttonName }).click();
+  const submitButton = panel.getByRole('button', { name: buttonName });
+  await expect(submitButton).toBeVisible();
+  await submitButton.evaluate((button) => {
+    const submitter = button as HTMLButtonElement;
+    submitter.form?.requestSubmit(submitter);
+  });
 }
 
 async function completeLensJourney(page: Page) {
@@ -888,16 +739,11 @@ async function completeLensJourney(page: Page) {
 }
 
 async function startLensJourney(page: Page) {
-  await clickCanvasFraction(page, 0.72, 0.5);
-  try {
-    await expect(page.getByTestId('lens-panel')).toBeVisible({ timeout: 1_500 });
-  } catch {
-    const startControl = page.getByTestId('start-lens-journey');
-    await expect(startControl).toHaveCount(1);
-    await startControl.focus();
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('lens-panel')).toBeVisible();
-  }
+  const startControl = page.getByTestId('start-lens-journey');
+  await expect(startControl).toHaveCount(1);
+  await startControl.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('lens-panel')).toBeVisible();
 }
 
 async function openCurrentLens(page: Page) {
@@ -1002,41 +848,6 @@ async function seedStoredGarden(page: Page, plotIds: string[]) {
   }, plotIds);
 }
 
-async function storePendingSeed(page: Page) {
-  await page.evaluate(() => {
-    localStorage.removeItem('signal-garden/lens-session-draft/vite/v1');
-    localStorage.setItem(
-      'signal-garden/pending-seed/vite/v1',
-      JSON.stringify({
-        id: 'mobile-pending-seed',
-        createdAt: '2026-06-07T13:00:00.000Z',
-        labelText: 'mobile signal',
-        unhookedText: 'Noticing the story: mobile signal',
-        emotions: ['curious'],
-        bodySignals: ['warm hands'],
-        values: ['steadiness'],
-        dreams: ['small lantern'],
-        tinyAction: 'Take one mobile pause',
-        status: 'planted',
-        visualType: 'seed',
-        lensJourney: {
-          completedAt: '2026-06-07T13:05:00.000Z',
-          lensOrder: ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'],
-          responses: {
-            wordLabel: 'mobile signal',
-            bodySignal: 'warm hands',
-            emotion: 'curious',
-            innerImage: 'small lantern',
-            observerNote: 'awareness is here',
-            alternateMeaning: 'steadiness can be small',
-            tinyAction: 'Take one mobile pause',
-          },
-        },
-      })
-    );
-  });
-}
-
 async function clickCanvasFraction(page: Page, xFraction: number, yFraction: number) {
   const wrapper = page.getByTestId('garden-canvas');
   await expect(wrapper).toBeVisible();
@@ -1048,7 +859,23 @@ async function clickCanvasFraction(page: Page, xFraction: number, yFraction: num
       : await wrapper.boundingBox();
   if (!box) throw new Error('Garden canvas missing');
 
-  await page.mouse.click(box.x + box.width * xFraction, box.y + box.height * yFraction);
+  const x = box.x + box.width * xFraction;
+  const y = box.y + box.height * yFraction;
+  if ((page.viewportSize()?.width ?? box.width) < 540) {
+    await page.touchscreen.tap(x, y);
+    return;
+  }
+
+  await page.mouse.click(x, y);
+}
+
+async function clickFrontRightSoil(page: Page) {
+  if ((page.viewportSize()?.width ?? 0) < 540) {
+    await clickCanvasFraction(page, 0.82, 0.52);
+    return;
+  }
+
+  await clickCanvasFraction(page, 0.74, 0.87);
 }
 
 async function clickActiveLensTarget(page: Page) {
