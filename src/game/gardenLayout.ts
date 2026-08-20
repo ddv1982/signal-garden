@@ -196,6 +196,9 @@ type GardenPlotAnchor = {
   wide: { x: number; y: number; scale: number; depth: number };
 };
 
+// Cover-crop slides the painted beds under the window. Each desktop plot is
+// tuned at a narrow crop (~0.45) and a wide crop (~0.68) so interpolation
+// keeps seeds off the pool, path, mosaic, pet, and lens props.
 const NARROW_VISIBLE_RATIO = 0.45;
 const WIDE_VISIBLE_RATIO = 0.68;
 
