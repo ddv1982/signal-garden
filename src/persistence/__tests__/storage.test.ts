@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readJson, writeJson, writeRaw, type StorageLike } from '../storage';
+import { readJson, writeJson, type StorageLike } from '../storage';
 
 type Shape = { count: number };
 
@@ -98,25 +98,6 @@ describe('writeJson', () => {
       removeItem: () => {},
     };
     expect(() => writeJson(storage, 'key', { count: 3 })).not.toThrow();
-    expect(warn).toHaveBeenCalledOnce();
-  });
-});
-
-describe('writeRaw', () => {
-  it('persists raw strings and swallows write errors', () => {
-    const storage = memoryStorage();
-    writeRaw(storage, 'key', 'dark');
-    expect(storage.data.key).toBe('dark');
-
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const failing: StorageLike = {
-      getItem: () => null,
-      setItem: () => {
-        throw new Error('full');
-      },
-      removeItem: () => {},
-    };
-    expect(() => writeRaw(failing, 'key', 'dark')).not.toThrow();
     expect(warn).toHaveBeenCalledOnce();
   });
 });

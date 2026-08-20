@@ -11,7 +11,17 @@ export type GardenPlot = {
   depth: number;
 };
 
-export type LensKind = 'word' | 'body' | 'emotion' | 'image' | 'observer' | 'meaning' | 'action';
+export const LENS_KINDS = [
+  'word',
+  'body',
+  'emotion',
+  'image',
+  'observer',
+  'meaning',
+  'action',
+] as const;
+
+export type LensKind = (typeof LENS_KINDS)[number];
 
 export type InnerExperienceMode = 'words' | 'images' | 'body' | 'emotions' | 'knowing' | 'mixed';
 
@@ -43,7 +53,7 @@ export type LensSessionDraft = {
 
 export type LensJourney = {
   completedAt: string;
-  lensOrder: LensKind[];
+  lensOrder: readonly LensKind[];
   responses: LensResponses;
 };
 
@@ -87,16 +97,6 @@ export type ReflectionSeed = {
   lensJourney?: LensJourney;
 };
 
-export type PetMood = 'curious' | 'cozy' | 'attentive' | 'sleepy' | 'proud' | 'concerned';
-
-export type PetState = {
-  name: string;
-  mood: PetMood;
-  lastInteractionAt?: string;
-  unlockedInteractionVariants: string[];
-};
-
 export type GardenState = {
   seeds: ReflectionSeed[];
-  pet: PetState;
 };

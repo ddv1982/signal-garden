@@ -60,11 +60,6 @@ const seedWithJourney: ReflectionSeed = {
 
 const garden: GardenState = {
   seeds: [seed],
-  pet: {
-    name: 'Pet',
-    mood: 'curious',
-    unlockedInteractionVariants: ['headButt'],
-  },
 };
 
 const profile: InnerLensProfile = {
@@ -101,7 +96,7 @@ describe('stored data validation', () => {
     expect(isReflectionSeed({ ...seed, status: 'unknown' })).toBe(false);
     expect(isInnerLensProfile({ ...profile, promptOrder: 'emotion-first' })).toBe(false);
     expect(isLensSessionDraft({ ...draft, currentLens: 'memory' })).toBe(false);
-    expect(isGardenState({ ...garden, pet: { ...garden.pet, mood: 'wild' } })).toBe(false);
+    expect(isGardenState({ ...garden, seeds: [{ ...seed, status: 'unknown' }] })).toBe(false);
   });
 
   it('parses JSON before validation', () => {

@@ -1,4 +1,9 @@
-import type { GardenPlot, LensKind, ReflectionSeed } from '../../shared/models';
+import {
+  LENS_KINDS,
+  type GardenPlot,
+  type LensKind,
+  type ReflectionSeed,
+} from '../../shared/models';
 
 export type GardenSeedLayoutItem = {
   index: number;
@@ -68,15 +73,7 @@ const MAX_VISIBLE_SEEDS = 50;
 export const GARDEN_DESIGN_WIDTH = 1480;
 export const GARDEN_DESIGN_HEIGHT = 484;
 export const LENS_POOL_CENTER = { x: 0.49, y: 0.66 };
-export const LENS_RING_ORDER: LensKind[] = [
-  'word',
-  'body',
-  'emotion',
-  'image',
-  'observer',
-  'meaning',
-  'action',
-];
+export const LENS_RING_ORDER = LENS_KINDS;
 export const PET_INTERACTION_OFFSET = { x: 0, y: -92 };
 export const PET_INTERACTION_SIZE = { width: 178, height: 226 };
 const MOBILE_LENS_PANEL_SAFE_HEIGHT = 144;

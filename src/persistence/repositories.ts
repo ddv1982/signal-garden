@@ -1,16 +1,11 @@
-import type {
-  GardenState,
-  InnerLensProfile,
-  LensSessionDraft,
-  ReflectionSeed,
-} from '../../shared/models';
+import type { InnerLensProfile, LensSessionDraft, ReflectionSeed } from '../../shared/models';
 import {
   isInnerLensProfile,
   isLensSessionDraft,
   isReflectionSeed,
 } from '../../shared/bridgeValidation';
 import { defaultThemePreference, isThemePreference, type ThemePreference } from '../domain/theme';
-import { getBrowserStorage, readJson, writeJson, writeRaw, type StorageLike } from './storage';
+import { getBrowserStorage, readJson, writeJson, type StorageLike } from './storage';
 
 const seedKey = 'signal-garden/reflection-seeds/vite/v1';
 const settingsKey = 'signal-garden/settings/vite/v1';
@@ -74,25 +69,20 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
       const settings = sanitizeAppSettings(
         readJson(storage, settingsKey, defaultSettings, isAppSettingsObject)
       );
-      const storedThemePreference = readThemePreference(storage);
-      return {
+      const leftoverTheme = readLeftoverThemePreference(storage);
+      const resolved = {
         ...settings,
-        themePreference: storedThemePreference ?? settings.themePreference,
+        themePreference: leftoverTheme.value ?? settings.themePreference,
       };
+      if (leftoverTheme.present) {
+        writeJson(storage, settingsKey, resolved);
+        storage?.removeItem(themePreferenceKey);
+      }
+      return resolved;
     },
     saveSettings(settings: AppSettings): void {
       writeJson(storage, settingsKey, settings);
-      writeThemePreference(storage, settings.themePreference);
-    },
-    gardenState(seeds: ReflectionSeed[]): GardenState {
-      return {
-        seeds,
-        pet: {
-          name: 'Pet',
-          mood: seeds.length > 0 ? 'proud' : 'curious',
-          unlockedInteractionVariants: ['headButt'],
-        },
-      };
+      storage?.removeItem(themePreferenceKey);
     },
   };
 }
@@ -132,19 +122,21 @@ function sanitizeAppSettings(settings: Partial<AppSettings>): AppSettings {
   };
 }
 
-function readThemePreference(storage: StorageLike | null): ThemePreference | null {
-  if (!storage) return null;
+function readLeftoverThemePreference(storage: StorageLike | null): {
+  present: boolean;
+  value: ThemePreference | null;
+} {
+  if (!storage) return { present: false, value: null };
   try {
     const rawPreference = storage.getItem(themePreferenceKey);
-    if (rawPreference === null) return null;
-    return isThemePreference(rawPreference) ? rawPreference : defaultThemePreference;
+    if (rawPreference === null) return { present: false, value: null };
+    return {
+      present: true,
+      value: isThemePreference(rawPreference) ? rawPreference : null,
+    };
   } catch {
-    return null;
+    return { present: false, value: null };
   }
-}
-
-function writeThemePreference(storage: StorageLike | null, themePreference: ThemePreference) {
-  writeRaw(storage, themePreferenceKey, themePreference);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

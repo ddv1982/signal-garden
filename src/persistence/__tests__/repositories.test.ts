@@ -118,7 +118,7 @@ describe('createSignalGardenRepository', () => {
       themePreference: 'dark',
     });
 
-    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBe('dark');
+    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBeNull();
     expect(repository.loadSettings()).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
@@ -140,7 +140,7 @@ describe('createSignalGardenRepository', () => {
     });
   });
 
-  it('prefers the dedicated theme preference over the legacy settings value', () => {
+  it('migrates a leftover theme key into settings and deletes the leftover', () => {
     const storage = createMemoryStorage();
     storage.setItem('signal-garden/theme-preference/vite/v1', 'light');
     storage.setItem(
@@ -148,7 +148,14 @@ describe('createSignalGardenRepository', () => {
       JSON.stringify({ reducedMotion: false, onboardingCompleted: true, themePreference: 'dark' })
     );
 
-    expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
+    const repository = createSignalGardenRepository(storage);
+    expect(repository.loadSettings()).toEqual({
+      reducedMotion: false,
+      onboardingCompleted: true,
+      themePreference: 'light',
+    });
+    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBeNull();
+    expect(JSON.parse(storage.getItem('signal-garden/settings/vite/v1') ?? '{}')).toEqual({
       reducedMotion: false,
       onboardingCompleted: true,
       themePreference: 'light',
@@ -169,7 +176,7 @@ describe('createSignalGardenRepository', () => {
     });
   });
 
-  it('falls back to system theme when the dedicated theme preference is invalid', () => {
+  it('ignores an invalid leftover theme key and keeps the settings value', () => {
     const storage = createMemoryStorage();
     storage.setItem('signal-garden/theme-preference/vite/v1', 'night');
     storage.setItem(
@@ -180,8 +187,9 @@ describe('createSignalGardenRepository', () => {
     expect(createSignalGardenRepository(storage).loadSettings()).toEqual({
       reducedMotion: true,
       onboardingCompleted: true,
-      themePreference: 'system',
+      themePreference: 'dark',
     });
+    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBeNull();
   });
 });
 

@@ -22,9 +22,7 @@ const seedDialogTabs: SeedDialogTab[] = ['overview', 'water', 'history'];
 type SeedDialogProps = {
   seed: ReflectionSeed;
   onClose: () => void;
-  /** Returns an error message to show in the form, or null on success. */
   onWater: (seed: ReflectionSeed, input: SeedWateringInput) => string | null;
-  /** Returns an error message to show in the form, or null on success. */
   onBloom: (seed: ReflectionSeed, input: SeedBloomInput) => string | null;
 };
 
@@ -86,6 +84,9 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     setActiveTab(tab);
     document.getElementById(seedDialogTabId(tab))?.focus();
   }
+
+  const stageCopy = seedStageCopy(seed);
+  const wateringPrompt = wateringPromptForSeed(seed);
 
   function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, tab: SeedDialogTab) {
     const currentIndex = seedDialogTabs.indexOf(tab);
@@ -163,9 +164,9 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
           aria-labelledby={seedDialogTabId('overview')}
         >
           <div className="seed-stage-card">
-            <p className="eyebrow">{seedStageCopy(seed).eyebrow}</p>
-            <strong>{seedStageCopy(seed).title}</strong>
-            <span>{seedStageCopy(seed).description}</span>
+            <p className="eyebrow">{stageCopy.eyebrow}</p>
+            <strong>{stageCopy.title}</strong>
+            <span>{stageCopy.description}</span>
           </div>
           <div className="seed-progress" aria-label={m.seed_dialog_growth_progress()}>
             {growthStepLabels.map((step, index) => (
@@ -260,24 +261,24 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
           ) : (
             <form className="watering-form" data-testid="watering-form" onSubmit={submitWatering}>
               <label>
-                {wateringPromptForSeed(seed).label}
+                {wateringPrompt.label}
                 <textarea
                   value={form.wateringLabel}
                   onChange={(event) =>
                     dispatch({ type: 'set-watering-label', value: event.target.value })
                   }
-                  placeholder={wateringPromptForSeed(seed).labelPlaceholder}
+                  placeholder={wateringPrompt.labelPlaceholder}
                   required
                 />
               </label>
               <label>
-                {wateringPromptForSeed(seed).actionLabel}
+                {wateringPrompt.actionLabel}
                 <textarea
                   value={form.wateringAction}
                   onChange={(event) =>
                     dispatch({ type: 'set-watering-action', value: event.target.value })
                   }
-                  placeholder={wateringPromptForSeed(seed).actionPlaceholder}
+                  placeholder={wateringPrompt.actionPlaceholder}
                   required
                 />
               </label>

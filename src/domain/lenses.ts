@@ -1,25 +1,18 @@
-import type {
-  InnerExperienceMode,
-  InnerLensProfile,
-  LensJourney,
-  LensKind,
-  LensPromptOrder,
-  LensResponses,
-  LensSessionDraft,
-  ReflectionSeed,
-  SeedVisualType,
+import {
+  LENS_KINDS,
+  type InnerExperienceMode,
+  type InnerLensProfile,
+  type LensJourney,
+  type LensKind,
+  type LensPromptOrder,
+  type LensResponses,
+  type LensSessionDraft,
+  type ReflectionSeed,
+  type SeedVisualType,
 } from '../../shared/models';
 import { m } from '../paraglide/messages.js';
 
-export const lensKinds: LensKind[] = [
-  'word',
-  'body',
-  'emotion',
-  'image',
-  'observer',
-  'meaning',
-  'action',
-];
+export const lensKinds = LENS_KINDS;
 
 export const emptyLensResponses: LensResponses = {
   wordLabel: '',
@@ -129,7 +122,7 @@ export function createLensSessionDraft(profile: InnerLensProfile): LensSessionDr
   };
 }
 
-export function lensOrderForProfile(profile: InnerLensProfile | null): LensKind[] {
+export function lensOrderForProfile(profile: InnerLensProfile | null): readonly LensKind[] {
   const order = profile?.promptOrder ?? 'open';
   if (order === 'body-first')
     return ['body', 'emotion', 'word', 'image', 'observer', 'meaning', 'action'];

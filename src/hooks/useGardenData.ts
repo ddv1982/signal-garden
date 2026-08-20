@@ -10,7 +10,7 @@ export function useGardenData(repository: SignalGardenRepository) {
   const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(() =>
     repository.loadPendingSeed()
   );
-  const gardenState = useMemo(() => repository.gardenState(seeds), [repository, seeds]);
+  const gardenState = useMemo(() => ({ seeds }), [seeds]);
 
   useEffect(() => repository.saveSeeds(seeds), [repository, seeds]);
 

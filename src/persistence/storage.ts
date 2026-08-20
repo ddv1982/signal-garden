@@ -70,15 +70,6 @@ export function writeJson<T>(storage: StorageLike | null, key: string, value: T)
   }
 }
 
-export function writeRaw(storage: StorageLike | null, key: string, value: string): void {
-  if (!storage) return;
-  try {
-    storage.setItem(key, value);
-  } catch (error) {
-    warnStorage('write', key, error);
-  }
-}
-
 function warnStorage(operation: string, key: string, error?: unknown) {
   if (typeof console === 'undefined') return;
   console.warn(`[signal-garden] Storage ${operation} failed for "${key}".`, error ?? '');

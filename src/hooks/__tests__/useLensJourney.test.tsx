@@ -160,9 +160,5 @@ function createRepository(draft: LensSessionDraft | null = null): Repository {
       themePreference: 'system' as const,
     })),
     saveSettings: vi.fn(),
-    gardenState: vi.fn(() => ({
-      seeds: [],
-      pet: { name: 'Pet', mood: 'curious' as const, unlockedInteractionVariants: ['headButt'] },
-    })),
   };
 }

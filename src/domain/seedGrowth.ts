@@ -8,6 +8,14 @@ import { m } from '../paraglide/messages.js';
 
 const GROWTH_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
+const STATUS_GROWTH: Record<SeedStatus, { points: number; visual: SeedVisualType }> = {
+  planted: { points: 0, visual: 'seed' },
+  sprouted: { points: 1, visual: 'sprout' },
+  growing: { points: 2, visual: 'bud' },
+  blooming: { points: 3, visual: 'flower' },
+  resting: { points: 0, visual: 'flower' },
+};
+
 export type SeedGrowthStage = 'seed' | 'sprout' | 'growing' | 'mature';
 
 export type SeedWateringInput = {
@@ -87,8 +95,7 @@ function advanceSeedWateringStage(seed: ReflectionSeed, now: string): Reflection
 
   const currentPoints = seed.growthPoints ?? statusGrowthPoints(seed.status);
   const nextPoints = Math.min(currentPoints + 1, 2);
-  const status: SeedStatus =
-    nextPoints <= 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
+  const status = statusForGrowthPoints(nextPoints);
 
   if (nextPoints === currentPoints && seed.status === status) return seed;
 
@@ -97,7 +104,7 @@ function advanceSeedWateringStage(seed: ReflectionSeed, now: string): Reflection
     status,
     growthPoints: nextPoints,
     lastGrowthAt: now,
-    visualType: visualTypeForStatus(seed, status),
+    visualType: visualTypeForStatus(status),
   };
 }
 
@@ -153,31 +160,29 @@ function advanceSeedGrowth(
   if (!shouldGrow) return seed;
 
   const nextPoints = Math.min((seed.growthPoints ?? statusGrowthPoints(seed.status)) + 1, 2);
-  const nextStatus: SeedStatus =
-    nextPoints === 0 ? 'planted' : nextPoints === 1 ? 'sprouted' : 'growing';
+  const nextStatus = statusForGrowthPoints(nextPoints);
 
   return {
     ...seed,
     status: nextStatus,
-    visualType: visualTypeForStatus(seed, nextStatus),
+    visualType: visualTypeForStatus(nextStatus),
     growthPoints: nextPoints,
     lastGrowthAt: now,
   };
 }
 
-function visualTypeForStatus(seed: ReflectionSeed, status: SeedStatus): SeedVisualType {
-  if (status === 'planted') return 'seed';
-  if (status === 'sprouted') return 'sprout';
-  if (status === 'growing') return 'bud';
-  if (status === 'blooming') return 'flower';
-  return 'flower';
+function statusForGrowthPoints(points: number): SeedStatus {
+  if (points <= 0) return 'planted';
+  if (points === 1) return 'sprouted';
+  return 'growing';
+}
+
+function visualTypeForStatus(status: SeedStatus): SeedVisualType {
+  return STATUS_GROWTH[status].visual;
 }
 
 function statusGrowthPoints(status: SeedStatus) {
-  if (status === 'blooming') return 3;
-  if (status === 'growing') return 2;
-  if (status === 'sprouted') return 1;
-  return 0;
+  return STATUS_GROWTH[status].points;
 }
 
 function elapsedMs(start: string, end: string) {
