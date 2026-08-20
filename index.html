@@ -30,29 +30,27 @@
     <script>
       (function () {
         try {
-          var preference = 'system';
-          var rawPreference = localStorage.getItem('signal-garden/theme-preference/vite/v1');
-          if (rawPreference === 'light' || rawPreference === 'dark' || rawPreference === 'system') {
-            preference = rawPreference;
-          } else if (rawPreference === null) {
-            var rawSettings = localStorage.getItem('signal-garden/settings/vite/v1');
-            if (rawSettings) {
-              var settings = JSON.parse(rawSettings);
-              var validSettings =
-                settings &&
-                typeof settings === 'object' &&
-                !Array.isArray(settings) &&
-                typeof settings.reducedMotion === 'boolean' &&
-                (settings.onboardingCompleted === undefined ||
-                  typeof settings.onboardingCompleted === 'boolean');
-              if (
-                validSettings &&
-                (settings.themePreference === 'light' ||
-                  settings.themePreference === 'dark' ||
-                  settings.themePreference === 'system')
-              ) {
-                preference = settings.themePreference;
-              }
+          var preference;
+          var rawSettings = localStorage.getItem('signal-garden/settings/vite/v1');
+          if (rawSettings) {
+            var settings = JSON.parse(rawSettings);
+            if (
+              settings &&
+              typeof settings === 'object' &&
+              !Array.isArray(settings) &&
+              (settings.themePreference === 'light' ||
+                settings.themePreference === 'dark' ||
+                settings.themePreference === 'system')
+            ) {
+              preference = settings.themePreference;
+            }
+          }
+          if (!preference) {
+            var leftover = localStorage.getItem('signal-garden/theme-preference/vite/v1');
+            if (leftover === 'light' || leftover === 'dark' || leftover === 'system') {
+              preference = leftover;
+            } else {
+              preference = 'system';
             }
           }
           var systemTheme =
