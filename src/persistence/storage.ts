@@ -55,12 +55,14 @@ export function readJson<T>(
   return fallback;
 }
 
-export function writeJson<T>(storage: StorageLike | null, key: string, value: T): void {
-  if (!storage) return;
+export function writeJson<T>(storage: StorageLike | null, key: string, value: T): boolean {
+  if (!storage) return false;
   try {
     storage.setItem(key, JSON.stringify(value));
+    return true;
   } catch (error) {
     warnStorage('write', key, error);
+    return false;
   }
 }
 

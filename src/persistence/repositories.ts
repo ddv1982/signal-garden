@@ -74,15 +74,15 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
         ...settings,
         themePreference: leftoverTheme.value ?? settings.themePreference,
       };
-      if (leftoverTheme.present) {
-        writeJson(storage, settingsKey, resolved);
+      if (leftoverTheme.present && writeJson(storage, settingsKey, resolved)) {
         storage?.removeItem(themePreferenceKey);
       }
       return resolved;
     },
     saveSettings(settings: AppSettings): void {
-      writeJson(storage, settingsKey, settings);
-      storage?.removeItem(themePreferenceKey);
+      if (writeJson(storage, settingsKey, settings)) {
+        storage?.removeItem(themePreferenceKey);
+      }
     },
   };
 }

@@ -30,28 +30,27 @@
     <script>
       (function () {
         try {
-          var preference;
-          var rawSettings = localStorage.getItem('signal-garden/settings/vite/v1');
-          if (rawSettings) {
-            var settings = JSON.parse(rawSettings);
-            if (
-              settings &&
-              typeof settings === 'object' &&
-              !Array.isArray(settings) &&
-              (settings.themePreference === 'light' ||
-                settings.themePreference === 'dark' ||
-                settings.themePreference === 'system')
-            ) {
-              preference = settings.themePreference;
+          var leftover = localStorage.getItem('signal-garden/theme-preference/vite/v1');
+          var preference =
+            leftover === 'light' || leftover === 'dark' || leftover === 'system' ? leftover : null;
+          if (!preference) {
+            var rawSettings = localStorage.getItem('signal-garden/settings/vite/v1');
+            if (rawSettings) {
+              var settings = JSON.parse(rawSettings);
+              if (
+                settings &&
+                typeof settings === 'object' &&
+                !Array.isArray(settings) &&
+                (settings.themePreference === 'light' ||
+                  settings.themePreference === 'dark' ||
+                  settings.themePreference === 'system')
+              ) {
+                preference = settings.themePreference;
+              }
             }
           }
           if (!preference) {
-            var leftover = localStorage.getItem('signal-garden/theme-preference/vite/v1');
-            if (leftover === 'light' || leftover === 'dark' || leftover === 'system') {
-              preference = leftover;
-            } else {
-              preference = 'system';
-            }
+            preference = 'system';
           }
           var systemTheme =
             window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches

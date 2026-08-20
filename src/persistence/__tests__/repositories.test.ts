@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createLensProfile, createLensSessionDraft } from '../../domain/lenses';
 import { createSignalGardenRepository } from '../repositories';
 import type { StorageLike } from '../storage';
@@ -190,6 +190,37 @@ describe('createSignalGardenRepository', () => {
       themePreference: 'dark',
     });
     expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBeNull();
+  });
+
+  it('keeps the leftover theme key when settings cannot be written', () => {
+    const values = new Map<string, string>([
+      ['signal-garden/theme-preference/vite/v1', 'light'],
+      [
+        'signal-garden/settings/vite/v1',
+        JSON.stringify({
+          reducedMotion: false,
+          onboardingCompleted: true,
+          themePreference: 'dark',
+        }),
+      ],
+    ]);
+    const storage: StorageLike = {
+      getItem(key) {
+        return values.get(key) ?? null;
+      },
+      setItem() {
+        throw new DOMException('quota', 'QuotaExceededError');
+      },
+      removeItem(key) {
+        values.delete(key);
+      },
+    };
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(createSignalGardenRepository(storage).loadSettings().themePreference).toBe('light');
+    expect(storage.getItem('signal-garden/theme-preference/vite/v1')).toBe('light');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 

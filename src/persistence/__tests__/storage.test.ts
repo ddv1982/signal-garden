@@ -97,7 +97,7 @@ describe('writeJson', () => {
       },
       removeItem: () => {},
     };
-    expect(() => writeJson(storage, 'key', { count: 3 })).not.toThrow();
+    expect(writeJson(storage, 'key', { count: 3 })).toBe(false);
     expect(warn).toHaveBeenCalledOnce();
   });
 });
