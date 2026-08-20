@@ -869,13 +869,21 @@ async function clickCanvasFraction(page: Page, xFraction: number, yFraction: num
   await page.mouse.click(x, y);
 }
 
+// The scene needs a couple of frames after the placement panel appears before
+// the soil markers register hit areas, so re-read the live plot position and
+// tap again rather than aiming once at a hardcoded fraction.
 async function clickFrontRightSoil(page: Page) {
-  if ((page.viewportSize()?.width ?? 0) < 540) {
-    await clickCanvasFraction(page, 0.82, 0.52);
-    return;
-  }
+  const wrapper = page.getByTestId('garden-canvas');
 
-  await clickCanvasFraction(page, 0.74, 0.87);
+  await expect(async () => {
+    await expect(wrapper).toHaveAttribute('data-front-right-plot-x', /0\.\d+/, { timeout: 2_000 });
+    const [xFraction, yFraction] = await wrapper.evaluate((element) => [
+      Number((element as HTMLElement).dataset.frontRightPlotX),
+      Number((element as HTMLElement).dataset.frontRightPlotY),
+    ]);
+    await clickCanvasFraction(page, xFraction, yFraction);
+    await expect(wrapper).toHaveAttribute('data-selected-plot', 'front-right', { timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
 }
 
 async function clickActiveLensTarget(page: Page) {

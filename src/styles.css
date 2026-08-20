@@ -29,6 +29,8 @@
   --shadow-floating: 0 18px 44px rgba(29, 29, 31, 0.12);
   --shadow-control: 0 1px 2px rgba(29, 29, 31, 0.06);
   --shadow-control-hover: 0 4px 14px rgba(29, 29, 31, 0.14);
+  /* Chrome above the garden stage: shell padding, top bar, and its margin. */
+  --stage-offset: 86px;
   --hue-parchment: 88;
   --hue-canopy: 148;
   --pane-fill: oklch(0.995 0.008 var(--hue-parchment) / 0.66);
@@ -609,7 +611,7 @@ strong {
 }
 
 .garden-stage {
-  min-height: min(760px, calc(100vh - 86px));
+  min-height: min(760px, calc(100vh - var(--stage-offset)));
   position: relative;
 }
 
@@ -652,7 +654,7 @@ strong {
 }
 
 .garden-canvas {
-  height: min(860px, calc(100vh - 86px));
+  height: min(860px, calc(100vh - var(--stage-offset)));
   min-height: 560px;
   width: 100%;
 }
@@ -738,9 +740,21 @@ strong {
   }
 }
 
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .signal-panel,
 .placement-panel {
-  animation: panel-in 0.28s ease-out both;
+  animation: panel-in var(--duration-scene) var(--ease-settle) both;
 }
 
 .signal-panel h3 {
@@ -1240,21 +1254,40 @@ fieldset.settings-section {
     padding: 10px;
   }
 
-  .topbar,
+  :root {
+    --stage-offset: 134px;
+  }
+
   .home-grid,
   .settings-grid {
     grid-template-columns: 1fr;
   }
 
-  .topbar-actions {
-    align-items: stretch;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    width: 100%;
+  /* Two compact rows, not three. The brand text costs a whole row on a 390px
+     screen and the mark already carries the identity; the tabs then get the
+     full width instead of clipping their labels next to the theme toggle. */
+  .topbar {
+    gap: 8px;
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .app-brand span:not(.brand-mark) {
-    white-space: normal;
+  .app-brand > div {
+    display: none;
+  }
+
+  .topbar-actions {
+    display: contents;
+  }
+
+  .theme-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .tabs {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .home-visual {
@@ -1265,16 +1298,6 @@ fieldset.settings-section {
   .home-companion-art {
     max-height: 60%;
     max-width: 58%;
-  }
-
-  .tabs {
-    gap: 3px;
-    overflow-x: auto;
-    width: 100%;
-  }
-
-  .theme-toggle {
-    align-self: start;
   }
 
   .tab {
@@ -1297,17 +1320,47 @@ fieldset.settings-section {
   }
 
   .garden-stage {
-    min-height: calc(100vh - 86px);
+    min-height: calc(100vh - var(--stage-offset));
   }
 
   .garden-canvas {
-    height: calc(100vh - 86px);
+    height: calc(100vh - var(--stage-offset));
     min-height: 520px;
   }
 
-  .signal-panel,
+  /* A bottom sheet: the world stays visible above it and the submit button
+     lands in the thumb zone instead of mid-screen. */
+  .signal-panel {
+    animation-name: sheet-in;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    bottom: 0;
+    left: 0;
+    max-width: none;
+    padding: 22px 16px max(18px, env(safe-area-inset-bottom));
+    right: 0;
+    top: auto;
+    transform: none;
+    width: auto;
+  }
+
+  .signal-panel::before {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    content: '';
+    height: 4px;
+    left: 50%;
+    position: absolute;
+    top: 8px;
+    translate: -50% 0;
+    width: 38px;
+  }
+
+  /* Placement stays at the top: its whole job is to hand the garden back to
+     you, and the soil you tap sits in the front band at the bottom. */
   .placement-panel {
+    bottom: auto;
     left: 14px;
+    max-width: none;
     right: 14px;
     top: 14px;
     transform: none;
@@ -1327,11 +1380,6 @@ fieldset.settings-section {
     pointer-events: none;
   }
 
-  .placement-panel {
-    bottom: auto;
-    top: 14px;
-  }
-
   .garden-keyboard-controls {
     bottom: 12px;
     left: 12px;
@@ -1341,12 +1389,9 @@ fieldset.settings-section {
 }
 
 @media (max-width: 480px) {
-  .topbar-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .theme-toggle {
-    justify-self: start;
+  .tabs {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 

@@ -59,6 +59,10 @@ export function drawPlantingPlots(ctx: PlantingRendererContext, width: number, h
   const dark = ctx.theme === 'dark';
   emptyPlots.forEach((plot) => {
     const { x, y } = gardenPlotPoint(frame, plot);
+    if (plot.id === 'front-right') {
+      ctx.hostElement.dataset.frontRightPlotX = (x / width).toFixed(4);
+      ctx.hostElement.dataset.frontRightPlotY = (y / height).toFixed(4);
+    }
     const plotScale = plot.scale * Phaser.Math.Clamp(frame.scale, 0.86, 1.42);
     const marker = ctx.scene.add.container(x, y).setDepth(plot.depth - 8);
     const glow = ctx.scene.add.ellipse(
