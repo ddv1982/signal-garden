@@ -196,13 +196,6 @@ type GardenPlotAnchor = {
   wide: { x: number; y: number; scale: number; depth: number };
 };
 
-// The garden background is cover-cropped, so viewport-normalized coordinates
-// land on different artwork depending on the frame's visible crop ratio
-// (visibleWidth / GARDEN_DESIGN_WIDTH). Each desktop plot is therefore tuned
-// against the artwork twice — at a narrow crop (~0.45) and a wide crop
-// (~0.68) — and createGardenPlots() interpolates between the anchors so plots
-// keep tracking the same garden beds (and stay off the pool, paths, mosaic,
-// pet, and lens props) while the artwork shifts underneath.
 const NARROW_VISIBLE_RATIO = 0.45;
 const WIDE_VISIBLE_RATIO = 0.68;
 
@@ -383,8 +376,6 @@ export function createLensObjectPlacements(
   currentLens: LensKind | null
 ): LensObjectPlacement[] {
   const compact = frame.width < 560;
-  // Step-by-step reveal: only the current lens prop is placed. Passing null returns
-  // the full ring (used for layout audits and tests).
   const source = currentLens
     ? LENS_RING.filter((placement) => placement.kind === currentLens)
     : LENS_RING;
