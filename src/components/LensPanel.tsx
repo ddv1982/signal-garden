@@ -6,7 +6,7 @@ import { m } from '../paraglide/messages.js';
 type LensPanelProps = {
   draft: LensSessionDraft;
   definition: LensDefinition;
-  lensOrder: LensKind[];
+  lensOrder: readonly LensKind[];
   stepNumber: number;
   isLastLens: boolean;
   input: string;

@@ -76,7 +76,7 @@ export function App() {
     eventId: string;
   } | null>(null);
   const [petMessage, setPetMessage] = useState<string>(m.pet_nearby());
-  const [gardenCanvasWidth, setGardenCanvasWidth] = useState(720);
+  const [gardenCanvasSize, setGardenCanvasSize] = useState({ width: 720, height: 520 });
   const [confirmingSeedDelete, setConfirmingSeedDelete] = useState(false);
   const [confirmingProfileReset, setConfirmingProfileReset] = useState(false);
 
@@ -95,7 +95,11 @@ export function App() {
   const needsOnboarding = !profile || !settings.onboardingCompleted;
   const petDebug =
     import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
-  const accessiblePlantPlot = firstAvailableGardenPlot(seeds, gardenCanvasWidth);
+  const accessiblePlantPlot = firstAvailableGardenPlot(
+    seeds,
+    gardenCanvasSize.width,
+    gardenCanvasSize.height
+  );
 
   useEffect(() => {
     if (profile) repository.saveLensProfile(profile);
@@ -260,7 +264,7 @@ export function App() {
                 onSignalRequested={journey.beginJourney}
                 onLensObjectSelected={journey.openLens}
                 onPendingSeedPlanted={plantPendingSeed}
-                onCanvasWidthChange={setGardenCanvasWidth}
+                onCanvasSizeChange={setGardenCanvasSize}
               />
             </Suspense>
             {(pendingSeed || journey.lensDraft || seeds.length > 0) && !journey.lensPanelOpen && (

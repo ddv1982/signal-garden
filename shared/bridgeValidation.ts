@@ -1,11 +1,8 @@
 import type {
   GardenState,
   InnerExperienceMode,
-  LensKind,
   LensPromptOrder,
   LensResponses,
-  PetMood,
-  PetState,
   ReflectionSeed,
   SeedBloomOutcome,
   SeedBloomReflection,
@@ -13,8 +10,8 @@ import type {
   SeedStatus,
   SeedVisualType,
 } from './models';
+import { LENS_KINDS } from './models';
 
-const petMoods: PetMood[] = ['curious', 'cozy', 'attentive', 'sleepy', 'proud', 'concerned'];
 const seedStatuses: SeedStatus[] = ['planted', 'sprouted', 'growing', 'blooming', 'resting'];
 const seedVisualTypes: SeedVisualType[] = [
   'seed',
@@ -26,7 +23,6 @@ const seedVisualTypes: SeedVisualType[] = [
   'stone',
 ];
 const seedBloomOutcomes: SeedBloomOutcome[] = ['done', 'adapted', 'more-care'];
-const lensKinds: LensKind[] = ['word', 'body', 'emotion', 'image', 'observer', 'meaning', 'action'];
 const innerExperienceModes: InnerExperienceMode[] = [
   'words',
   'images',
@@ -44,12 +40,7 @@ export function parseStoredJson(raw: string): unknown {
 }
 
 export function isGardenState(value: unknown): value is GardenState {
-  return (
-    isRecord(value) &&
-    Array.isArray(value.seeds) &&
-    value.seeds.every(isReflectionSeed) &&
-    isPetState(value.pet)
-  );
+  return isRecord(value) && Array.isArray(value.seeds) && value.seeds.every(isReflectionSeed);
 }
 
 export function isReflectionSeed(value: unknown): value is ReflectionSeed {
@@ -91,27 +82,13 @@ export function isInnerLensProfile(value: unknown) {
 export function isLensSessionDraft(value: unknown) {
   return (
     isRecord(value) &&
-    includes(lensKinds, value.currentLens) &&
+    includes(LENS_KINDS, value.currentLens) &&
     isLensResponses(value.responses) &&
     Array.isArray(value.completedLensIds) &&
-    value.completedLensIds.every((kind) => includes(lensKinds, kind)) &&
+    value.completedLensIds.every((kind) => includes(LENS_KINDS, kind)) &&
     typeof value.startedAt === 'string' &&
     typeof value.updatedAt === 'string'
   );
-}
-
-function isPetState(value: unknown): value is PetState {
-  return (
-    isRecord(value) &&
-    typeof value.name === 'string' &&
-    isPetMood(value.mood) &&
-    isOptionalString(value.lastInteractionAt) &&
-    isStringArray(value.unlockedInteractionVariants)
-  );
-}
-
-function isPetMood(value: unknown): value is PetMood {
-  return includes(petMoods, value);
 }
 
 function isSeedStatus(value: unknown): value is SeedStatus {
@@ -148,7 +125,7 @@ function isLensJourney(value: unknown): boolean {
     isRecord(value) &&
     typeof value.completedAt === 'string' &&
     Array.isArray(value.lensOrder) &&
-    value.lensOrder.every((kind) => includes(lensKinds, kind)) &&
+    value.lensOrder.every((kind) => includes(LENS_KINDS, kind)) &&
     isLensResponses(value.responses)
   );
 }

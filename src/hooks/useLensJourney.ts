@@ -18,12 +18,9 @@ type Repository = ReturnType<typeof createSignalGardenRepository>;
 export type UseLensJourneyOptions = {
   repository: Repository;
   profile: InnerLensProfile | null;
-  /** Called when starting a journey without a profile; the caller owns profile state. */
   onProfileEnsured: (profile: InnerLensProfile) => void;
-  /** Called when the final lens completes and the journey has become a seed. */
   onSeedReady: (seed: ReflectionSeed) => void;
   onMessage: (message: string) => void;
-  /** Called when beginning a journey should bring the garden into view. */
   onEnterGarden: () => void;
 };
 
@@ -98,11 +95,15 @@ export function useLensJourney({
     onMessage(m.pet_next_lens({ title: nextDefinition.title }));
   }
 
-  function clearJourney() {
+  function dropSession() {
     setLensDraft(null);
     setLensPanelOpen(false);
     setLensInput('');
     repository.clearLensSessionDraft();
+  }
+
+  function clearJourney() {
+    dropSession();
     onMessage(m.pet_signal_settles());
   }
 
@@ -110,12 +111,8 @@ export function useLensJourney({
     setLensPanelOpen(false);
   }
 
-  /** Drops the in-progress session without the "settles back" message (settings reset). */
   function resetSession() {
-    setLensDraft(null);
-    setLensPanelOpen(false);
-    setLensInput('');
-    repository.clearLensSessionDraft();
+    dropSession();
   }
 
   return {

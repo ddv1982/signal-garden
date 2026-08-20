@@ -1,4 +1,9 @@
-import type { GardenPlot, LensKind, ReflectionSeed } from '../../shared/models';
+import {
+  LENS_KINDS,
+  type GardenPlot,
+  type LensKind,
+  type ReflectionSeed,
+} from '../../shared/models';
 
 export type GardenSeedLayoutItem = {
   index: number;
@@ -68,15 +73,7 @@ const MAX_VISIBLE_SEEDS = 50;
 export const GARDEN_DESIGN_WIDTH = 1480;
 export const GARDEN_DESIGN_HEIGHT = 484;
 export const LENS_POOL_CENTER = { x: 0.49, y: 0.66 };
-export const LENS_RING_ORDER: LensKind[] = [
-  'word',
-  'body',
-  'emotion',
-  'image',
-  'observer',
-  'meaning',
-  'action',
-];
+export const LENS_RING_ORDER = LENS_KINDS;
 export const PET_INTERACTION_OFFSET = { x: 0, y: -92 };
 export const PET_INTERACTION_SIZE = { width: 178, height: 226 };
 const MOBILE_LENS_PANEL_SAFE_HEIGHT = 144;
@@ -199,13 +196,9 @@ type GardenPlotAnchor = {
   wide: { x: number; y: number; scale: number; depth: number };
 };
 
-// The garden background is cover-cropped, so viewport-normalized coordinates
-// land on different artwork depending on the frame's visible crop ratio
-// (visibleWidth / GARDEN_DESIGN_WIDTH). Each desktop plot is therefore tuned
-// against the artwork twice — at a narrow crop (~0.45) and a wide crop
-// (~0.68) — and createGardenPlots() interpolates between the anchors so plots
-// keep tracking the same garden beds (and stay off the pool, paths, mosaic,
-// pet, and lens props) while the artwork shifts underneath.
+// Cover-crop slides the painted beds under the window. Each desktop plot is
+// tuned at a narrow crop (~0.45) and a wide crop (~0.68) so interpolation
+// keeps seeds off the pool, path, mosaic, pet, and lens props.
 const NARROW_VISIBLE_RATIO = 0.45;
 const WIDE_VISIBLE_RATIO = 0.68;
 
@@ -386,8 +379,6 @@ export function createLensObjectPlacements(
   currentLens: LensKind | null
 ): LensObjectPlacement[] {
   const compact = frame.width < 560;
-  // Step-by-step reveal: only the current lens prop is placed. Passing null returns
-  // the full ring (used for layout audits and tests).
   const source = currentLens
     ? LENS_RING.filter((placement) => placement.kind === currentLens)
     : LENS_RING;

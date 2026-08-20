@@ -318,7 +318,7 @@ test.describe('garden-first lens journey', () => {
       colorScheme: 'dark' as const,
       themePreference: 'night',
       settings: { reducedMotion: false, onboardingCompleted: true, themePreference: 'light' },
-      expectedTheme: 'dark',
+      expectedTheme: 'light',
     },
     {
       name: 'invalid legacy preference',

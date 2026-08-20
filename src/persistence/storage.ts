@@ -14,11 +14,6 @@ export function getBrowserStorage(): StorageLike | null {
 }
 
 export type ReadJsonOptions<T> = {
-  /**
-   * Attempt to convert an invalid stored shape into a valid one (schema
-   * migration). A successful migration is validated and written back, so
-   * old data survives a version bump instead of being silently discarded.
-   */
   migrate?: (value: unknown) => T | null;
 };
 
@@ -60,22 +55,14 @@ export function readJson<T>(
   return fallback;
 }
 
-export function writeJson<T>(storage: StorageLike | null, key: string, value: T): void {
-  if (!storage) return;
+export function writeJson<T>(storage: StorageLike | null, key: string, value: T): boolean {
+  if (!storage) return false;
   try {
     storage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    // Most commonly QuotaExceededError; losing one save beats crashing the app.
-    warnStorage('write', key, error);
-  }
-}
-
-export function writeRaw(storage: StorageLike | null, key: string, value: string): void {
-  if (!storage) return;
-  try {
-    storage.setItem(key, value);
+    return true;
   } catch (error) {
     warnStorage('write', key, error);
+    return false;
   }
 }
 
