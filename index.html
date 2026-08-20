@@ -41,6 +41,9 @@
                 settings &&
                 typeof settings === 'object' &&
                 !Array.isArray(settings) &&
+                typeof settings.reducedMotion === 'boolean' &&
+                (settings.onboardingCompleted === undefined ||
+                  typeof settings.onboardingCompleted === 'boolean') &&
                 (settings.themePreference === 'light' ||
                   settings.themePreference === 'dark' ||
                   settings.themePreference === 'system')
