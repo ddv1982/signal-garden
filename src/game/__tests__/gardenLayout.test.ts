@@ -158,6 +158,14 @@ describe('available garden plots', () => {
     expect(firstAvailableGardenPlot([], 960)?.id).toBe('front-right');
   });
 
+  it('uses canvas height when interpolating desktop plant-here coordinates', () => {
+    const withoutHeight = firstAvailableGardenPlot([], 720, 0);
+    const withHeight = firstAvailableGardenPlot([], 720, 520);
+
+    expect(withoutHeight?.id).toBe(withHeight?.id);
+    expect(withoutHeight).not.toEqual(withHeight);
+  });
+
   it('skips occupied plot ids for accessible planting', () => {
     const seeds = [seedWithPlot('front-right'), seedWithPlot('front-center')];
 

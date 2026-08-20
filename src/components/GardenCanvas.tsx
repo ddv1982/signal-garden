@@ -19,7 +19,7 @@ type GardenCanvasProps = {
   onSignalRequested: () => void;
   onLensObjectSelected: (kind: LensKind) => void;
   onPendingSeedPlanted: (position: { plotId: string; x: number; y: number }) => void;
-  onCanvasWidthChange: (width: number) => void;
+  onCanvasSizeChange: (size: { width: number; height: number }) => void;
 };
 
 type GardenCanvasCallbacks = Pick<
@@ -45,7 +45,7 @@ export function GardenCanvas({
   onSignalRequested,
   onLensObjectSelected,
   onPendingSeedPlanted,
-  onCanvasWidthChange,
+  onCanvasSizeChange,
 }: GardenCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<GardenGameHandle | null>(null);
@@ -72,26 +72,34 @@ export function GardenCanvas({
     if (!element) return;
 
     let previousWidth = 0;
-    const reportWidth = (width: number) => {
+    let previousHeight = 0;
+    const reportSize = (width: number, height: number) => {
       const roundedWidth = Math.round(width);
-      if (roundedWidth > 0 && roundedWidth !== previousWidth) {
+      const roundedHeight = Math.round(height);
+      if (
+        roundedWidth > 0 &&
+        roundedHeight > 0 &&
+        (roundedWidth !== previousWidth || roundedHeight !== previousHeight)
+      ) {
         previousWidth = roundedWidth;
-        onCanvasWidthChange(roundedWidth);
+        previousHeight = roundedHeight;
+        onCanvasSizeChange({ width: roundedWidth, height: roundedHeight });
       }
     };
 
-    reportWidth(element.getBoundingClientRect().width);
+    const rect = element.getBoundingClientRect();
+    reportSize(rect.width, rect.height);
 
     if (typeof ResizeObserver === 'undefined') return;
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (entry) reportWidth(entry.contentRect.width);
+      if (entry) reportSize(entry.contentRect.width, entry.contentRect.height);
     });
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [onCanvasWidthChange]);
+  }, [onCanvasSizeChange]);
 
   useEffect(() => {
     const container = containerRef.current;
