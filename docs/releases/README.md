@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.31`](./0.1.31.md) — collapses leftover lens lists and leftover theme storage without pouring a new architecture
 - [`0.1.30`](./0.1.30.md) — opens the mobile gate to the full garden loop and retires skipped debug-only paths
 - [`0.1.29`](./0.1.29.md) — measures the garden paths with coverage reporting and focused journey/data-control tests
 - [`0.1.28`](./0.1.28.md) — clears duplicate lens journey chrome so the current lens and garden prop carry the path
