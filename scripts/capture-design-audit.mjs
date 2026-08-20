@@ -31,8 +31,6 @@ for (const [viewportName, viewport] of Object.entries(viewports)) {
     const label = `${viewportName}-${colorScheme}`;
     const page = await browser.newPage({ viewport, colorScheme });
     await page.goto(baseUrl);
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
 
     await page.waitForSelector('[data-testid="onboarding-panel"]');
     await shot(page, `onboarding-${label}`);

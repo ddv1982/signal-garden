@@ -213,8 +213,16 @@ button:disabled {
 }
 
 .app-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   padding: 12px 18px 18px;
+}
+
+/* Short screens (Home, Settings, an empty Archive) otherwise strand their
+   panel at the top with a third of the window empty below it. */
+.app-shell > .panel {
+  margin-block: auto;
 }
 
 .topbar {
@@ -226,6 +234,7 @@ button:disabled {
   max-width: min(1500px, calc(100vw - 36px));
   position: sticky;
   top: 12px;
+  width: 100%;
   z-index: 6;
 }
 
@@ -419,6 +428,7 @@ strong {
   margin: 0 auto;
   max-width: 1180px;
   padding: clamp(24px, 4vw, 44px);
+  width: 100%;
 }
 
 .home-grid {
@@ -975,14 +985,38 @@ strong {
 
 .seed-card {
   align-items: start;
+  background: var(--pane-fill);
+  border-color: var(--pane-line);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 var(--pane-sheen);
   display: grid;
   gap: 8px;
   min-height: 132px;
-  padding: 16px;
+  overflow: hidden;
+  padding: 18px;
+  position: relative;
   text-align: left;
 }
 
+/* Warm light pooling at the base of each card, so a seed reads as growing
+   out of the bed rather than printed on a tile. */
+.seed-card::before {
+  background: linear-gradient(to top, oklch(0.72 0.09 var(--hue-canopy) / 0.16), transparent);
+  bottom: 0;
+  content: '';
+  height: 46%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+.seed-card:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
 .seed-stage-art {
+  filter: drop-shadow(0 6px 10px oklch(0.3 0.04 var(--hue-canopy) / 0.28));
   height: 52px;
   object-fit: contain;
   width: 52px;
@@ -1009,6 +1043,25 @@ strong {
   font-weight: var(--weight-heading);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.growth-meter {
+  align-self: end;
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.growth-meter i {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  flex: 1 1 0;
+  height: 3px;
+  transition: background-color var(--duration-ui) var(--ease-glide);
+}
+
+.growth-meter i.filled {
+  background: var(--color-primary);
 }
 
 .toggle {
