@@ -25,7 +25,7 @@ import sleepingDarkUrl from '../assets/companion/frames-dark/sleeping.webp';
 import stretchDarkUrl from '../assets/companion/frames-dark/stretch.webp';
 import wakeDarkUrl from '../assets/companion/frames-dark/wake.webp';
 import gardenBackgroundUrl from '../assets/garden/background-v4.webp';
-import gardenBackgroundDarkUrl from '../assets/garden/background-dusk-v3.jpg';
+import gardenBackgroundDarkUrl from '../assets/garden/background-dusk-v3.webp';
 import budUrl from '../assets/garden/props/bud.webp';
 import dreamStoneUrl from '../assets/garden/props/dream-stone.webp';
 import flowerUrl from '../assets/garden/props/flower.webp';

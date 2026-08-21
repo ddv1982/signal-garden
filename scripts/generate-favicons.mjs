@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
@@ -9,36 +9,21 @@ const publicDir = resolve(root, 'public');
 mkdirSync(publicDir, { recursive: true });
 
 const sizes = [
-  { size: 16, names: ['favicon-16x16.png', 'signal-garden-icon-16.png'] },
-  { size: 32, names: ['favicon-32x32.png', 'signal-garden-icon-32.png'] },
-  { size: 180, names: ['apple-touch-icon.png', 'signal-garden-apple-touch-icon.png'] },
+  { size: 16, name: 'favicon-16x16.png' },
+  { size: 32, name: 'favicon-32x32.png' },
+  { size: 180, name: 'apple-touch-icon.png' },
 ];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#365e4a"/>
-  <text
-    x="32"
-    y="34"
-    fill="#fff"
-    font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    font-size="32"
-    font-weight="700"
-    letter-spacing="0"
-    text-anchor="middle"
-    dominant-baseline="middle"
-  >SG</text>
-</svg>
-`;
-
-writeFileSync(resolve(publicDir, 'favicon.svg'), svg);
-writeFileSync(resolve(publicDir, 'signal-garden-icon.svg'), svg);
+// public/favicon.svg is the hand-authored source of truth; everything else here
+// is rasterized from it.
+const svg = readFileSync(resolve(publicDir, 'favicon.svg'), 'utf8');
 
 const iconPngs = [];
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ deviceScaleFactor: 1, viewport: { width: 256, height: 256 } });
 
 try {
-  for (const { size, names } of sizes) {
+  for (const { size, name } of sizes) {
     const html = `<!doctype html>
       <html>
         <head>
@@ -66,9 +51,7 @@ try {
     await page.setContent(html);
     const buffer = await page.screenshot({ omitBackground: true, type: 'png' });
 
-    for (const name of names) {
-      writeFileSync(resolve(publicDir, name), buffer);
-    }
+    writeFileSync(resolve(publicDir, name), buffer);
     if (size === 16 || size === 32) {
       iconPngs.push({ size, buffer });
     }
@@ -78,7 +61,6 @@ try {
 }
 
 writeFileSync(resolve(publicDir, 'favicon.ico'), createIconFile(iconPngs));
-writeFileSync(resolve(publicDir, 'signal-garden-icon.ico'), createIconFile(iconPngs));
 
 function createIconFile(pngBuffers) {
   const headerSize = 6;

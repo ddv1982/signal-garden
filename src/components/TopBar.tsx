@@ -36,9 +36,7 @@ export function TopBar({
   return (
     <header className="topbar">
       <div className="app-brand">
-        <span className="brand-mark" aria-hidden="true">
-          SG
-        </span>
+        <span className="brand-mark" aria-hidden="true" />
         <div>
           <p className="eyebrow">{m.app_brand_name()}</p>
           <span>{m.app_brand_tagline()}</span>

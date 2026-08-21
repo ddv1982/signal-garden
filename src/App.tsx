@@ -19,6 +19,7 @@ import { useSystemTheme } from './hooks/useSystemTheme';
 import { useGardenData } from './hooks/useGardenData';
 import { useAppSettings } from './hooks/useAppSettings';
 import { friendlySeedDate } from './domain/dates';
+import { growthIndexForSeed, growthStepLabels } from './domain/seedDisplay';
 import { LensPanel } from './components/LensPanel';
 import { OnboardingPanel } from './components/OnboardingPanel';
 import { SeedStageArt } from './components/SeedStageArt';
@@ -28,7 +29,7 @@ import { m } from './paraglide/messages.js';
 import companionIdleUrl from './assets/companion/frames/idle-sit.webp';
 import companionIdleDarkUrl from './assets/companion/frames-dark/idle-sit.webp';
 import gardenBackgroundUrl from './assets/garden/background-v4.webp';
-import gardenBackgroundDarkUrl from './assets/garden/background-dusk-v3.jpg';
+import gardenBackgroundDarkUrl from './assets/garden/background-dusk-v3.webp';
 
 const repository = createSignalGardenRepository();
 const GardenCanvas = lazy(() =>
@@ -386,6 +387,14 @@ export function App() {
                   <small>
                     {m.archive_planted_date({ date: friendlySeedDate(seed.createdAt) })}
                   </small>
+                  <span className="growth-meter" aria-hidden="true">
+                    {growthStepLabels.map((label, index) => (
+                      <i
+                        key={label}
+                        className={index <= growthIndexForSeed(seed) ? 'filled' : ''}
+                      />
+                    ))}
+                  </span>
                 </button>
               ))}
             </div>
