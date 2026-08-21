@@ -798,11 +798,23 @@ async function assertBootstrapTheme(
   }
 ) {
   await page.emulateMedia({ colorScheme: scenario.colorScheme });
-  await page.route('**/src/main.tsx', (route) =>
-    route.fulfill({
-      contentType: 'application/javascript',
-      body: '',
-    })
+
+  // These tests prove the inline bootstrap in index.html sets the theme on its
+  // own, so React must not boot: an empty #root is the evidence it did not.
+  // Match on pathname rather than by glob, because a dev server that has seen
+  // any file change since it started serves the entry as
+  // /src/main.tsx?t=<timestamp> to bust its own module cache, and a glob for
+  // the bare path silently stops matching the moment that query appears.
+  let bootstrapStubbed = false;
+  await page.route(
+    (url) => url.pathname === '/src/main.tsx',
+    (route) => {
+      bootstrapStubbed = true;
+      return route.fulfill({
+        contentType: 'application/javascript',
+        body: '',
+      });
+    }
   );
   await page.addInitScript(
     ({ settings, themePreference }) => {
@@ -820,6 +832,13 @@ async function assertBootstrapTheme(
   );
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  // Fail on the cause rather than the symptom. Without this, a stub that stops
+  // matching reports itself as "#root was not empty", which reads like the app
+  // booted too eagerly instead of like the test lost its grip on the entry.
+  expect(bootstrapStubbed, 'the /src/main.tsx stub never matched, so React was free to boot').toBe(
+    true
+  );
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', scenario.expectedTheme);
   await expect
