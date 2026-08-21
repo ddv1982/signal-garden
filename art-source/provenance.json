@@ -1,0 +1,104 @@
+{
+  "purpose": "Records which committed art can be regenerated and which is the only copy that exists. Checked by scripts/audit-art-provenance.mjs (pnpm art:audit).",
+  "roles": {
+    "master": "Generated source art. Nothing derives it; deleting it loses it. Hash-pinned.",
+    "master-of-record": "A runtime asset that is itself the only surviving copy, because no master was ever committed. Treat it exactly like a master: never re-encode it. Hash-pinned.",
+    "derived": "Reproducible from a master by the recorded recipe, so it does not need to be archived."
+  },
+  "files": [
+    {
+      "path": "art-source/garden/background-dusk-generated.png",
+      "role": "master",
+      "sha256": "e46c3d140de758dbda579a818bfe23058f52bfca018ca48e6df78600fe1132bd",
+      "notes": "2192x717 dusk/blue-hour pass, 2026-06-10. Master for the first dusk backdrop."
+    },
+    {
+      "path": "art-source/garden/background-dusk-v2-generated.png",
+      "role": "master",
+      "sha256": "cbd248bb48c0b9f9ccdab7a66ea11cf386e4aec9088444d34f4a0dfb21b398db",
+      "notes": "2193x717 gameplay stage pass, 2026-06-10. Established the nighttime palette."
+    },
+    {
+      "path": "art-source/garden/background-dusk-v3-generated.png",
+      "role": "master",
+      "sha256": "1837887cbba6b252be75460becf3ba344937ed05f330407a2e1f890bb07b4b80",
+      "notes": "2192x717. Master for the current dark-mode runtime backdrop."
+    },
+    {
+      "path": "art-source/garden/growth-bud-chromakey.png",
+      "role": "master",
+      "sha256": "ce6eb8ea906553a7ac5fb08a7edd986dd35aa54d2e846d5308d06e4135b48a08",
+      "notes": "1254x1254 chromakey sheet for the bud growth stage."
+    },
+    {
+      "path": "art-source/garden/props-sheet-chromakey.png",
+      "role": "master",
+      "sha256": "934ccc5f2ebff4880e665afa4f9c7d9eb25cd2946e458332cd945ad986d6857b",
+      "notes": "1254x1254 chromakey sheet for seed, soil, lantern and stone props."
+    },
+    {
+      "path": "art-source/lenses/garden-lens-sheet-chromakey.png",
+      "role": "master",
+      "sha256": "577f92e3814abaa49c9091e3be51ad69d9e4712692378991ff1ba717d1b6e040",
+      "notes": "1536x1024 lens object sheet. Read by scripts/clean-lens-props.mjs and scripts/audit-lens-props.mjs. A byte-identical second copy lived at art-source/garden/full-art-pass/ and was removed; this is the only copy."
+    },
+    {
+      "path": "art-source/companion/full-art-pass/ragdoll-pet-pose-sheet-chromakey.png",
+      "role": "master",
+      "sha256": "cc5efbca4bf4bf97cc742c500bbf9f5f8ffed03501435334287c769ef4fe65c4",
+      "notes": "1448x1086 chromakey pose sheet for the companion cat frames."
+    },
+    {
+      "path": "src/assets/garden/background-v4.webp",
+      "role": "master-of-record",
+      "sha256": "2503bbccd0c2c688bd174f04b7dd627bf1d20205b18260da665491e57701dfd9",
+      "notes": "Live light-mode backdrop, 1480x484. No master exists: no larger or earlier version appears anywhere in git history, and the art came from a generative workflow that does not reproduce deterministically from a prompt. It was re-encoded once in 0.1.19 (232470 to 228596 bytes, 39.32 dB, max pixel delta 66) for a 1.7% saving, which is the loss this pin exists to stop repeating. That pass also cleaned chroma-contaminated edge pixels in the asset, so the current bytes are the correct ones and the earlier blob must not be restored."
+    },
+    {
+      "path": "src/assets/garden/background-v3.webp",
+      "role": "master-of-record",
+      "sha256": "c693213de39086a536a2833c03da0a9625b6b3ee7bcba5ec3bcc47fafcc97ec6",
+      "notes": "Superseded light-mode backdrop, 1480x484, referenced by no runtime code. Kept because it has no master either and only ever existed as this one blob, added in the initial prototype commit. 0.1.12 also chose to retain it as release history."
+    },
+    {
+      "path": "src/assets/garden/background-dusk-v3.webp",
+      "role": "derived",
+      "derivedFrom": "art-source/garden/background-dusk-v3-generated.png",
+      "regenerate": { "resize": [1480, 484], "webp": { "quality": 85, "effort": 6 } },
+      "reproducible": true,
+      "notes": "Live dark-mode backdrop. It previously shipped as a transcode of an intermediate JPEG and measured 31.78 dB against the master; re-deriving directly reached 33.71 dB for 23 KB more, and the recipe now reproduces it byte for byte. On main this file is still the .jpg predecessor below, so the audit skips this entry until that change lands."
+    },
+    {
+      "path": "src/assets/garden/background-dusk-v3.jpg",
+      "role": "derived",
+      "derivedFrom": "art-source/garden/background-dusk-v3-generated.png",
+      "regenerate": { "resize": [1480, 484] },
+      "reproducible": false,
+      "notes": "Predecessor of the WebP above. Encoder settings were not recorded, so it re-derives visually rather than byte for byte."
+    },
+    {
+      "path": "src/assets/garden/background-dusk-v1.jpg",
+      "role": "derived",
+      "derivedFrom": "art-source/garden/background-dusk-generated.png",
+      "regenerate": { "resize": [1480, 484] },
+      "reproducible": false,
+      "notes": "Superseded, referenced by nothing. Re-deriving to WebP at quality 85 was verified byte-identical to the WebP that replaced it."
+    },
+    {
+      "path": "src/assets/garden/background-dusk-v2.jpg",
+      "role": "derived",
+      "derivedFrom": "art-source/garden/background-dusk-v2-generated.png",
+      "regenerate": { "resize": [1480, 484] },
+      "reproducible": false,
+      "notes": "Superseded, referenced by nothing. Re-deriving to WebP at quality 85 was verified byte-identical to the WebP that replaced it."
+    },
+    {
+      "path": "src/assets/garden/background-dark.jpg",
+      "role": "derived",
+      "derivedFrom": "src/assets/garden/background-v4.webp",
+      "regenerateWith": "scripts/create-dark-background.mjs",
+      "reproducible": false,
+      "notes": "Superseded moonlit backdrop, referenced by nothing. A tint pass over the light backdrop, so it derives from a runtime asset rather than from a master."
+    }
+  ]
+}

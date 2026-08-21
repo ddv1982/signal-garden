@@ -2,6 +2,10 @@
 
 This folder contains generated garden graphics passes for Signal Garden.
 
+Which of these can be regenerated, and which are the only copy that exists, is
+recorded in `art-source/provenance.json` and checked by `pnpm art:audit`. Both
+light backdrops are irreplaceable and hash-pinned; see `art-source/README.md`.
+
 - Source: generated with the built-in image generation workflow for this project.
 - Intended use: browser prototype game art for the Phaser Dream Garden.
 - Visual target: soft storybook/felt-watercolor garden environment with warm light, handmade textures, and calm self-reflection mood.
