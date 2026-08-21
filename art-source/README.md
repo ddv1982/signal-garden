@@ -19,7 +19,9 @@ Three roles:
   master: never re-encode it.
 - **derived** — reproducible from a master by the recorded recipe, so it does
   not need to be archived. Superseded derived art can be deleted; the recipe is
-  the archive.
+  the archive. Entries marked `reproducible` are regenerated and compared byte
+  for byte on every run, so a recipe that stops matching its output is a
+  failure rather than a comment that quietly goes stale.
 
 Adding art without a provenance entry fails the audit. That is deliberate: the
 way this gap appears is that someone commits art and nobody writes down where it
