@@ -40,6 +40,9 @@ jobs:
       - name: Format check
         run: pnpm run format:check
 
+      - name: Art provenance
+        run: pnpm run art:audit
+
       - name: Test
         run: pnpm run test:compiled
 
