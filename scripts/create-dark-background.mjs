@@ -6,10 +6,10 @@ import sharp from 'sharp';
 const [, , inputPath, outputPath] = process.argv;
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const defaultInputWebp = path.join(projectRoot, 'src/assets/garden/background-v4.webp');
-const defaultOutputJpg = path.join(projectRoot, 'src/assets/garden/background-dark.jpg');
+const defaultOutputWebp = path.join(projectRoot, 'src/assets/garden/background-dark.webp');
 
 const sourcePath = inputPath ?? defaultInputWebp;
-const targetPath = outputPath ?? defaultOutputJpg;
+const targetPath = outputPath ?? defaultOutputWebp;
 
 if ((inputPath && !outputPath) || (!inputPath && outputPath)) {
   console.error('Usage: node scripts/create-dark-background.mjs [input-image output-image]');
@@ -79,6 +79,11 @@ addGlow(output, info, 0.51, 0.69, 180, [94, 167, 191], 0.12);
 addVignette(output, info, 0.32);
 
 fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+// The encoder follows the target extension, so an output path cannot end up
+// holding contents that disagree with its name.
+const useJpeg = /\.jpe?g$/i.test(targetPath);
+
 await sharp(output, {
   raw: {
     width: info.width,
@@ -86,7 +91,7 @@ await sharp(output, {
     channels: info.channels,
   },
 })
-  .jpeg({ quality: 88 })
+  .toFormat(useJpeg ? 'jpeg' : 'webp', { quality: useJpeg ? 88 : 90 })
   .toFile(targetPath);
 
 console.log(`Wrote ${path.relative(projectRoot, targetPath)}`);
