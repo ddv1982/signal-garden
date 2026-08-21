@@ -25,6 +25,7 @@
     "icons:generate": "node scripts/generate-favicons.mjs",
     "assets:dark": "node scripts/create-dark-asset-variants.mjs",
     "assets:dark-background": "node scripts/create-dark-background.mjs",
+    "art:audit": "node scripts/audit-art-provenance.mjs",
     "garden:audit:dark": "node scripts/audit-dark-garden-props.mjs",
     "lens:audit": "node scripts/audit-lens-props.mjs",
     "lens:audit:dark": "node scripts/audit-lens-props.mjs src/assets/lenses/props-dark --skip-chroma",
