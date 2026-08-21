@@ -2,6 +2,7 @@
 
 Latest first.
 
+- [`0.1.32`](./0.1.32.md) — puts every screen inside the blurred garden world and records which art can never be regrown
 - [`0.1.31`](./0.1.31.md) — collapses leftover lens lists and leftover theme storage without pouring a new architecture
 - [`0.1.30`](./0.1.30.md) — opens the mobile gate to the full garden loop and retires skipped debug-only paths
 - [`0.1.29`](./0.1.29.md) — measures the garden paths with coverage reporting and focused journey/data-control tests
