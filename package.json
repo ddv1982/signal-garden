@@ -23,6 +23,7 @@
     "coverage:compiled": "vitest run --coverage --coverage.reporter=text-summary",
     "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --emit-ts-declarations",
     "icons:generate": "node scripts/generate-favicons.mjs",
+    "icons:preview": "node scripts/preview-icons.mjs",
     "assets:dark": "node scripts/create-dark-asset-variants.mjs",
     "assets:dark-background": "node scripts/create-dark-background.mjs",
     "garden:audit:dark": "node scripts/audit-dark-garden-props.mjs",
