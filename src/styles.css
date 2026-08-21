@@ -1403,3 +1403,27 @@ fieldset.settings-section {
     transform: none;
   }
 }
+
+/* Panes above the garden stage re-blur on every canvas frame, which is the one
+   place the glass costs real frames on a slow device. There is no media query
+   for "slow device", but the users most likely to want the cheap path are the
+   ones already asking for less transparency, so this doubles as the escape
+   hatch. The dark selector is repeated because :root[data-theme] would
+   otherwise out-specify :root. */
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root[data-theme='dark'] {
+    --pane-blur: none;
+    --pane-fill: var(--color-surface-muted);
+    --color-surface: var(--color-surface-muted);
+    --color-surface-strong: var(--color-surface-muted);
+    --color-panel-glass: var(--color-surface-muted);
+  }
+
+  .garden-status,
+  .signal-panel input,
+  .signal-panel textarea {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
