@@ -10,7 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outPath = resolve(root, process.argv[2] ?? 'docs/screenshots/app-icon.png');
 
 const favicon = readFileSync(resolve(root, 'public/favicon.svg'), 'utf8');
-const maskIcon = readFileSync(resolve(root, 'public/safari-pinned-tab.svg'), 'utf8');
+const maskIcon = readFileSync(resolve(root, 'public/brand-mark.svg'), 'utf8');
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
