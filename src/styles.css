@@ -271,32 +271,18 @@ button:disabled {
 
 .brand-mark {
   align-items: center;
-  background: radial-gradient(circle at 34% 30%, var(--color-accent), var(--color-primary) 68%);
-  border: 1px solid var(--pane-line);
-  border-radius: 13px;
-  box-shadow:
-    0 6px 18px oklch(0.36 0.06 var(--hue-canopy) / 0.34),
-    inset 0 1px 0 var(--pane-sheen);
-  color: transparent;
+  background: var(--color-primary);
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(38, 83, 63, 0.2);
+  color: var(--text-inverse);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 0.9rem;
   font-weight: var(--weight-subheading);
   height: 38px;
   justify-content: center;
-  overflow: hidden;
-  position: relative;
   width: 38px;
-}
-
-/* The mark is the signal itself: one bright point in the canopy. */
-.brand-mark::after {
-  background: #fffdf6;
-  border-radius: 50%;
-  box-shadow: 0 0 12px 3px oklch(1 0 0 / 0.55);
-  content: '';
-  height: 9px;
-  width: 9px;
 }
 
 .section-heading h2,
