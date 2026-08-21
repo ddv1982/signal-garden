@@ -276,28 +276,19 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* The browser icon itself rather than a recolourable copy of it, so the top bar
+   and the tab strip cannot drift apart and the mark does not restyle per theme
+   the way the surrounding chrome does. */
 .brand-mark {
-  align-items: center;
-  background: var(--color-primary);
-  border: 1px solid rgba(29, 29, 31, 0.08);
-  border-radius: var(--radius-sm);
+  --mark-size: 38px;
+  background: url('/favicon.svg') center / cover no-repeat;
+  /* Tracks the rx=12 corner on the 64-unit icon artwork. */
+  border-radius: calc(var(--mark-size) * 12 / 64);
   box-shadow: 0 2px 8px rgba(38, 83, 63, 0.2);
-  display: inline-flex;
+  display: inline-block;
   flex: 0 0 auto;
-  height: 38px;
-  justify-content: center;
-  width: 38px;
-}
-
-/* Masks the same silhouette the browser icon uses, so the top bar and the
-   tab strip show one mark rather than two unrelated ones. */
-.brand-mark::after {
-  -webkit-mask: url('/brand-mark.svg') center / 100% no-repeat;
-  background: var(--text-inverse);
-  content: '';
-  height: 100%;
-  mask: url('/brand-mark.svg') center / 100% no-repeat;
-  width: 100%;
+  height: var(--mark-size);
+  width: var(--mark-size);
 }
 
 .section-heading h2,
