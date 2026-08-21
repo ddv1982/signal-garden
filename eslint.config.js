@@ -40,6 +40,14 @@ export default tseslint.config(
         console: 'readonly',
         process: 'readonly',
         URL: 'readonly',
+        // Playwright scripts pass callbacks to page.evaluate that run in the
+        // page. Listed individually rather than pulling in all of
+        // globals.browser so a stray browser API in Node code still fails.
+        document: 'readonly',
+        getComputedStyle: 'readonly',
+        localStorage: 'readonly',
+        performance: 'readonly',
+        requestAnimationFrame: 'readonly',
       },
     },
   }
