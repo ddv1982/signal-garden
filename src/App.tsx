@@ -29,7 +29,7 @@ import { m } from './paraglide/messages.js';
 import companionIdleUrl from './assets/companion/frames/idle-sit.webp';
 import companionIdleDarkUrl from './assets/companion/frames-dark/idle-sit.webp';
 import gardenBackgroundUrl from './assets/garden/background-v4.webp';
-import gardenBackgroundDarkUrl from './assets/garden/background-dusk-v3.jpg';
+import gardenBackgroundDarkUrl from './assets/garden/background-dusk-v3.webp';
 
 const repository = createSignalGardenRepository();
 const GardenCanvas = lazy(() =>

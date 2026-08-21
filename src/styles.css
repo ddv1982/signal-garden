@@ -112,7 +112,7 @@
   --pane-line: oklch(0.98 0.02 var(--hue-parchment) / 0.22);
   --pane-sheen: oklch(1 0 0 / 0.2);
   --shadow-pane: 0 26px 70px oklch(0.16 0.03 var(--hue-canopy) / 0.44);
-  --world-image: url('./assets/garden/background-dusk-v3.jpg') 50% 26% / cover;
+  --world-image: url('./assets/garden/background-dusk-v3.webp') 50% 26% / cover;
   --world-filter: blur(56px) saturate(1.3) brightness(0.66);
   --world-scrim:
     radial-gradient(
@@ -910,7 +910,7 @@ strong {
 :root[data-theme='dark'] .onboarding-backdrop {
   background:
     linear-gradient(rgba(20, 34, 35, 0.24), rgba(20, 34, 35, 0.24)),
-    url('./assets/garden/background-dusk-v3.jpg') center / cover;
+    url('./assets/garden/background-dusk-v3.webp') center / cover;
 }
 
 .onboarding-panel {
