@@ -151,6 +151,7 @@ export function GardenCanvas({
         ref={containerRef}
         className="garden-canvas"
         data-testid="garden-canvas"
+        data-reduced-motion={reducedMotion}
         data-watered-seed={lastWateringEvent?.seedId ?? undefined}
         data-watering-event={lastWateringEvent?.eventId ?? undefined}
         role="img"

@@ -57,6 +57,7 @@ export function App() {
   const {
     settings,
     activeTheme,
+    effectiveReducedMotion,
     setThemePreference,
     setReducedMotion,
     completeOnboarding,
@@ -303,7 +304,7 @@ export function App() {
             >
               <GardenCanvas
                 state={gardenState}
-                reducedMotion={settings.reducedMotion}
+                reducedMotion={effectiveReducedMotion}
                 theme={activeTheme}
                 pendingSeed={pendingSeed}
                 currentLens={journey.currentLens}
