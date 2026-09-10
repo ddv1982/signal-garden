@@ -32,7 +32,7 @@ function seedStatusLowerLabel(status: SeedStatus): string {
   }
 }
 
-export function seedCardAccessibilityLabel(seed: ReflectionSeed): string {
+export function seedCardAccessibilityLabel(seed: ReflectionSeed, pending = false): string {
   const date = friendlySeedDate(seed.createdAt);
   const status = seedStatusLowerLabel(seed.status);
   const primaryText = seed.unhookedText || seed.labelText || seed.tinyAction;
@@ -44,6 +44,13 @@ export function seedCardAccessibilityLabel(seed: ReflectionSeed): string {
         ? m.seed_watered_once({ count: wateringCount })
         : m.seed_watered_many({ count: wateringCount });
 
+  if (pending || seed.placement === 'archive')
+    return m.seed_saved_accessibility({
+      placement: pending ? m.seed_pending_label() : m.seed_archived_label(),
+      date,
+      wateringText,
+      primaryText,
+    });
   return m.seed_card_accessibility({ status, date, wateringText, primaryText });
 }
 

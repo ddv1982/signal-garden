@@ -147,6 +147,7 @@ function advanceSeedGrowth(
   now: string,
   reason: 'visit' | 'journey'
 ): ReflectionSeed {
+  if (seed.placement === 'archive') return seed;
   if (seed.status === 'blooming') {
     return {
       ...seed,

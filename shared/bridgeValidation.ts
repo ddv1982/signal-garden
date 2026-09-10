@@ -3,6 +3,7 @@ import type {
   InnerExperienceMode,
   LensPromptOrder,
   LensResponses,
+  LensSessionDraft,
   ReflectionSeed,
   SeedBloomOutcome,
   SeedBloomReflection,
@@ -56,6 +57,9 @@ export function isReflectionSeed(value: unknown): value is ReflectionSeed {
     isStringArray(value.dreams) &&
     typeof value.tinyAction === 'string' &&
     isSeedStatus(value.status) &&
+    (value.placement === undefined ||
+      value.placement === 'garden' ||
+      value.placement === 'archive') &&
     isOptionalGardenPosition(value.gardenPosition) &&
     isOptionalString(value.gardenPlotId) &&
     isOptionalString(value.plantedAt) &&
@@ -79,9 +83,12 @@ export function isInnerLensProfile(value: unknown) {
   );
 }
 
-export function isLensSessionDraft(value: unknown) {
+export function isLensSessionDraft(value: unknown): value is LensSessionDraft {
   return (
     isRecord(value) &&
+    isOptionalString(value.sessionId) &&
+    (value.revision === undefined ||
+      (Number.isSafeInteger(value.revision) && Number(value.revision) >= 0)) &&
     includes(LENS_KINDS, value.currentLens) &&
     isLensResponses(value.responses) &&
     Array.isArray(value.completedLensIds) &&

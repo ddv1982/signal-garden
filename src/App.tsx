@@ -1,17 +1,10 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import type { InnerExperienceMode, LensPromptOrder, ReflectionSeed } from '../shared/models';
 import { seedCardAccessibilityLabel, seedStatusLabel } from './domain/accessibilityCopy';
 import { seedExportFilename, serializeSeedExport } from './domain/exportSeeds';
 import type { ThemePreference } from './domain/theme';
 import { createLensProfile, lensDefinitions } from './domain/lenses';
-import {
-  advanceGardenGrowth,
-  assignPlotToSeed,
-  bloomSeed,
-  waterSeed,
-  type SeedBloomInput,
-  type SeedWateringInput,
-} from './domain/seedGrowth';
+import { type SeedBloomInput, type SeedWateringInput } from './domain/seedGrowth';
 import { createSignalGardenRepository } from './persistence/repositories';
 import { firstAvailableGardenPlot } from './game/gardenLayout';
 import { useLensJourney } from './hooks/useLensJourney';
@@ -54,12 +47,11 @@ export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('garden');
   const {
     seeds,
-    setSeeds,
     pendingSeed,
     gardenState,
-    savePendingSeed,
-    clearPendingSeed,
-    clearGarden,
+    completedSeeds,
+    error: storageError,
+    command,
   } = useGardenData(repository);
   const systemTheme = useSystemTheme();
   const {
@@ -78,6 +70,8 @@ export function App() {
   } | null>(null);
   const [petMessage, setPetMessage] = useState<string>(m.pet_nearby());
   const [gardenCanvasSize, setGardenCanvasSize] = useState({ width: 720, height: 520 });
+  const placementInFlight = useRef(false);
+  const [placing, setPlacing] = useState(false);
   const [confirmingSeedDelete, setConfirmingSeedDelete] = useState(false);
   const [confirmingProfileReset, setConfirmingProfileReset] = useState(false);
 
@@ -85,10 +79,6 @@ export function App() {
     repository,
     profile,
     onProfileEnsured: setProfile,
-    onSeedReady: (seed) => {
-      setSeeds((current) => advanceGardenGrowth(current, new Date().toISOString(), 'journey'));
-      savePendingSeed(seed);
-    },
     onMessage: setPetMessage,
     onEnterGarden: () => setActiveTab('garden'),
   });
@@ -97,7 +87,7 @@ export function App() {
   const petDebug =
     import.meta.env.DEV && new URLSearchParams(window.location.search).has('petDebug');
   const accessiblePlantPlot = firstAvailableGardenPlot(
-    seeds,
+    gardenState.seeds,
     gardenCanvasSize.width,
     gardenCanvasSize.height
   );
@@ -126,52 +116,74 @@ export function App() {
     setPetMessage(m.pet_onboarding_complete());
   }
 
-  function plantPendingSeed(position: { plotId: string; x: number; y: number }) {
-    if (!pendingSeed) return;
-
-    const plantedSeed = assignPlotToSeed(pendingSeed, position.plotId, {
-      x: position.x,
-      y: position.y,
+  async function plantPendingSeed(position: { plotId: string; x: number; y: number }) {
+    if (!pendingSeed || placementInFlight.current) return;
+    placementInFlight.current = true;
+    setPlacing(true);
+    const result = await command({
+      kind: 'place',
+      id: pendingSeed.id,
+      placement: { kind: 'garden', ...position },
     });
-    setSeeds((current) => [plantedSeed, ...current]);
-    clearPendingSeed();
-    setPetMessage(m.pet_seed_planted());
+    placementInFlight.current = false;
+    setPlacing(false);
+    if (result.ok) setPetMessage(m.pet_seed_planted());
   }
 
-  function handleSeedWatering(seed: ReflectionSeed, input: SeedWateringInput): string | null {
-    try {
-      const watered = waterSeed(seed, input);
-      const latestWatering = watered.waterings?.[watered.waterings.length - 1];
-      setSeeds((current) => current.map((item) => (item.id === seed.id ? watered : item)));
-      setSelectedSeed(watered);
-      if (latestWatering) {
-        setLastWateringEvent({ seedId: seed.id, eventId: latestWatering.id });
-      }
-      setPetMessage(m.pet_seed_watered());
-      return null;
-    } catch (error) {
-      return error instanceof Error ? error.message : m.app_error_watering_save();
+  async function archivePendingSeed() {
+    if (!pendingSeed || placementInFlight.current) return;
+    placementInFlight.current = true;
+    setPlacing(true);
+    const result = await command({
+      kind: 'place',
+      id: pendingSeed.id,
+      placement: { kind: 'archive' },
+    });
+    placementInFlight.current = false;
+    setPlacing(false);
+    if (result.ok) {
+      setPetMessage(m.garden_archived_message());
+      setActiveTab('archive');
     }
   }
 
-  function handleSeedBloom(seed: ReflectionSeed, input: SeedBloomInput): string | null {
-    try {
-      const bloomed = bloomSeed(seed, input);
-      setSeeds((current) => current.map((item) => (item.id === seed.id ? bloomed : item)));
-      setSelectedSeed(bloomed);
-      setLastWateringEvent({
-        seedId: seed.id,
-        eventId: `bloom-${bloomed.bloomReflection?.completedAt ?? Date.now()}`,
-      });
-      setPetMessage(m.pet_seed_bloomed());
-      return null;
-    } catch (error) {
-      return error instanceof Error ? error.message : m.app_error_bloom_save();
-    }
+  async function handleSeedWatering(
+    seed: ReflectionSeed,
+    input: SeedWateringInput
+  ): Promise<string | null> {
+    const result = await command({
+      kind: 'water',
+      id: seed.id,
+      input,
+      eventId: crypto.randomUUID(),
+    });
+    if (!result.ok) return result.error;
+    const watered = result.document.seeds.find((item) => item.id === seed.id);
+    const latestWatering = watered?.waterings?.at(-1);
+    if (watered) setSelectedSeed(watered);
+    if (latestWatering) setLastWateringEvent({ seedId: seed.id, eventId: latestWatering.id });
+    setPetMessage(m.pet_seed_watered());
+    return null;
+  }
+
+  async function handleSeedBloom(
+    seed: ReflectionSeed,
+    input: SeedBloomInput
+  ): Promise<string | null> {
+    const result = await command({ kind: 'bloom', id: seed.id, input });
+    if (!result.ok) return result.error;
+    const bloomed = result.document.seeds.find((item) => item.id === seed.id);
+    if (bloomed) setSelectedSeed(bloomed);
+    setLastWateringEvent({
+      seedId: seed.id,
+      eventId: `bloom-${bloomed?.bloomReflection?.completedAt}`,
+    });
+    setPetMessage(m.pet_seed_bloomed());
+    return null;
   }
 
   function exportSeeds() {
-    const blob = new Blob([serializeSeedExport(seeds)], { type: 'application/json' });
+    const blob = new Blob([serializeSeedExport(completedSeeds)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -180,17 +192,21 @@ export function App() {
     URL.revokeObjectURL(url);
   }
 
-  function deleteAllSeeds() {
-    clearGarden();
+  async function deleteAllSeeds() {
+    const result = await command({
+      kind: 'delete-completed',
+      ids: completedSeeds.map((seed) => seed.id),
+    });
+    if (!result.ok) return;
     setSelectedSeed(null);
     setConfirmingSeedDelete(false);
     setPetMessage(m.pet_empty_garden());
   }
 
-  function resetLensProfile() {
+  async function resetLensProfile() {
+    if (journey.lensDraft && !(await journey.resetSession())) return;
     resetOnboarding();
     setProfile(null);
-    journey.resetSession();
     repository.clearLensProfile();
     setConfirmingProfileReset(false);
   }
@@ -208,6 +224,40 @@ export function App() {
         onSelectTab={selectTab}
         onSelectTheme={setThemePreference}
       />
+
+      {(storageError || journey.error) && (
+        <div className="panel" role="alert">
+          <p>{storageError || journey.error}</p>
+          {journey.lensDraft && (
+            <button type="button" onClick={journey.retrySave}>
+              {m.persistence_retry_answer()}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              const blob = new Blob(
+                [
+                  JSON.stringify(
+                    { saved: repository.reflections.recovery(), unsavedDraft: journey.lensDraft },
+                    null,
+                    2
+                  ),
+                ],
+                { type: 'application/json' }
+              );
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = 'signal-garden-recovery.json';
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            {m.persistence_export_recovery()}
+          </button>
+        </div>
+      )}
 
       {activeTab === 'home' && (
         <section className="panel home-grid">
@@ -291,6 +341,14 @@ export function App() {
                   stepNumber={journey.lensStepNumber}
                   isLastLens={journey.isLastLens}
                   input={journey.lensInput}
+                  submitting={journey.submitting}
+                  saveStatus={
+                    journey.saveState === 'saving'
+                      ? m.lens_answer_saving()
+                      : journey.saveState === 'saved'
+                        ? m.lens_answer_saved()
+                        : m.lens_answer_unsaved()
+                  }
                   onInputChange={journey.setLensInput}
                   onDismiss={journey.dismissPanel}
                   onRest={journey.clearJourney}
@@ -301,15 +359,13 @@ export function App() {
               <div className="placement-panel" data-testid="placement-panel" aria-live="polite">
                 <strong>{m.garden_seed_ready()}</strong>
                 <span>
-                  {accessiblePlantPlot
-                    ? m.garden_seed_ready_available()
-                    : m.garden_seed_ready_full()}
+                  {accessiblePlantPlot ? m.garden_seed_ready_available() : m.garden_archive_full()}
                 </span>
                 <button
                   type="button"
                   className="primary-action"
                   data-testid="plant-here"
-                  disabled={!accessiblePlantPlot}
+                  disabled={!accessiblePlantPlot || placing}
                   onClick={() => {
                     if (accessiblePlantPlot) {
                       plantPendingSeed({
@@ -321,6 +377,9 @@ export function App() {
                   }}
                 >
                   {m.garden_plant_here()}
+                </button>
+                <button type="button" disabled={placing} onClick={archivePendingSeed}>
+                  {m.garden_save_archive()}
                 </button>
               </div>
             )}
@@ -359,9 +418,9 @@ export function App() {
               <p className="eyebrow">{m.archive_eyebrow()}</p>
               <h2>{m.archive_title()}</h2>
             </div>
-            <span className="section-count">{plantedSeedCountLabel(seeds.length)}</span>
+            <span className="section-count">{plantedSeedCountLabel(completedSeeds.length)}</span>
           </div>
-          {seeds.length === 0 ? (
+          {completedSeeds.length === 0 ? (
             <div className="archive-empty">
               <SeedStageArt stageIndex={0} theme={activeTheme} />
               <p>{m.archive_empty()}</p>
@@ -371,21 +430,29 @@ export function App() {
             </div>
           ) : (
             <div className="seed-list">
-              {seeds.map((seed) => (
+              {completedSeeds.map((seed) => (
                 <button
                   key={seed.id}
                   type="button"
                   className="seed-card"
-                  aria-label={seedCardAccessibilityLabel(seed)}
+                  aria-label={seedCardAccessibilityLabel(seed, seed.id === pendingSeed?.id)}
                   onClick={() => setSelectedSeed(seed)}
                 >
                   <SeedStageArt seed={seed} theme={activeTheme} />
                   <span>
-                    {m.archive_seed_card_status({ status: seedStatusLabel(seed.status) })}
+                    {seed.id === pendingSeed?.id
+                      ? m.seed_pending_label()
+                      : seed.placement === 'archive'
+                        ? m.seed_archived_label()
+                        : m.archive_seed_card_status({ status: seedStatusLabel(seed.status) })}
                   </span>
                   <strong>{seed.unhookedText || seed.labelText || seed.tinyAction}</strong>
                   <small>
-                    {m.archive_planted_date({ date: friendlySeedDate(seed.createdAt) })}
+                    {seed.placement === 'archive' || seed.id === pendingSeed?.id
+                      ? m.archive_saved_date({ date: friendlySeedDate(seed.createdAt) })
+                      : m.archive_planted_date({
+                          date: friendlySeedDate(seed.plantedAt ?? seed.createdAt),
+                        })}
                   </small>
                   <span className="growth-meter" aria-hidden="true">
                     {growthStepLabels.map((label, index) => (
@@ -473,7 +540,7 @@ export function App() {
                   {m.settings_reset_lens_profile()}
                 </button>
               )}
-              <button type="button" onClick={exportSeeds} disabled={seeds.length === 0}>
+              <button type="button" onClick={exportSeeds} disabled={completedSeeds.length === 0}>
                 {m.settings_export_seed_data()}
               </button>
               {confirmingSeedDelete ? (
@@ -483,9 +550,9 @@ export function App() {
                   aria-label={m.settings_confirm_seed_deletion_label()}
                 >
                   <span>
-                    {seeds.length === 1
-                      ? m.settings_delete_seed_one({ count: seeds.length })
-                      : m.settings_delete_seed_many({ count: seeds.length })}
+                    {completedSeeds.length === 1
+                      ? m.settings_delete_seed_one({ count: completedSeeds.length })
+                      : m.settings_delete_seed_many({ count: completedSeeds.length })}
                   </span>
                   <button type="button" onClick={() => setConfirmingSeedDelete(false)}>
                     {m.settings_cancel()}
@@ -499,7 +566,7 @@ export function App() {
                   type="button"
                   className="danger"
                   onClick={() => setConfirmingSeedDelete(true)}
-                  disabled={seeds.length === 0}
+                  disabled={completedSeeds.length === 0}
                 >
                   {m.settings_delete_seeds()}
                 </button>
@@ -511,11 +578,12 @@ export function App() {
 
       {needsOnboarding && <OnboardingPanel onComplete={finishOnboarding} />}
 
-      {selectedSeed && (
+      {selectedSeed && completedSeeds.some((seed) => seed.id === selectedSeed.id) && (
         <SeedDialog
           key={selectedSeed.id}
-          seed={selectedSeed}
+          seed={completedSeeds.find((seed) => seed.id === selectedSeed.id) ?? selectedSeed}
           onClose={() => setSelectedSeed(null)}
+          canCare={selectedSeed.id !== pendingSeed?.id}
           onWater={handleSeedWatering}
           onBloom={handleSeedBloom}
         />

@@ -76,20 +76,19 @@ describe('app state hooks', () => {
     expect(document.documentElement.style.colorScheme).toBe('light');
   });
 
-  it('owns pending seed persistence and garden clearing', () => {
+  it('owns pending seed persistence and garden clearing', async () => {
     const storage = createMemoryStorage();
-    const repository = createSignalGardenRepository(storage);
+    const repository = createSignalGardenRepository(storage, async (work) => work());
 
+    storage.setItem('signal-garden/pending-seed/vite/v1', JSON.stringify(seed));
     function Harness() {
       const garden = useGardenData(repository);
       return (
         <button
           type="button"
-          onClick={() => {
-            garden.setSeeds([seed]);
-            garden.savePendingSeed(seed);
-            garden.clearGarden();
-          }}
+          onClick={() =>
+            garden.command({ kind: 'delete-completed', ids: ['one', 'archived', 'seed-1'] })
+          }
         >
           Clear garden
         </button>
@@ -97,10 +96,10 @@ describe('app state hooks', () => {
     }
 
     act(() => root.render(<Harness />));
-    act(() => container.querySelector('button')?.click());
+    await act(async () => container.querySelector('button')?.click());
 
-    expect(repository.loadSeeds()).toEqual([]);
-    expect(repository.loadPendingSeed()).toBeNull();
+    expect(repository.reflections.read().document.seeds).toEqual([]);
+    expect(repository.reflections.read().document.pendingSeed).toBeNull();
   });
 });
 

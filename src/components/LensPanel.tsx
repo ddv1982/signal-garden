@@ -10,6 +10,8 @@ type LensPanelProps = {
   stepNumber: number;
   isLastLens: boolean;
   input: string;
+  saveStatus?: string;
+  submitting?: boolean;
   onInputChange: (value: string) => void;
   onDismiss: () => void;
   onRest: () => void;
@@ -23,6 +25,8 @@ export function LensPanel({
   stepNumber,
   isLastLens,
   input,
+  saveStatus,
+  submitting = false,
   onInputChange,
   onDismiss,
   onRest,
@@ -75,15 +79,17 @@ export function LensPanel({
         <textarea
           ref={inputRef}
           value={input}
+          disabled={submitting}
           onChange={(event) => onInputChange(event.target.value)}
           placeholder={definition.helper}
         />
       </label>
+      {saveStatus && <p role="status">{saveStatus}</p>}
       <div className="form-actions">
         <button type="button" onClick={onRest}>
           {m.lens_let_it_rest()}
         </button>
-        <button type="submit" className="primary-action">
+        <button type="submit" className="primary-action" disabled={submitting}>
           {isLastLens ? m.lens_make_seed() : m.lens_continue()}
         </button>
       </div>

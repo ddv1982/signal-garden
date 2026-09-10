@@ -1,18 +1,12 @@
-import type { InnerLensProfile, LensSessionDraft, ReflectionSeed } from '../../shared/models';
-import {
-  isInnerLensProfile,
-  isLensSessionDraft,
-  isReflectionSeed,
-} from '../../shared/bridgeValidation';
+import { createReflectionStore, type ReflectionLock } from './reflections';
+import type { InnerLensProfile } from '../../shared/models';
+import { isInnerLensProfile } from '../../shared/bridgeValidation';
 import { defaultThemePreference, isThemePreference, type ThemePreference } from '../domain/theme';
 import { getBrowserStorage, readJson, writeJson, type StorageLike } from './storage';
 
-const seedKey = 'signal-garden/reflection-seeds/vite/v1';
 const settingsKey = 'signal-garden/settings/vite/v1';
 const themePreferenceKey = 'signal-garden/theme-preference/vite/v1';
 const lensProfileKey = 'signal-garden/inner-lens-profile/vite/v1';
-const lensSessionKey = 'signal-garden/lens-session-draft/vite/v1';
-const pendingSeedKey = 'signal-garden/pending-seed/vite/v1';
 
 export type AppSettings = {
   reducedMotion: boolean;
@@ -26,17 +20,12 @@ const defaultSettings: AppSettings = {
   themePreference: defaultThemePreference,
 };
 
-export function createSignalGardenRepository(storage: StorageLike | null = getBrowserStorage()) {
+export function createSignalGardenRepository(
+  storage: StorageLike | null = getBrowserStorage(),
+  lock?: ReflectionLock
+) {
   return {
-    loadSeeds(): ReflectionSeed[] {
-      return readJson(storage, seedKey, [], isSeedArray);
-    },
-    saveSeeds(seeds: ReflectionSeed[]): void {
-      writeJson(storage, seedKey, seeds);
-    },
-    clearSeeds(): void {
-      storage?.removeItem(seedKey);
-    },
+    reflections: createReflectionStore(storage, lock),
     loadLensProfile(): InnerLensProfile | null {
       const profile = readJson(storage, lensProfileKey, null, isNullableInnerLensProfile);
       return profile && profile.completedAt ? profile : null;
@@ -46,24 +35,6 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
     },
     clearLensProfile(): void {
       storage?.removeItem(lensProfileKey);
-    },
-    loadLensSessionDraft(): LensSessionDraft | null {
-      return readJson(storage, lensSessionKey, null, isNullableLensSessionDraft);
-    },
-    saveLensSessionDraft(draft: LensSessionDraft): void {
-      writeJson(storage, lensSessionKey, draft);
-    },
-    clearLensSessionDraft(): void {
-      storage?.removeItem(lensSessionKey);
-    },
-    loadPendingSeed(): ReflectionSeed | null {
-      return readJson(storage, pendingSeedKey, null, isNullableReflectionSeed);
-    },
-    savePendingSeed(seed: ReflectionSeed): void {
-      writeJson(storage, pendingSeedKey, seed);
-    },
-    clearPendingSeed(): void {
-      storage?.removeItem(pendingSeedKey);
     },
     loadSettings(): AppSettings {
       const settings = sanitizeAppSettings(
@@ -89,20 +60,8 @@ export function createSignalGardenRepository(storage: StorageLike | null = getBr
 
 export type SignalGardenRepository = ReturnType<typeof createSignalGardenRepository>;
 
-function isSeedArray(value: unknown): value is ReflectionSeed[] {
-  return Array.isArray(value) && value.every(isReflectionSeed);
-}
-
 function isNullableInnerLensProfile(value: unknown): value is InnerLensProfile | null {
   return value === null || isInnerLensProfile(value);
-}
-
-function isNullableLensSessionDraft(value: unknown): value is LensSessionDraft | null {
-  return value === null || isLensSessionDraft(value);
-}
-
-function isNullableReflectionSeed(value: unknown): value is ReflectionSeed | null {
-  return value === null || isReflectionSeed(value);
 }
 
 function isAppSettingsObject(value: unknown): value is Partial<AppSettings> {

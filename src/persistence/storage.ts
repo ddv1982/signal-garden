@@ -4,9 +4,6 @@ export function getBrowserStorage(): StorageLike | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const probeKey = 'signal-garden/storage-probe';
-    window.localStorage.setItem(probeKey, '1');
-    window.localStorage.removeItem(probeKey);
     return window.localStorage;
   } catch {
     return null;

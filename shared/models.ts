@@ -44,6 +44,8 @@ export type LensResponses = {
 };
 
 export type LensSessionDraft = {
+  sessionId?: string;
+  revision?: number;
   currentLens: LensKind;
   responses: LensResponses;
   completedLensIds: LensKind[];
@@ -85,6 +87,7 @@ export type ReflectionSeed = {
   dreams: string[];
   tinyAction: string;
   status: SeedStatus;
+  placement?: 'garden' | 'archive';
   gardenPosition?: { x: number; y: number };
   gardenPlotId?: string;
   plantedAt?: string;

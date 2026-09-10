@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReflectionSeed } from '../../shared/models';
+import { friendlySeedDate } from '../domain/dates';
 import { seedStatusLabel } from '../domain/accessibilityCopy';
 import { lensDefinitions } from '../domain/lenses';
 import {
@@ -21,12 +22,18 @@ const seedDialogTabs: SeedDialogTab[] = ['overview', 'water', 'history'];
 
 type SeedDialogProps = {
   seed: ReflectionSeed;
+  canCare?: boolean;
   onClose: () => void;
-  onWater: (seed: ReflectionSeed, input: SeedWateringInput) => string | null;
-  onBloom: (seed: ReflectionSeed, input: SeedBloomInput) => string | null;
+  onWater: (
+    seed: ReflectionSeed,
+    input: SeedWateringInput
+  ) => string | null | Promise<string | null>;
+  onBloom: (seed: ReflectionSeed, input: SeedBloomInput) => string | null | Promise<string | null>;
 };
 
-export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps) {
+export function SeedDialog({ seed, onClose, onWater, onBloom, canCare = true }: SeedDialogProps) {
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [activeTab, setActiveTab] = useState<SeedDialogTab>('overview');
   const [form, dispatch] = useWateringForm();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -40,7 +47,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     }
   }, []);
 
-  function submitWatering(event: React.FormEvent) {
+  async function submitWatering(event: React.FormEvent) {
     event.preventDefault();
     const transformedLabel = form.wateringLabel.trim();
     const kindAction = form.wateringAction.trim();
@@ -52,7 +59,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       return;
     }
 
-    const error = onWater(seed, { transformedLabel, kindAction });
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    const error = await onWater(seed, { transformedLabel, kindAction });
+    savingRef.current = false;
+    setSaving(false);
     if (error) {
       dispatch({ type: 'watering-failed', message: error });
       return;
@@ -60,7 +72,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     dispatch({ type: 'reset' });
   }
 
-  function submitBloom(event: React.FormEvent) {
+  async function submitBloom(event: React.FormEvent) {
     event.preventDefault();
     const reflection = form.bloomReflection.trim();
     if (!reflection) {
@@ -71,7 +83,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       return;
     }
 
-    const error = onBloom(seed, { outcome: form.bloomOutcome, reflection });
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    const error = await onBloom(seed, { outcome: form.bloomOutcome, reflection });
+    savingRef.current = false;
+    setSaving(false);
     if (error) {
       dispatch({ type: 'bloom-failed', message: error });
       return;
@@ -85,7 +102,19 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
     document.getElementById(seedDialogTabId(tab))?.focus();
   }
 
-  const stageCopy = seedStageCopy(seed);
+  const stageCopy = !canCare
+    ? {
+        eyebrow: m.seed_pending_label(),
+        title: m.seed_pending_title(),
+        description: m.seed_pending_description(),
+      }
+    : seed.placement === 'archive'
+      ? {
+          eyebrow: m.seed_archived_label(),
+          title: m.seed_archived_title(),
+          description: m.seed_archived_description(),
+        }
+      : seedStageCopy(seed);
   const wateringPrompt = wateringPromptForSeed(seed);
 
   function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, tab: SeedDialogTab) {
@@ -124,7 +153,13 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
       onClose={onClose}
     >
       <div className="dialog-heading">
-        <p className="eyebrow">{m.seed_dialog_eyebrow({ status: seedStatusLabel(seed.status) })}</p>
+        <p className="eyebrow">
+          {!canCare
+            ? m.seed_pending_label()
+            : seed.placement === 'archive'
+              ? m.seed_archived_label()
+              : m.seed_dialog_eyebrow({ status: seedStatusLabel(seed.status) })}
+        </p>
         <button
           ref={closeButtonRef}
           type="button"
@@ -138,22 +173,24 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
         {seed.unhookedText || seed.labelText || m.seed_dialog_fallback_title()}
       </h2>
       <div className="seed-dialog-tabs" role="tablist" aria-label={m.seed_dialog_details_label()}>
-        {seedDialogTabs.map((tab) => (
-          <button
-            key={tab}
-            id={seedDialogTabId(tab)}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab}
-            aria-controls={seedDialogPanelId(tab)}
-            tabIndex={activeTab === tab ? 0 : -1}
-            className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
-            onClick={() => setActiveTab(tab)}
-            onKeyDown={(event) => handleTabKeyDown(event, tab)}
-          >
-            {seedDialogTabLabel(tab)}
-          </button>
-        ))}
+        {seedDialogTabs
+          .filter((tab) => canCare || tab !== 'water')
+          .map((tab) => (
+            <button
+              key={tab}
+              id={seedDialogTabId(tab)}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab}
+              aria-controls={seedDialogPanelId(tab)}
+              tabIndex={activeTab === tab ? 0 : -1}
+              className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
+              onClick={() => setActiveTab(tab)}
+              onKeyDown={(event) => handleTabKeyDown(event, tab)}
+            >
+              {seedDialogTabLabel(tab)}
+            </button>
+          ))}
       </div>
 
       {activeTab === 'overview' && (
@@ -184,7 +221,12 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
               {seed.bloomReflection.reflection}
             </p>
           )}
-          <button type="button" className="primary-action" onClick={() => setActiveTab('water')}>
+          <button
+            type="button"
+            className="primary-action"
+            disabled={!canCare}
+            onClick={() => setActiveTab('water')}
+          >
             {seed.bloomReflection
               ? m.seed_dialog_review_growth()
               : isReadyToBloom(seed)
@@ -194,7 +236,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
         </section>
       )}
 
-      {activeTab === 'water' && (
+      {activeTab === 'water' && canCare && (
         <section
           id={seedDialogPanelId('water')}
           className="seed-dialog-panel"
@@ -206,6 +248,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
               <p className="eyebrow">{m.seed_stage_flower_eyebrow()}</p>
               <strong>{m.seed_stage_flower_title()}</strong>
               <span>{seed.bloomReflection.reflection}</span>
+              <small>{friendlySeedDate(seed.bloomReflection.completedAt)}</small>
             </div>
           ) : isReadyToBloom(seed) ? (
             <form className="watering-form" data-testid="bloom-form" onSubmit={submitBloom}>
@@ -253,7 +296,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                 <button type="button" onClick={() => dispatch({ type: 'reset' })}>
                   {m.lens_let_it_rest()}
                 </button>
-                <button type="submit" className="primary-action">
+                <button type="submit" className="primary-action" disabled={saving}>
                   {m.seed_dialog_bloom_submit()}
                 </button>
               </div>
@@ -291,7 +334,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                 <button type="button" onClick={() => dispatch({ type: 'reset' })}>
                   {m.lens_let_it_rest()}
                 </button>
-                <button type="submit" className="primary-action">
+                <button type="submit" className="primary-action" disabled={saving}>
                   {m.seed_dialog_water_seed()}
                 </button>
               </div>
@@ -355,6 +398,8 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                       {index + 1}. {watering.transformedLabel}
                     </strong>
                     <span>{watering.kindAction}</span>
+                    {watering.note && <span>{watering.note}</span>}
+                    <small>{friendlySeedDate(watering.createdAt)}</small>
                   </p>
                 ))
               ) : (
@@ -368,6 +413,7 @@ export function SeedDialog({ seed, onClose, onWater, onBloom }: SeedDialogProps)
                     })}
                   </strong>
                   <span>{seed.bloomReflection.reflection}</span>
+                  <small>{friendlySeedDate(seed.bloomReflection.completedAt)}</small>
                 </p>
               )}
             </div>

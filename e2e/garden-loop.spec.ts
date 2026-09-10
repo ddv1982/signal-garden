@@ -760,13 +760,17 @@ async function openCurrentLens(page: Page) {
 
 async function storedSeeds(page: Page) {
   return page.evaluate(() =>
-    JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]')
+    localStorage.getItem('signal-garden/reflections/v2')
+      ? JSON.parse(localStorage.getItem('signal-garden/reflections/v2') ?? '{}').seeds
+      : JSON.parse(localStorage.getItem('signal-garden/reflection-seeds/vite/v1') ?? '[]')
   );
 }
 
 async function storedPendingSeed(page: Page) {
   return page.evaluate(() =>
-    JSON.parse(localStorage.getItem('signal-garden/pending-seed/vite/v1') ?? 'null')
+    localStorage.getItem('signal-garden/reflections/v2')
+      ? JSON.parse(localStorage.getItem('signal-garden/reflections/v2') ?? '{}').pendingSeed
+      : JSON.parse(localStorage.getItem('signal-garden/pending-seed/vite/v1') ?? 'null')
   );
 }
 
@@ -778,7 +782,9 @@ async function storedLensProfile(page: Page) {
 
 async function storedLensSessionDraft(page: Page) {
   return page.evaluate(() =>
-    JSON.parse(localStorage.getItem('signal-garden/lens-session-draft/vite/v1') ?? 'null')
+    localStorage.getItem('signal-garden/reflections/v2')
+      ? JSON.parse(localStorage.getItem('signal-garden/reflections/v2') ?? '{}').draft
+      : JSON.parse(localStorage.getItem('signal-garden/lens-session-draft/vite/v1') ?? 'null')
   );
 }
 
@@ -863,7 +869,13 @@ async function seedStoredGarden(page: Page, plotIds: string[]) {
       growthPoints: 0,
       visualType: 'seed',
     }));
-    localStorage.setItem('signal-garden/reflection-seeds/vite/v1', JSON.stringify(seeds));
+    const raw = localStorage.getItem('signal-garden/reflections/v2');
+    if (raw)
+      localStorage.setItem(
+        'signal-garden/reflections/v2',
+        JSON.stringify({ ...JSON.parse(raw), seeds })
+      );
+    else localStorage.setItem('signal-garden/reflection-seeds/vite/v1', JSON.stringify(seeds));
   }, plotIds);
 }
 
