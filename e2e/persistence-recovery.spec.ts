@@ -145,3 +145,20 @@ test('deletion in another tab closes stale details and cannot resurrect a reflec
   await other.reload();
   expect(await stored(other)).toMatchObject({ seeds: [] });
 });
+
+test('pending reflection keyboard tabs skip unavailable care controls', async ({ page }) => {
+  await setup(page, [], seed);
+  await page.getByRole('button', { name: m.tab_archive(), exact: true }).click();
+  await page.locator('button.seed-card').click();
+  const overview = page.getByRole('tab', { name: m.seed_dialog_tab_overview(), exact: true });
+  const history = page.getByRole('tab', { name: m.seed_dialog_tab_history(), exact: true });
+  await overview.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(history).toBeFocused();
+  await expect(history).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toBeVisible();
+  await page.keyboard.press('ArrowLeft');
+  await expect(overview).toBeFocused();
+  await expect(overview).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toBeVisible();
+});

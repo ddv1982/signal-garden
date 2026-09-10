@@ -117,25 +117,26 @@ export function SeedDialog({ seed, onClose, onWater, onBloom, canCare = true }: 
       : seedStageCopy(seed);
   const wateringPrompt = wateringPromptForSeed(seed);
 
+  const visibleTabs = seedDialogTabs.filter((tab) => canCare || tab !== 'water');
+
   function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, tab: SeedDialogTab) {
-    const currentIndex = seedDialogTabs.indexOf(tab);
+    const currentIndex = visibleTabs.indexOf(tab);
     let nextTab: SeedDialogTab | null = null;
 
     switch (event.key) {
       case 'ArrowRight':
       case 'ArrowDown':
-        nextTab = seedDialogTabs[(currentIndex + 1) % seedDialogTabs.length];
+        nextTab = visibleTabs[(currentIndex + 1) % visibleTabs.length];
         break;
       case 'ArrowLeft':
       case 'ArrowUp':
-        nextTab =
-          seedDialogTabs[(currentIndex - 1 + seedDialogTabs.length) % seedDialogTabs.length];
+        nextTab = visibleTabs[(currentIndex - 1 + visibleTabs.length) % visibleTabs.length];
         break;
       case 'Home':
-        nextTab = seedDialogTabs[0];
+        nextTab = visibleTabs[0];
         break;
       case 'End':
-        nextTab = seedDialogTabs[seedDialogTabs.length - 1];
+        nextTab = visibleTabs[visibleTabs.length - 1];
         break;
     }
 
@@ -173,24 +174,22 @@ export function SeedDialog({ seed, onClose, onWater, onBloom, canCare = true }: 
         {seed.unhookedText || seed.labelText || m.seed_dialog_fallback_title()}
       </h2>
       <div className="seed-dialog-tabs" role="tablist" aria-label={m.seed_dialog_details_label()}>
-        {seedDialogTabs
-          .filter((tab) => canCare || tab !== 'water')
-          .map((tab) => (
-            <button
-              key={tab}
-              id={seedDialogTabId(tab)}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab}
-              aria-controls={seedDialogPanelId(tab)}
-              tabIndex={activeTab === tab ? 0 : -1}
-              className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
-              onClick={() => setActiveTab(tab)}
-              onKeyDown={(event) => handleTabKeyDown(event, tab)}
-            >
-              {seedDialogTabLabel(tab)}
-            </button>
-          ))}
+        {visibleTabs.map((tab) => (
+          <button
+            key={tab}
+            id={seedDialogTabId(tab)}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls={seedDialogPanelId(tab)}
+            tabIndex={activeTab === tab ? 0 : -1}
+            className={activeTab === tab ? 'seed-dialog-tab active' : 'seed-dialog-tab'}
+            onClick={() => setActiveTab(tab)}
+            onKeyDown={(event) => handleTabKeyDown(event, tab)}
+          >
+            {seedDialogTabLabel(tab)}
+          </button>
+        ))}
       </div>
 
       {activeTab === 'overview' && (

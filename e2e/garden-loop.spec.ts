@@ -554,7 +554,7 @@ test.describe('garden-first lens journey', () => {
     await completeLensJourney(page);
 
     await expect(page.getByTestId('plant-here')).toBeDisabled();
-    await expect(page.getByText(m.garden_seed_ready_full())).toBeVisible();
+    await expect(page.getByText(m.garden_archive_full())).toBeVisible();
     await expect.poll(() => storedSeeds(page)).toHaveLength(12);
   });
 

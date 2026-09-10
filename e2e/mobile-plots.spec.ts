@@ -88,8 +88,18 @@ test('all twelve desktop plots remain selectable through mobile breakpoints', as
   );
   for (const width of [960, 390, 539, 540, 960]) {
     await page.setViewportSize({ width, height: 800 });
-    await expect.poll(async () => (await canvasBox(page)).width).toBeLessThanOrEqual(width);
-    await page.waitForTimeout(150);
+    const expectedWidth = width - (width <= 760 ? 22 : 38);
+    await expect
+      .poll(() => page.getByTestId('garden-canvas').evaluate((host) => host.clientWidth))
+      .toBe(expectedWidth);
+    await expect
+      .poll(() =>
+        page.getByTestId('garden-canvas').evaluate((host) => {
+          const canvas = host.querySelector('canvas');
+          return canvas?.width === host.clientWidth && canvas?.height === host.clientHeight;
+        })
+      )
+      .toBe(true);
     for (const id of plotIds) {
       await tapPlot(page, id, true);
       await expect(
