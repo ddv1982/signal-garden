@@ -15,6 +15,7 @@ export type { PlantingPosition, WateringEvent };
 
 export type GardenGameHandle = {
   update(update: GardenGameUpdate): void;
+  resize(width: number, height: number): void;
   playHeadButt(): void;
   previewPetFrame(frame: PetFrameId): void;
   previewPetSequence(sequence: PetSequenceId): void;
@@ -36,6 +37,9 @@ export function createGardenGame(options: GardenGameOptions): GardenGameHandle {
   });
 
   return {
+    resize(width, height) {
+      game.scale.setParentSize(width, height);
+    },
     update(update) {
       scene.setGardenState(update);
     },

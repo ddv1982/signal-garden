@@ -83,6 +83,7 @@ export function GardenCanvas({
       ) {
         previousWidth = roundedWidth;
         previousHeight = roundedHeight;
+        gameRef.current?.resize(roundedWidth, roundedHeight);
         onCanvasSizeChange({ width: roundedWidth, height: roundedHeight });
       }
     };
