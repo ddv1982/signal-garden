@@ -1,54 +1,64 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
+import {
+  readImageRGBA,
+  runtimeImageFiles,
+  imageBaseName,
+  writeImageRGBA,
+} from './lib/readImage.mjs';
 
 const projectRoot = new URL('..', import.meta.url).pathname;
-const propDir = path.join(projectRoot, 'src/assets/lenses/props');
-const sourceSheetPath = path.join(projectRoot, 'art-source/lenses/garden-lens-sheet-chromakey.png');
+const propDir = path.resolve(process.argv[2] ?? path.join(projectRoot, 'src/assets/lenses/props'));
+const sourceSheetPath = path.resolve(
+  process.argv[4] ?? path.join(projectRoot, 'art-source/lenses/garden-lens-sheet-chromakey.png')
+);
+const outputDir = path.resolve(process.argv[3] ?? propDir);
 const alphaThreshold = 8;
 const outputPadding = 24;
 const sourceCrops = {
-  'action-basket.png': { x: 935, y: 760, width: 365, height: 264 },
-  'body-ripple.png': { x: 408, y: 528, width: 350, height: 225 },
-  'emotion-lantern.png': { x: 810, y: 522, width: 270, height: 244 },
-  'image-cloud.png': { x: 1085, y: 535, width: 370, height: 235 },
-  'observer-pool.png': { x: 230, y: 765, width: 365, height: 245 },
+  'action-basket': { x: 935, y: 760, width: 365, height: 264 },
+  'body-ripple': { x: 408, y: 528, width: 350, height: 225 },
+  'emotion-lantern': { x: 810, y: 522, width: 270, height: 244 },
+  'image-cloud': { x: 1085, y: 535, width: 370, height: 235 },
+  'observer-pool': { x: 230, y: 765, width: 365, height: 245 },
 };
 
-const files = fs
-  .readdirSync(propDir)
-  .filter((file) => file.endsWith('.png'))
-  .sort();
+const files = runtimeImageFiles(propDir);
+fs.mkdirSync(outputDir, { recursive: true });
 const sourceSheet = PNG.sync.read(fs.readFileSync(sourceSheetPath));
 
 for (const file of files) {
+  const baseName = imageBaseName(file);
   const filePath = path.join(propDir, file);
-  const source = sourceCrops[file]
-    ? cropSourceSheet(sourceSheet, sourceCrops[file])
-    : PNG.sync.read(fs.readFileSync(filePath));
+  const source = sourceCrops[baseName]
+    ? cropSourceSheet(sourceSheet, sourceCrops[baseName])
+    : await readImageRGBA(filePath);
   removeChromaKeyBackground(source);
   removeDetachedEdgeArtifacts(source);
-  if (file === 'emotion-lantern.png') removeSmallDetachedArtifacts(source, 80);
+  if (baseName === 'emotion-lantern') removeSmallDetachedArtifacts(source, 80);
   defringeChromaKeyEdges(source);
   removePinkMatteEdges(source);
   defringeGreenKeyEdges(source);
   softenGreenMatteEdges(source);
-  if (file === 'image-cloud.png') softenCloudBrightHalo(source);
-  if (file === 'observer-pool.png') removeObserverLowerPinkMatte(source);
+  if (baseName === 'image-cloud') softenCloudBrightHalo(source);
+  if (baseName === 'observer-pool') removeObserverLowerPinkMatte(source);
   if (!hasSemiTransparentAlpha(source)) featherAlphaEdges(source);
   bleedTransparentEdgeColors(source);
   const cleaned = cropAndPad(source, outputPadding);
-  if (file === 'observer-pool.png') {
+  if (baseName === 'observer-pool') {
     removeObserverLowerPinkMatte(cleaned);
     bleedTransparentEdgeColors(cleaned);
   }
-  fs.writeFileSync(filePath, PNG.sync.write(cleaned));
+  await writeImageRGBA(path.join(outputDir, file), cleaned);
 
   const metrics = collectMetrics(cleaned);
   console.log(
     `${file}\t${cleaned.width}x${cleaned.height}\tbbox=${metrics.bbox}\tmargins=${metrics.margins}\tchromaKey=${metrics.chromaKey}`
   );
 }
+
+console.log(`Processed ${files.length} images`);
 
 function cropSourceSheet(sheet, crop) {
   const output = new PNG({ width: crop.width, height: crop.height, colorType: 6 });

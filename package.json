@@ -17,6 +17,7 @@
     "preview": "vite preview",
     "typecheck": "pnpm i18n:compile && pnpm typecheck:compiled",
     "typecheck:compiled": "tsc --noEmit",
+    "test:scripts": "node --test scripts/tests/*.test.mjs",
     "test": "pnpm i18n:compile && pnpm test:compiled",
     "test:compiled": "vitest run",
     "coverage": "pnpm i18n:compile && pnpm coverage:compiled",
