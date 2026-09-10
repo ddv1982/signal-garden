@@ -1,14 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
+import { readImageRGBA, runtimeImageFiles } from './lib/readImage.mjs';
 
 const projectRoot = new URL('..', import.meta.url).pathname;
-const frameDir = path.join(projectRoot, 'src/assets/companion/frames');
-const outputPath = path.join(projectRoot, 'docs/screenshots/pet-animation-contact-sheet.png');
-const frameFiles = fs
-  .readdirSync(frameDir)
-  .filter((file) => file.endsWith('.png'))
-  .sort();
+const frameDir = path.resolve(
+  process.argv[2] ?? path.join(projectRoot, 'src/assets/companion/frames')
+);
+const outputPath = path.resolve(
+  process.argv[3] ?? path.join(projectRoot, 'docs/screenshots/pet-animation-contact-sheet.png')
+);
+if (!outputPath.endsWith('.png')) throw new Error('Contact sheet output must use .png');
+const frameFiles = runtimeImageFiles(frameDir);
 const cellWidth = 256;
 const cellHeight = 286;
 const columns = 4;
@@ -18,7 +21,7 @@ const sheet = new PNG({ width: cellWidth * columns, height: cellHeight * rows, c
 sheet.data.fill(0);
 
 for (const [index, frameFile] of frameFiles.entries()) {
-  const source = PNG.sync.read(fs.readFileSync(path.join(frameDir, frameFile)));
+  const source = await readImageRGBA(path.join(frameDir, frameFile));
   const column = index % columns;
   const row = Math.floor(index / columns);
   const originX = column * cellWidth;
@@ -55,7 +58,7 @@ for (const [index, frameFile] of frameFiles.entries()) {
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, PNG.sync.write(sheet));
-console.log(outputPath);
+console.log(`Processed ${frameFiles.length} frames into ${outputPath}`);
 
 function fillChecker(originX, originY, width, height) {
   for (let y = 0; y < height; y += 1) {

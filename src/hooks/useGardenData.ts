@@ -1,43 +1,47 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { ReflectionSeed } from '../../shared/models';
-import { advanceGardenGrowth } from '../domain/seedGrowth';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SignalGardenRepository } from '../persistence/repositories';
+import type { ReflectionCommand, ReflectionResult } from '../persistence/reflections';
 
 export function useGardenData(repository: SignalGardenRepository) {
-  const [seeds, setSeeds] = useState<ReflectionSeed[]>(() =>
-    advanceGardenGrowth(repository.loadSeeds())
+  const [snapshot, setSnapshot] = useState(() => repository.reflections.read());
+  const [error, setError] = useState<string | null>(null);
+  const receiveSnapshot = useCallback((result: ReflectionResult) => {
+    setSnapshot((previous) => (result.ok ? result : { ...result, document: previous.document }));
+  }, []);
+  useEffect(() => repository.reflections.subscribe(receiveSnapshot), [repository, receiveSnapshot]);
+  useEffect(() => {
+    let active = true;
+    void repository.reflections.command({ kind: 'grow' }).then((result) => {
+      if (active) {
+        receiveSnapshot(result);
+        setError(result.ok ? null : result.error);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [repository, receiveSnapshot]);
+  const { seeds, pendingSeed } = snapshot.document;
+  const gardenState = useMemo(
+    () => ({ seeds: seeds.filter((seed) => seed.placement !== 'archive') }),
+    [seeds]
   );
-  const [pendingSeed, setPendingSeed] = useState<ReflectionSeed | null>(() =>
-    repository.loadPendingSeed()
+  const completedSeeds = useMemo(
+    () => (pendingSeed ? [...seeds, pendingSeed] : seeds),
+    [seeds, pendingSeed]
   );
-  const gardenState = useMemo(() => ({ seeds }), [seeds]);
-
-  useEffect(() => repository.saveSeeds(seeds), [repository, seeds]);
-
-  function savePendingSeed(seed: ReflectionSeed) {
-    repository.savePendingSeed(seed);
-    setPendingSeed(seed);
+  async function command(command: ReflectionCommand) {
+    const result = await repository.reflections.command(command);
+    receiveSnapshot(result);
+    setError(result.ok ? null : result.error);
+    return result;
   }
-
-  function clearPendingSeed() {
-    repository.clearPendingSeed();
-    setPendingSeed(null);
-  }
-
-  function clearGarden() {
-    setSeeds([]);
-    repository.clearSeeds();
-    repository.clearPendingSeed();
-    setPendingSeed(null);
-  }
-
   return {
     seeds,
-    setSeeds,
     pendingSeed,
     gardenState,
-    savePendingSeed,
-    clearPendingSeed,
-    clearGarden,
+    completedSeeds,
+    error: snapshot.ok ? error : snapshot.error,
+    command,
   };
 }

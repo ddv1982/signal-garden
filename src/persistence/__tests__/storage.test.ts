@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readJson, writeJson, type StorageLike } from '../storage';
+import { getBrowserStorage, readJson, writeJson, type StorageLike } from '../storage';
 
 type Shape = { count: number };
 
@@ -29,6 +29,18 @@ function memoryStorage(initial: Record<string, string> = {}): StorageLike & {
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+describe('getBrowserStorage', () => {
+  it('allows reads when the browser storage quota is completely full', () => {
+    const storage = memoryStorage({ readable: 'saved reflection' });
+    storage.setItem = () => {
+      throw new DOMException('quota', 'QuotaExceededError');
+    };
+    vi.stubGlobal('localStorage', storage);
+    expect(getBrowserStorage()?.getItem('readable')).toBe('saved reflection');
+    vi.unstubAllGlobals();
+  });
 });
 
 describe('readJson', () => {

@@ -47,6 +47,14 @@ describe('createGardenSeedLayout', () => {
 });
 
 describe('createGardenPlots', () => {
+  it.each([390, 539, 540, 560, 960])('preserves every plot identity at %i pixels', (width) => {
+    const plots = createGardenPlots(width, 680);
+    expect(plots.map((plot) => plot.id)).toEqual(
+      createGardenPlots(960, 680).map((plot) => plot.id)
+    );
+    expect(new Set(plots.map((plot) => plot.id)).size).toBe(12);
+  });
+
   it('returns stable normalized plot ids for designed planting spots', () => {
     const desktop = createGardenPlots(960, 640);
     const mobile = createGardenPlots(390, 680);
@@ -65,16 +73,7 @@ describe('createGardenPlots', () => {
       'back-center',
       'back-right',
     ]);
-    expect(mobile.map((plot) => plot.id)).toEqual([
-      'front-left',
-      'front-center',
-      'front-right',
-      'front-far-right',
-      'middle-left',
-      'middle-center',
-      'middle-right',
-      'back-center',
-    ]);
+    expect(mobile.map((plot) => plot.id)).toEqual(desktop.map((plot) => plot.id));
     expect(desktop.every((plot) => plot.x > 0 && plot.x < 1 && plot.y > 0 && plot.y < 1)).toBe(
       true
     );
@@ -144,7 +143,7 @@ describe('createGardenPlots', () => {
       return dx * dx + dy * dy < 1;
     };
 
-    for (const [width, height] of PLOT_CANVAS_SIZES.filter(([width]) => width >= 540)) {
+    for (const [width, height] of PLOT_CANVAS_SIZES.filter(([width]) => width >= 560)) {
       const plots = createGardenPlots(width, height);
 
       expect(plots.filter((plot) => intersects(plot, petZone))).toEqual([]);
@@ -154,6 +153,11 @@ describe('createGardenPlots', () => {
 });
 
 describe('available garden plots', () => {
+  it('does not reserve plots for archived reflections', () => {
+    const archived: ReflectionSeed = { ...seedWithPlot('front-right'), placement: 'archive' };
+    expect(firstAvailableGardenPlot([archived], 390)?.id).toBe('front-right');
+  });
+
   it('prefers a front-right accessible planting plot when it is empty', () => {
     expect(firstAvailableGardenPlot([], 960)?.id).toBe('front-right');
   });
@@ -173,20 +177,16 @@ describe('available garden plots', () => {
     expect(firstAvailableGardenPlot(seeds, 960)?.id).toBe('front-left');
   });
 
-  it('uses the mobile plot set below the canvas-width threshold', () => {
+  it('keeps all unoccupied plot identities available on mobile', () => {
     const seeds = [
       seedWithPlot('front-right'),
       seedWithPlot('front-center'),
       seedWithPlot('front-left'),
     ];
 
-    expect(availableGardenPlots(seeds, 390).map((plot) => plot.id)).toEqual([
-      'front-far-right',
-      'middle-left',
-      'middle-center',
-      'middle-right',
-      'back-center',
-    ]);
+    expect(availableGardenPlots(seeds, 390).map((plot) => plot.id)).toEqual(
+      availableGardenPlots(seeds, 960).map((plot) => plot.id)
+    );
     expect(firstAvailableGardenPlot(seeds, 390)?.id).toBe('front-far-right');
   });
 
@@ -326,13 +326,12 @@ describe('pending seed layout', () => {
     });
   });
 
-  it('starts the mobile pending seed on the selected soil plot instead of over the pool', () => {
+  it('keeps the mobile pending seed between the beds without covering a plot', () => {
     const frame = createGardenFrame(390, 758);
     const plot = firstAvailableGardenPlot([], 390);
     const point = pendingSeedStartPoint(frame, plot);
-    const plotPoint = gardenPlotPoint(frame, plot!);
-
-    expect(point).toEqual(plotPoint);
+    expect(point.x).toBeCloseTo(195);
+    expect(point.y).toBeCloseTo(758 * 0.9);
   });
 });
 
@@ -353,15 +352,15 @@ describe('resolveGardenSeedPlacement', () => {
     };
     const placement = resolveGardenSeedPlacement(seed, fallback, 390, 680);
 
-    expect(placement.x).toBeCloseTo(319.8);
-    expect(placement.y).toBeCloseTo(353.6);
-    expect(placement.scale).toBe(0.72);
-    expect(placement.depth).toBe(260);
+    expect(placement.x).toBeCloseTo(292.5);
+    expect(placement.y).toBeCloseTo(646);
+    expect(placement.scale).toBe(0.48);
+    expect(placement.depth).toBe(348);
   });
 
   it('falls back to stored garden position when the plot id is not in the current plot set', () => {
     const seed = {
-      ...seedWithPlot('back-left'),
+      ...seedWithPlot('retired-plot'),
       gardenPosition: { x: 0.8, y: 0.84 },
     };
     const placement = resolveGardenSeedPlacement(seed, fallback, 390, 680);

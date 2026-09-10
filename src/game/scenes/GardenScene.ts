@@ -349,7 +349,13 @@ export class GardenScene extends Phaser.Scene {
         .setStrokeStyle(2, dark ? 0xd8f4e6 : 0xfff1ad, dark ? 0.66 : 0.76)
     );
     group.setInteractive(new Phaser.Geom.Circle(0, 0, 54), Phaser.Geom.Circle.Contains);
-    group.on('pointerdown', () => {
+    group.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const seed = seedUnderPointer(this.seedGroups, this.state.seeds, pointer);
+      if (seed) {
+        this.onSeedSelected(seed);
+        return;
+      }
+
       this.pet.playAttention();
       this.onSignalRequested();
     });

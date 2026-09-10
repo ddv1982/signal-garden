@@ -1,38 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createLensProfile, createLensSessionDraft } from '../../domain/lenses';
+import { createLensProfile } from '../../domain/lenses';
 import { createSignalGardenRepository } from '../repositories';
 import type { StorageLike } from '../storage';
-import type { ReflectionSeed } from '../../../shared/models';
 
 describe('createSignalGardenRepository', () => {
-  it('saves and loads seeds from a storage-like object', () => {
-    const storage = createMemoryStorage();
-    const repository = createSignalGardenRepository(storage);
-    const seed: ReflectionSeed = {
-      id: 'seed-1',
-      createdAt: '2026-06-06T12:00:00.000Z',
-      labelText: 'I am too late',
-      emotions: [],
-      bodySignals: [],
-      values: [],
-      dreams: [],
-      tinyAction: 'Offer myself one small kind pause.',
-      status: 'planted',
-      visualType: 'seed',
-    };
-
-    repository.saveSeeds([seed]);
-
-    expect(repository.loadSeeds()).toEqual([seed]);
-  });
-
-  it('falls back when stored seed data is invalid', () => {
-    const storage = createMemoryStorage();
-    storage.setItem('signal-garden/reflection-seeds/vite/v1', '{"broken":true}');
-
-    expect(createSignalGardenRepository(storage).loadSeeds()).toEqual([]);
-  });
-
   it('saves and loads the local lens profile', () => {
     const storage = createMemoryStorage();
     const repository = createSignalGardenRepository(storage);
@@ -52,49 +23,6 @@ describe('createSignalGardenRepository', () => {
     repository.clearLensProfile();
 
     expect(repository.loadLensProfile()).toBeNull();
-  });
-
-  it('saves, loads, and clears an unfinished lens session', () => {
-    const storage = createMemoryStorage();
-    const repository = createSignalGardenRepository(storage);
-    const draft = createLensSessionDraft(createLensProfile('images', 'image-first'));
-
-    repository.saveLensSessionDraft(draft);
-    expect(repository.loadLensSessionDraft()).toEqual(draft);
-
-    repository.clearLensSessionDraft();
-    expect(repository.loadLensSessionDraft()).toBeNull();
-  });
-
-  it('saves, loads, and clears a completed pending seed', () => {
-    const storage = createMemoryStorage();
-    const repository = createSignalGardenRepository(storage);
-    const seed: ReflectionSeed = {
-      id: 'pending-seed-1',
-      createdAt: '2026-06-06T12:05:00.000Z',
-      labelText: 'I am behind',
-      unhookedText: 'I am noticing the story that I am behind',
-      emotions: ['sad'],
-      bodySignals: ['tight chest'],
-      values: ['I may need rest'],
-      dreams: ['gray cloud'],
-      tinyAction: 'Take one soft pause',
-      status: 'planted',
-      visualType: 'stone',
-    };
-
-    repository.savePendingSeed(seed);
-    expect(repository.loadPendingSeed()).toEqual(seed);
-
-    repository.clearPendingSeed();
-    expect(repository.loadPendingSeed()).toBeNull();
-  });
-
-  it('falls back when stored pending seed data is invalid', () => {
-    const storage = createMemoryStorage();
-    storage.setItem('signal-garden/pending-seed/vite/v1', JSON.stringify({ id: 'missing-fields' }));
-
-    expect(createSignalGardenRepository(storage).loadPendingSeed()).toBeNull();
   });
 
   it('loads older settings without onboarding state', () => {

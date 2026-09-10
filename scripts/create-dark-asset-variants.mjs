@@ -2,8 +2,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
+import {
+  readImageRGBA,
+  runtimeImageFiles,
+  imageBaseName,
+  writeImageRGBA,
+} from './lib/readImage.mjs';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
+
+const inputRoot = path.resolve(process.argv[2] ?? projectRoot);
+const outputRoot = path.resolve(process.argv[3] ?? inputRoot);
 
 const assetGroups = [
   {
@@ -24,21 +33,19 @@ const assetGroups = [
 ];
 
 for (const group of assetGroups) {
-  const sourceDir = path.join(projectRoot, group.from);
-  const targetDir = path.join(projectRoot, group.to);
+  const sourceDir = path.join(inputRoot, group.from);
+  const targetDir = path.join(outputRoot, group.to);
+  const files = runtimeImageFiles(sourceDir);
   fs.mkdirSync(targetDir, { recursive: true });
-
-  for (const file of fs
-    .readdirSync(sourceDir)
-    .filter((item) => item.endsWith('.png'))
-    .sort()) {
+  for (const file of files) {
     const sourcePath = path.join(sourceDir, file);
     const targetPath = path.join(targetDir, file);
-    const source = PNG.sync.read(fs.readFileSync(sourcePath));
-    const output = tintForDarkMode(source, group.kind, file);
-    fs.writeFileSync(targetPath, PNG.sync.write(output));
+    const source = await readImageRGBA(sourcePath);
+    const output = tintForDarkMode(source, group.kind, imageBaseName(file));
+    await writeImageRGBA(targetPath, output);
     console.log(`${group.to}/${file}`);
   }
+  console.log(`Processed ${files.length} ${group.kind} images`);
 }
 
 function tintForDarkMode(source, kind, file) {
@@ -181,7 +188,7 @@ function darkProfileFor(kind, file) {
   }
 
   const lensProfiles = {
-    'action-basket.png': {
+    'action-basket': {
       warmTint: [224, 170, 112],
       moonTint: [126, 155, 166],
       exposure: 0.82,
@@ -195,7 +202,7 @@ function darkProfileFor(kind, file) {
       greenBias: 1,
       blueBias: 1.03,
     },
-    'body-ripple.png': {
+    'body-ripple': {
       moonTint: [114, 178, 204],
       warmTint: [142, 174, 178],
       exposure: 0.86,
@@ -207,7 +214,7 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.5,
       blueBias: 1.04,
     },
-    'emotion-lantern.png': {
+    'emotion-lantern': {
       moonTint: [122, 146, 166],
       warmTint: [230, 150, 82],
       exposure: 0.76,
@@ -218,7 +225,7 @@ function darkProfileFor(kind, file) {
       softAlphaScale: 0.78,
       softAlphaFloor: 0.7,
     },
-    'image-cloud.png': {
+    'image-cloud': {
       moonTint: [150, 162, 184],
       warmTint: [172, 166, 172],
       exposure: 0.8,
@@ -233,7 +240,7 @@ function darkProfileFor(kind, file) {
       greenBias: 1,
       blueBias: 1.04,
     },
-    'meaning-gate.png': {
+    'meaning-gate': {
       moonTint: [126, 156, 148],
       warmTint: [214, 168, 112],
       exposure: 0.82,
@@ -247,7 +254,7 @@ function darkProfileFor(kind, file) {
       greenBias: 1,
       blueBias: 1.03,
     },
-    'observer-pool.png': {
+    'observer-pool': {
       moonTint: [108, 170, 196],
       warmTint: [142, 174, 176],
       exposure: 0.82,
@@ -259,7 +266,7 @@ function darkProfileFor(kind, file) {
       softAlphaFloor: 0.48,
       blueBias: 1.04,
     },
-    'word-stones.png': {
+    'word-stones': {
       moonTint: [132, 152, 162],
       warmTint: [206, 166, 116],
       exposure: 0.84,

@@ -43,6 +43,9 @@ jobs:
       - name: Art provenance
         run: pnpm run art:audit
 
+      - name: Asset script tests
+        run: pnpm run test:scripts
+
       - name: Test
         run: pnpm run test:compiled
 

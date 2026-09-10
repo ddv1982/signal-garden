@@ -43,6 +43,7 @@ Paraglide Vite plugin regenerates typed message functions during dev and build.
 ```sh
 corepack pnpm run typecheck
 corepack pnpm run test
+corepack pnpm run test:scripts
 corepack pnpm run pet:audit
 corepack pnpm run pet:sheet
 corepack pnpm run e2e
@@ -61,6 +62,10 @@ Use `http://localhost:5173/?petDebug=1` during development to freeze pet poses a
 Generated garden assets live under `src/assets/garden/` and `src/assets/lenses/`. The active Phaser scene uses the generated backdrop, seed/growth props, and separate lens objects for the playable journey.
 
 Reflection text stays local in this prototype. OpenAI image generation was used during development for bitmap assets only; no OpenAI text model reads or interprets user reflections at runtime.
+
+Completed reflections can be planted or saved directly to Archive, including when the garden is full. Archive keeps the original answers and care history. Settings exports and deletes completed reflections, including a seed waiting to be planted. Deleting completed reflections keeps an unfinished journey.
+
+Reflection saves use one versioned local document and Web Locks to coordinate tabs. Use HTTPS or localhost in a browser that supports Web Locks. If saving is unavailable or browser storage is full, the app keeps readable records and offers recovery export. Wait for the saved indicator before closing a journey. Text whose save has not finished can still be lost if the browser closes. Reload older open tabs after updating the app so they use the new document.
 
 Current beta screenshots:
 

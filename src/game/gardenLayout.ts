@@ -278,18 +278,22 @@ const DESKTOP_PLOT_ANCHORS: GardenPlotAnchor[] = [
 ];
 
 const MOBILE_PLOTS: GardenPlot[] = [
-  { id: 'front-left', x: 0.16, y: 0.55, band: 'front', scale: 0.72, depth: 250 },
-  { id: 'front-center', x: 0.32, y: 0.5, band: 'front', scale: 0.68, depth: 245 },
-  { id: 'front-right', x: 0.82, y: 0.52, band: 'front', scale: 0.72, depth: 260 },
-  { id: 'front-far-right', x: 0.9, y: 0.56, band: 'front', scale: 0.66, depth: 270 },
-  { id: 'middle-left', x: 0.22, y: 0.48, band: 'middle', scale: 0.58, depth: 205 },
-  { id: 'middle-center', x: 0.48, y: 0.49, band: 'middle', scale: 0.58, depth: 205 },
-  { id: 'middle-right', x: 0.68, y: 0.5, band: 'middle', scale: 0.58, depth: 215 },
-  { id: 'back-center', x: 0.78, y: 0.47, band: 'back', scale: 0.54, depth: 180 },
+  { id: 'front-left', x: 0.08, y: 0.95, band: 'front', scale: 0.48, depth: 344 },
+  { id: 'front-center', x: 0.25, y: 0.95, band: 'front', scale: 0.48, depth: 350 },
+  { id: 'front-right', x: 0.75, y: 0.95, band: 'front', scale: 0.48, depth: 348 },
+  { id: 'front-far-right', x: 0.92, y: 0.95, band: 'front', scale: 0.48, depth: 358 },
+  { id: 'middle-left', x: 0.08, y: 0.875, band: 'middle', scale: 0.48, depth: 252 },
+  { id: 'middle-center-left', x: 0.25, y: 0.875, band: 'middle', scale: 0.48, depth: 246 },
+  { id: 'middle-center', x: 0.75, y: 0.875, band: 'middle', scale: 0.48, depth: 256 },
+  { id: 'middle-center-right', x: 0.92, y: 0.875, band: 'middle', scale: 0.48, depth: 244 },
+  { id: 'middle-right', x: 0.92, y: 0.8, band: 'middle', scale: 0.48, depth: 210 },
+  { id: 'back-left', x: 0.08, y: 0.8, band: 'back', scale: 0.48, depth: 130 },
+  { id: 'back-center', x: 0.25, y: 0.8, band: 'back', scale: 0.48, depth: 126 },
+  { id: 'back-right', x: 0.75, y: 0.8, band: 'back', scale: 0.48, depth: 134 },
 ];
 
 export function createGardenPlots(width: number, height: number): GardenPlot[] {
-  if (width < 540) return MOBILE_PLOTS.map((plot) => ({ ...plot }));
+  if (width < 560) return MOBILE_PLOTS.map((plot) => ({ ...plot }));
 
   const frame = createGardenFrame(width, height);
   const ratio = frame.visibleWidth / GARDEN_DESIGN_WIDTH;
@@ -314,7 +318,12 @@ export function availableGardenPlots(
   width: number,
   height = 0
 ): GardenPlot[] {
-  const occupied = new Set(seeds.map((seed) => seed.gardenPlotId).filter(Boolean));
+  const occupied = new Set(
+    seeds
+      .filter((seed) => seed.placement !== 'archive')
+      .map((seed) => seed.gardenPlotId)
+      .filter(Boolean)
+  );
   return createGardenPlots(width, height).filter((plot) => !occupied.has(plot.id));
 }
 
@@ -466,8 +475,7 @@ export function circleOverlapsEllipse(
 }
 
 export function pendingSeedStartPoint(frame: GardenFrame, plot: GardenPlot | null) {
-  if (frame.width < 560)
-    return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.72, 0.82);
+  if (frame.width < 560) return visibleGardenPoint(frame, 0.5, 0.9);
 
   return plot ? gardenPlotPoint(frame, plot) : visibleGardenPoint(frame, 0.64, 0.48);
 }
