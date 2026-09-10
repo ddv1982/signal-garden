@@ -397,7 +397,7 @@ export function App() {
               >
                 {m.garden_start_lens_journey()}
               </button>
-              {seeds.map((seed) => (
+              {gardenState.seeds.map((seed) => (
                 <button
                   key={seed.id}
                   type="button"

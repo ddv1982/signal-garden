@@ -187,6 +187,7 @@ test('archived records neither hide the planted seeds nor reserve plots', async 
     placement: 'archive',
   }));
   await openGarden(page, [...archived, ...plotIds.map((id) => reflection(id, id))]);
+  await expect(page.locator('.garden-keyboard-controls button')).toHaveCount(plotIds.length + 1);
   for (const id of plotIds) {
     await tapPlot(page, id, true);
     await expect(
