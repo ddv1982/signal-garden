@@ -47,8 +47,12 @@ export function useLensJourney({
 
   useEffect(
     () =>
-      repository.reflections.subscribe(() => {
-        const next = repository.reflections.read().document.draft;
+      repository.reflections.subscribe((result) => {
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        const next = result.document.draft;
         if (local.current === durable.current) {
           durable.current = next;
           local.current = next;

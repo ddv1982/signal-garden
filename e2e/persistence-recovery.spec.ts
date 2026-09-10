@@ -162,3 +162,73 @@ test('pending reflection keyboard tabs skip unavailable care controls', async ({
   await expect(overview).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tabpanel')).toBeVisible();
 });
+
+async function failReflectionReads(page: Page) {
+  await page.evaluate((key) => {
+    const original = Storage.prototype.getItem;
+    document.documentElement.dataset.failReflectionReads = 'true';
+    Storage.prototype.getItem = function (name) {
+      if (name === key && document.documentElement.dataset.failReflectionReads === 'true') {
+        throw new DOMException('Test read failure', 'SecurityError');
+      }
+      return original.call(this, name);
+    };
+    window.dispatchEvent(new StorageEvent('storage', { key }));
+  }, documentKey);
+}
+
+test('read failures retain an open watering form through notification and retry', async ({
+  page,
+}) => {
+  await setup(page, [seed]);
+  await page.getByRole('button', { name: m.tab_archive(), exact: true }).click();
+  await page.locator('button.seed-card').click();
+  await page.getByRole('button', { name: m.seed_dialog_water_seed(), exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  const fields = dialog.locator('textarea');
+  await fields.nth(0).fill('Keep the softened thought');
+  await fields.nth(1).fill('Keep the kind action');
+  await failReflectionReads(page);
+  await expect(fields.nth(0)).toHaveValue('Keep the softened thought');
+  await dialog.getByRole('button', { name: m.seed_dialog_water_seed(), exact: true }).click();
+  await expect(dialog).toContainText(m.persistence_unreadable_error());
+  await expect(fields.nth(0)).toHaveValue('Keep the softened thought');
+  await expect(fields.nth(1)).toHaveValue('Keep the kind action');
+  await page.evaluate(() => {
+    delete document.documentElement.dataset.failReflectionReads;
+  });
+  await dialog.getByRole('button', { name: m.seed_dialog_water_seed(), exact: true }).click();
+  await expect
+    .poll(() => stored(page))
+    .toMatchObject({
+      seeds: [
+        {
+          waterings: [
+            { transformedLabel: 'Keep the softened thought', kindAction: 'Keep the kind action' },
+          ],
+        },
+      ],
+    });
+});
+
+test('a failed storage notification cannot discard the current saved draft', async ({ page }) => {
+  await setup(page);
+  await page.getByTestId('start-lens-journey').focus();
+  await page.keyboard.press('Enter');
+  const field = page.getByLabel(m.lens_word_field());
+  await field.fill('Keep this answer through a read failure');
+  await expect
+    .poll(() => stored(page))
+    .toMatchObject({
+      draft: { responses: { wordLabel: 'Keep this answer through a read failure' } },
+    });
+  await failReflectionReads(page);
+  await expect(field).toHaveValue('Keep this answer through a read failure');
+  await page.evaluate(() => {
+    delete document.documentElement.dataset.failReflectionReads;
+  });
+  await field.fill('Reads recovered, answer retained');
+  await expect
+    .poll(() => stored(page))
+    .toMatchObject({ draft: { responses: { wordLabel: 'Reads recovered, answer retained' } } });
+});

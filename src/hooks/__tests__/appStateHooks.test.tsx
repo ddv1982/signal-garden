@@ -101,6 +101,37 @@ describe('app state hooks', () => {
     expect(repository.reflections.read().document.seeds).toEqual([]);
     expect(repository.reflections.read().document.pendingSeed).toBeNull();
   });
+
+  it('retains initially readable seeds if the visit command cannot read storage', async () => {
+    const memory = createMemoryStorage();
+    memory.setItem('signal-garden/reflection-seeds/vite/v1', JSON.stringify([seed]));
+    let failReads = false;
+    const repository = createSignalGardenRepository(
+      {
+        ...memory,
+        getItem(key) {
+          if (failReads) throw new Error('Storage became unavailable');
+          return memory.getItem(key);
+        },
+      },
+      async (work) => {
+        failReads = true;
+        return work();
+      }
+    );
+    function Harness() {
+      const garden = useGardenData(repository);
+      return (
+        <>
+          <output>{garden.seeds.length}</output>
+          <p role="alert">{garden.error}</p>
+        </>
+      );
+    }
+    await act(async () => root.render(<Harness />));
+    expect(container.querySelector('output')?.textContent).toBe('1');
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain('preserved');
+  });
 });
 
 function createMemoryStorage(): StorageLike {
