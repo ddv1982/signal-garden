@@ -100,6 +100,12 @@ test('all twelve desktop plots remain selectable through mobile breakpoints', as
         })
       )
       .toBe(true);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
     for (const id of plotIds) {
       await tapPlot(page, id, true);
       await expect(
