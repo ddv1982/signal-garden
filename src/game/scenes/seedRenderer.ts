@@ -3,12 +3,8 @@ import type { GardenState, ReflectionSeed } from '../../../shared/models';
 import { growthStageForSeed } from '../../domain/seedGrowth';
 import type { ActiveTheme } from '../../domain/theme';
 import {
-  GARDEN_DESIGN_HEIGHT,
-  GARDEN_DESIGN_WIDTH,
   createGardenSeedLayout,
   createGardenPlots,
-  gardenPlotPoint,
-  gardenPoint,
   resolveGardenSeedPlacement,
   type GardenFrame,
   type LensPropAnchor,
@@ -41,32 +37,16 @@ export function drawSeeds(
   height: number,
   frame: GardenFrame
 ): Phaser.GameObjects.Container[] {
-  const visibleSeeds = ctx.state.seeds.slice(0, 50);
-  const layout = createGardenSeedLayout(
-    GARDEN_DESIGN_WIDTH,
-    GARDEN_DESIGN_HEIGHT,
-    visibleSeeds.length
-  );
+  const visibleSeeds = ctx.state.seeds.filter((seed) => seed.placement !== 'archive').slice(0, 50);
+  const layout = createGardenSeedLayout(width, height, visibleSeeds.length);
   const plots = createGardenPlots(width, height);
   const seedGroups: Phaser.GameObjects.Container[] = [];
 
   layout.forEach((item) => {
     const seed = visibleSeeds[item.index];
-    const placement = resolveGardenSeedPlacement(
-      seed,
-      item,
-      GARDEN_DESIGN_WIDTH,
-      GARDEN_DESIGN_HEIGHT,
-      plots
-    );
-    const plot = seed.gardenPlotId
-      ? plots.find((item) => item.id === seed.gardenPlotId)
-      : undefined;
-    const point = plot
-      ? gardenPlotPoint(frame, plot)
-      : gardenPoint(frame, placement.x, placement.y);
+    const placement = resolveGardenSeedPlacement(seed, item, width, height, plots);
     const group = ctx.scene.add
-      .container(point.x, point.y)
+      .container(placement.x, placement.y)
       .setScale(placement.scale * Phaser.Math.Clamp(frame.scale, 0.82, 1.38))
       .setDepth(placement.depth);
     group.setInteractive(new Phaser.Geom.Ellipse(0, -28, 72, 96), Phaser.Geom.Ellipse.Contains);
@@ -103,7 +83,7 @@ export function seedUnderPointer(
     const seedId = group.getData('seedId') as string | undefined;
     if (!seedId) continue;
 
-    const scale = Math.max(group.scaleX, group.scaleY, 1);
+    const scale = Math.max(Math.abs(group.scaleX), Math.abs(group.scaleY));
     const dx = pointerX - group.x;
     const dy = pointerY - (group.y - 28 * scale);
     const radiusX = 36 * scale;

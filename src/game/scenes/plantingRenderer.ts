@@ -64,7 +64,7 @@ export function drawPlantingPlots(ctx: PlantingRendererContext, width: number, h
       ctx.hostElement.dataset.frontRightPlotY = (y / height).toFixed(4);
     }
     const plotScale = plot.scale * Phaser.Math.Clamp(frame.scale, 0.86, 1.42);
-    const marker = ctx.scene.add.container(x, y).setDepth(plot.depth - 8);
+    const marker = ctx.scene.add.container(x, y).setDepth(510);
     const glow = ctx.scene.add.ellipse(
       0,
       0,
@@ -122,9 +122,9 @@ export function drawPendingSeed(
   const startPoint = pendingSeedStartPoint(frame, emptyPlot ?? null);
   const startX = startPoint.x;
   const startY = pendingSeedRestY(frame, width, height, startPoint.y, emptyPlot ?? null);
-  const group = ctx.scene.add.container(startX, startY).setDepth(470);
+  const group = ctx.scene.add.container(startX, startY).setDepth(520);
   drawSeed(ctx, group, ctx.pendingSeed);
-  group.setScale(width < 560 ? 1.55 : 1.28);
+  group.setScale(width < 560 ? 1.1 : 1.28);
   group.setInteractive(new Phaser.Geom.Circle(0, -14, 46), Phaser.Geom.Circle.Contains);
   ctx.scene.input.setDraggable(group);
   group.on('pointerdown', () => {
