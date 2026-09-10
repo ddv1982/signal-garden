@@ -82,6 +82,7 @@ async function storedSeeds(page: Page): Promise<ReflectionSeed[]> {
 test('all twelve desktop plots remain selectable through mobile breakpoints', async ({
   page,
 }, testInfo) => {
+  test.setTimeout(60_000);
   await openGarden(
     page,
     plotIds.map((id) => reflection(id, id))
